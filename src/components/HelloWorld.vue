@@ -21,7 +21,7 @@
     >
       <a-form-model-item label="目标范围">
         <a-input
-          v-model="formPoint.centerBox"
+          v-model="formPoint.bbox"
           placeholder="[minLng, minLat,maxLng, maxLat] or [lng,lat]"
         />
       </a-form-model-item>
@@ -60,6 +60,8 @@
 <script>
 import { v4 as uuidv4 } from "uuid";
 import XLSX from "xlsx";
+import commonAPI from "@/api/commonAPI.js";
+import randomExt from "@/utils/random-ext.js";
 export default {
   name: "HelloWorld",
   data() {
@@ -75,7 +77,7 @@ export default {
         pointNum: 200,
         appName: "app_tzn_test",
         serviceName: "tzn_008",
-        centerBbox: "120.496331,31.26383,120.54396,31.32881",
+        bbox: "120.496331,31.26383,120.54396,31.32881",
       },
       formLine: {
         adminId: "320505",
@@ -95,7 +97,10 @@ export default {
     //下载轨迹数据
     async downloadLineData(e) {
       e.preventDefault();
-      const { data } = await this.getRoadLine(this.formLine);
+      const { data } = await commonAPI.getRoadLine(
+        this.formLine,
+        this.formBase
+      );
       console.log(data);
       this.exportXslx(data.result.records);
     },
@@ -135,9 +140,9 @@ export default {
                 dataId: uuidv4(),
                 location: {
                   type: "Point",
-                  coordinates: this.randomCoordByBbox(bbox),
+                  coordinates: randomExt.randomCoordByBbox(bbox),
                 },
-                keyValueMap: this.createRandomProps(),
+                keyValueMap: randomExt.createRandomProps(),
               }
             )
           ),
@@ -150,12 +155,17 @@ export default {
      */
     async pushPoints() {
       const { appName, bbox, serviceName, pointNum } = this.formPoint;
-      console.log(form);
       try {
-        const opts = await this.createRandomPoints(pointNum, bbox);
+        const opts = await randomExt.createRandomPoints(pointNum, bbox);
         const esDataEntityList = await this.createLayerSource(opts, bbox);
         const params = { appName, serviceName, esDataEntityList };
-        this.sendPointData(params);
+        commonAPI.sendPointData(params, this.formBase).then((res) => {
+          if (res.data.status === 200) {
+            this.$message.success("点位数据推送成功", 2);
+          } else {
+            this.$message.error("数据推送失败，请重试", 2);
+          }
+        });
       } catch (error) {
         console.log(error);
       }
