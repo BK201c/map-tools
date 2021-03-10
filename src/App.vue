@@ -1,17 +1,17 @@
 <template>
   <div id="app">
-    <HelloWorld />
+    <Layout />
   </div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
+import Layout from "@/layout";
 
 export default {
   name: "App",
   components: {
-    HelloWorld,
-  },
+    Layout
+  }
 };
 </script>
 

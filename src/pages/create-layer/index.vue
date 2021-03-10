@@ -71,18 +71,18 @@ export default {
       formLayout: "horizontal",
       formBase: {
         host: "http://10.68.8.20",
-        token: "F66452BB69AE4B16A187C82837B53C1C",
+        token: "F66452BB69AE4B16A187C82837B53C1C"
       },
       formPoint: {
         pointNum: 200,
         appName: "app_tzn_test",
         serviceName: "tzn_008",
-        bbox: "120.496331,31.26383,120.54396,31.32881",
+        bbox: "120.496331,31.26383,120.54396,31.32881"
       },
       formLine: {
         adminId: "320505",
-        keyword: "金山",
-      },
+        keyword: "金山"
+      }
     };
   },
   methods: {
@@ -110,14 +110,14 @@ export default {
       const gbid = "65010200031129111110";
       const rowTitle = ["gbid", "lon", "lat"];
       const points = [
-        ...lines.map((line) =>
+        ...lines.map(line =>
           line.geometry.type !== "LineString"
             ? line.geometry.coordinates
             : [line.geometry.coordinates]
-        ),
+        )
       ]
         .flat(2)
-        .map((e) => [gbid].concat(e));
+        .map(e => [gbid].concat(e));
       const xlsxData = [rowTitle].concat(points);
       /* convert state to workbook */
       const ws = XLSX.utils.aoa_to_sheet(xlsxData);
@@ -131,7 +131,7 @@ export default {
      * 创建KMAP layer格式数据
      */
     createLayerSource(pointsCollection, bbox) {
-      return new Promise((reslove) => {
+      return new Promise(reslove => {
         reslove([
           ...pointsCollection.features.map(() =>
             Object.assign(
@@ -140,12 +140,12 @@ export default {
                 dataId: uuidv4(),
                 location: {
                   type: "Point",
-                  coordinates: randomExt.randomCoordByBbox(bbox),
+                  coordinates: randomExt.randomCoordByBbox(bbox)
                 },
-                keyValueMap: randomExt.createRandomProps(),
+                keyValueMap: randomExt.createRandomProps()
               }
             )
-          ),
+          )
         ]);
       });
     },
@@ -159,7 +159,7 @@ export default {
         const opts = await randomExt.createRandomPoints(pointNum, bbox);
         const esDataEntityList = await this.createLayerSource(opts, bbox);
         const params = { appName, serviceName, esDataEntityList };
-        commonAPI.sendPointData(params, this.formBase).then((res) => {
+        commonAPI.sendPointData(params, this.formBase).then(res => {
           if (res.data.status === 200) {
             this.$message.success("点位数据推送成功", 2);
           } else {
@@ -169,8 +169,8 @@ export default {
       } catch (error) {
         console.log(error);
       }
-    },
-  },
+    }
+  }
 };
 </script>
 <style lang="scss">

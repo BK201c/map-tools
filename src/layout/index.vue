@@ -1,19 +1,23 @@
 <template>
-  <section></section>
+  <section>
+    <the-menu></the-menu>
+    <router-view></router-view>
+  </section>
 </template>
 
 <script>
+import menu from "@/layout/menu/menu";
 export default {
   data() {
     return {};
   },
   name: "",
-  components: {},
+  components: { "the-menu": menu },
   computed: {},
   created() {},
   mounted() {},
   watch: {},
-  methods: {},
+  methods: {}
 };
 </script>
 
