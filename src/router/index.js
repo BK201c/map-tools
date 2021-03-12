@@ -1,6 +1,6 @@
 import VueRouter from "vue-router";
 
-import dashboard from "@/pages/create-layer/";
+import dashboard from "@/pages/create-layer/index.vue";
 const routes = [{ path: "/", component: dashboard }];
 
 // 3. 创建 router 实例，然后传 `routes` 配置

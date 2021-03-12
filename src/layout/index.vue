@@ -1,7 +1,11 @@
 <template>
-  <section>
-    <the-menu></the-menu>
-    <router-view></router-view>
+  <section class="main-container">
+    <section class="sidebar">
+      <the-menu></the-menu>
+    </section>
+    <section class="content">
+      <router-view></router-view>
+    </section>
   </section>
 </template>
 
@@ -21,4 +25,16 @@ export default {
 };
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.main-container {
+  padding: {
+    top: 60px;
+    bottom: 60px;
+  }
+  display: flex;
+  justify-content: space-around;
+  .content {
+    flex-grow: 1;
+  }
+}
+</style>
