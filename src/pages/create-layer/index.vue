@@ -173,10 +173,4 @@ export default {
   }
 };
 </script>
-<style lang="scss">
-.container {
-  width: 90%;
-  margin: 0 auto;
-  padding-bottom: 100px;
-}
-</style>
+<style lang="scss"></style>

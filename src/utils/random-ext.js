@@ -32,7 +32,7 @@ const randomExt = {
 
   //生成随机点位
   createRandomPoints(sum = 200, bbox) {
-    return new Promise((reslove) => {
+    return new Promise(reslove => {
       reslove(randomPoint(sum, bbox.split(",")));
     });
   },
@@ -43,7 +43,7 @@ const randomExt = {
    */
   randomCoordByBbox(bbox) {
     let [minLng, minLat, maxLng, maxLat] = [
-      ...bbox.split(",").map((e) => parseFloat(e)),
+      ...bbox.split(",").map(e => parseFloat(e))
     ];
     const lng = minLng + (maxLng - minLng) * Math.random();
     const lat = minLat + (maxLat - minLat) * Math.random();
@@ -57,9 +57,9 @@ const randomExt = {
       lng - Math.random(),
       lng + Math.random(),
       lat - Math.random(),
-      lat + Math.random(),
+      lat + Math.random()
     ];
-  },
+  }
 };
 
 export default randomExt;

@@ -1,48 +1,79 @@
 <template>
   <div class="container">
+    <div class="preview-box">
+      <div id="previewMap"></div>
+    </div>
     <a-form-model :model="form" :label-col="labelCol" :wrapper-col="wrapperCol">
-      <a-form-model-item label="地图服务">
-        <a-input v-model="form.host" />
+      <a-form-model-item label="服务地址">
+        <a-input v-model="form.url" />
       </a-form-model-item>
-      <a-form-model-item label="Token">
+      <!-- <a-form-model-item label="Token">
         <a-input v-model="form.token" />
+      </a-form-model-item> -->
+      <a-form-model-item label="切片方式">
+        <a-radio-group v-model="form.ogcStand" default-value="WMTS">
+          <a-radio value="WMTS" name="ogcStand">
+            WMTS
+          </a-radio>
+          <a-radio value="WMS" name="ogcStand">
+            WMS
+          </a-radio>
+        </a-radio-group>
       </a-form-model-item>
-      <a-form-model-item label="中心点">
-        <a-input v-model="form.center" placeholder="[lng,lat]" />
+      <a-form-model-item label="切片原点(origin)">
+        <a-input v-model="form.origin" placeholder="x,y" />
       </a-form-model-item>
-      <a-form-model-item label="地图坐标系">
+      <a-form-model-item label="最大分辨率">
+        <a-input
+          v-model="form.maxResolution"
+          placeholder="0.7031250000000002"
+        />
+      </a-form-model-item>
+      <a-form-model-item label="坐标系">
         <a-radio-group v-model="form.crs" default-value="EPSG:3857">
-          <a-radio value="EPSG:3857" name="crs">
+          <a-radio value="EPSG:3857">
             EPSG:3857
           </a-radio>
-          <a-radio value="EPSG:4326" name="crs">
+          <a-radio value="EPSG:4326">
             EPSG:4326
           </a-radio>
-          <a-radio value="EPSG:4490" name="crs">
+          <a-radio value="EPSG:4490">
             EPSG:4490
           </a-radio>
         </a-radio-group>
       </a-form-model-item>
-      <a-form-model-item label="默认层级">
-        <a-slider
-          :marks="marks"
-          :default-value="5"
+      <a-form-model-item label="中心点">
+        <a-input v-model="form.center" placeholder="lng,lat" />
+      </a-form-model-item>
+      <a-form-model-item label="层级范围">
+        <a-input-number
+          v-model="form.minZoom"
+          placeholder="最小层级"
           :min="0"
           :max="20"
-          :tooltip-visible="true"
+        />
+        <span>&nbsp; - &nbsp;</span>
+        <a-input-number
+          v-model="form.maxZoom"
+          placeholder="最大层级"
+          :min="0"
+          :max="30"
         />
       </a-form-model-item>
       <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
         <a-button type="primary" @click="previewMap">预览</a-button>
       </a-form-model-item>
     </a-form-model>
-    <div class="preview-box">
-      <div id="previewMap"></div>
-    </div>
   </div>
 </template>
 
 <script>
+import tileGridExt from "@/utils/tilegrid-ext.js";
+import Map from "ol/Map";
+import View from "ol/View";
+import TileLayer from "ol/layer/Tile";
+import WMTSTileGrid from "ol/tilegrid/WMTS";
+import WMTS from "ol/source/WMTS";
 export default {
   name: "previewMap",
   data() {
@@ -51,16 +82,22 @@ export default {
       wrapperCol: { span: 12 },
       formLayout: "horizontal",
       form: {
-        host: "http://10.68.8.20",
-        token: "F66452BB69AE4B16A187C82837B53C1C",
-        center: "",
-        crs: "EPSG:3857"
+        url:
+          "https://services.arcgisonline.com/arcgis/rest/services/Demographics/USA_Population_Density/MapServer",
+        token: "",
+        center: "-11158582,4813697",
+        crs: "EPSG:3857",
+        minZoom: 0,
+        maxZoom: 20,
+        ogcStand: "WMTS",
+        origin: "-2.0037508342787E7,2.0037508342787E7",
+        maxResolution: 156543.03392800014
       },
-      marks: {
-        0: "0",
-        20: "20"
-      }
+      map: null
     };
+  },
+  mounted() {
+    this.initMapObj();
   },
   methods: {
     // 表单验证
@@ -70,14 +107,63 @@ export default {
         this.$message.error("请输入正确的点位格式", 2);
       }
     },
-    previewMap() {}
+
+    //创建wmts图层
+    createWMTS() {
+      const { resolutions, matrixIds } = tileGridExt.getResolutionByCalc(
+        this.form.maxZoom,
+        this.form.maxResolution
+      );
+      const origin = [...this.form.origin.split(",").map(p => Number(p))];
+      const smOption = {
+        url: `${this.form.url}/WMTS/`,
+        format: "image/png",
+        projection: this.form.crs,
+        tileGrid: new WMTSTileGrid({
+          origin: origin,
+          resolutions: resolutions,
+          matrixIds: matrixIds
+        }),
+        style: "default",
+        matrixSet: "default028mm",
+        layer: "0"
+      };
+      console.log(smOption);
+      return new TileLayer({
+        source: new WMTS(smOption)
+      });
+    },
+
+    initMapObj() {
+      this.map = new Map({
+        target: "previewMap"
+      });
+    },
+
+    previewMap() {
+      const viewOption = {
+        center: this.form.center.split(","),
+        zoom: 5,
+        maxZoom: this.form.maxZoom,
+        minZoom: this.form.minZoom
+      };
+      this.map.setView(new View(viewOption));
+      this.map.addLayer(this.createWMTS());
+      console.log(this.map);
+    }
   }
 };
 </script>
 <style lang="scss">
-.container {
-  width: 90%;
-  margin: 0 auto;
-  padding-bottom: 100px;
+.preview-box {
+  width: 100%;
+  padding: 15px 50px;
+  #previewMap {
+    width: 100%;
+    min-width: 200px;
+    min-height: 100px;
+    height: 250px;
+    border: 1px solid #d5d5d5;
+  }
 }
 </style>

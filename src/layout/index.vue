@@ -28,8 +28,8 @@ export default {
 <style scoped lang="scss">
 .main-container {
   padding: {
-    top: 60px;
-    bottom: 60px;
+    top: 20px;
+    bottom: 20px;
   }
   display: flex;
   justify-content: space-around;
