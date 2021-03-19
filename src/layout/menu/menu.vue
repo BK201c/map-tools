@@ -2,7 +2,7 @@
   <div>
     <a-menu
       style="width: 185px"
-      :default-selected-keys="['createLayer']"
+      :default-selected-keys="current"
       mode="inline"
       @click="handleClick"
     >
@@ -19,9 +19,12 @@
 export default {
   data() {
     return {
-      current: ["mail"],
-      openKeys: ["sub1"]
+      current: ["createLayer"]
     };
+  },
+  created() {
+    this.current[0] = this.$route.name;
+    console.log(this.$route);
   },
   methods: {
     handleClick(e) {

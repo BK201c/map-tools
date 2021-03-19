@@ -207,7 +207,7 @@ export default {
 
     async previewMap() {
       const metaData = this.form.isArcGisService
-        ? await this.getMetaByServer(this.form.url)
+        ? await this.getMetaByServer(this.form.url.trim())
         : this.getMetaByFrom(this.form);
       const layer =
         this.form.sliceType === "WMTS"
