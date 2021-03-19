@@ -11,55 +11,67 @@
         <a-input v-model="form.token" />
       </a-form-model-item> -->
       <a-form-model-item label="切片方式">
-        <a-radio-group v-model="form.ogcStand" default-value="WMTS">
-          <a-radio value="WMTS" name="ogcStand">
+        <a-radio-group v-model="form.sliceType" default-value="WMTS">
+          <a-radio value="WMTS" name="sliceType">
             WMTS
           </a-radio>
-          <a-radio value="WMS" name="ogcStand">
+          <a-radio value="WMS" name="sliceType">
             WMS
           </a-radio>
         </a-radio-group>
       </a-form-model-item>
-      <a-form-model-item label="切片原点(origin)">
-        <a-input v-model="form.origin" placeholder="x,y" />
-      </a-form-model-item>
-      <a-form-model-item label="最大分辨率">
-        <a-input
-          v-model="form.maxResolution"
-          placeholder="0.7031250000000002"
-        />
-      </a-form-model-item>
-      <a-form-model-item label="坐标系">
-        <a-radio-group v-model="form.crs" default-value="EPSG:3857">
-          <a-radio value="EPSG:3857">
-            EPSG:3857
+      <a-form-model-item label="ArcGis服务类型">
+        <a-radio-group v-model="form.isArcGisService" :default-value="true">
+          <a-radio :value="true">
+            是
           </a-radio>
-          <a-radio value="EPSG:4326">
-            EPSG:4326
-          </a-radio>
-          <a-radio value="EPSG:4490">
-            EPSG:4490
+          <a-radio :value="false">
+            否
           </a-radio>
         </a-radio-group>
       </a-form-model-item>
-      <a-form-model-item label="中心点">
-        <a-input v-model="form.center" placeholder="lng,lat" />
-      </a-form-model-item>
-      <a-form-model-item label="层级范围">
-        <a-input-number
-          v-model="form.minZoom"
-          placeholder="最小层级"
-          :min="0"
-          :max="20"
-        />
-        <span>&nbsp; - &nbsp;</span>
-        <a-input-number
-          v-model="form.maxZoom"
-          placeholder="最大层级"
-          :min="0"
-          :max="30"
-        />
-      </a-form-model-item>
+      <div v-if="!form.isArcGisService">
+        <a-form-model-item label="切片原点(origin)">
+          <a-input v-model="form.origin" placeholder="x,y" />
+        </a-form-model-item>
+        <a-form-model-item label="最大分辨率">
+          <a-input
+            v-model="form.maxResolution"
+            placeholder="0.7031250000000002"
+          />
+        </a-form-model-item>
+        <a-form-model-item label="坐标系">
+          <a-radio-group v-model="form.crs" default-value="EPSG:3857">
+            <a-radio value="EPSG:3857">
+              EPSG:3857
+            </a-radio>
+            <a-radio value="EPSG:4326">
+              EPSG:4326
+            </a-radio>
+            <a-radio value="EPSG:4490">
+              EPSG:4490
+            </a-radio>
+          </a-radio-group>
+        </a-form-model-item>
+        <a-form-model-item label="中心点">
+          <a-input v-model="form.center" placeholder="lng,lat" />
+        </a-form-model-item>
+        <a-form-model-item label="层级范围">
+          <a-input-number
+            v-model="form.minZoom"
+            placeholder="最小层级"
+            :min="0"
+            :max="20"
+          />
+          <span>&nbsp; - &nbsp;</span>
+          <a-input-number
+            v-model="form.maxZoom"
+            placeholder="最大层级"
+            :min="0"
+            :max="30"
+          />
+        </a-form-model-item>
+      </div>
       <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
         <a-button type="primary" @click="previewMap">预览</a-button>
       </a-form-model-item>
@@ -74,6 +86,7 @@ import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
 import WMTSTileGrid from "ol/tilegrid/WMTS";
 import WMTS from "ol/source/WMTS";
+import axios from "axios";
 export default {
   name: "previewMap",
   data() {
@@ -89,8 +102,9 @@ export default {
         crs: "EPSG:3857",
         minZoom: 0,
         maxZoom: 20,
-        ogcStand: "WMTS",
+        sliceType: "WMTS",
         origin: "-2.0037508342787E7,2.0037508342787E7",
+        isArcGisService: true,
         maxResolution: 156543.03392800014
       },
       map: null
@@ -109,20 +123,40 @@ export default {
     },
 
     //创建wmts图层
-    createWMTS() {
-      const { resolutions, matrixIds } = tileGridExt.getResolutionByCalc(
-        this.form.maxZoom,
-        this.form.maxResolution
-      );
-      const origin = [...this.form.origin.split(",").map(p => Number(p))];
+    createWMTS(option) {
+      return new Promise(reslove => {
+        const smOption = {
+          url: `${option?.url}/WMTS/`,
+          format: "image/png",
+          projection: option?.crs,
+          tileGrid: new WMTSTileGrid({
+            origin: option?.origin,
+            resolutions: option?.resolutions,
+            matrixIds: option?.matrixIds
+          }),
+          style: "default",
+          matrixSet: "default028mm",
+          layer: "0"
+        };
+        console.log(smOption);
+        reslove(
+          new TileLayer({
+            source: new WMTS(smOption)
+          })
+        );
+      });
+    },
+
+    // 创建WMS切片图层
+    createWMS(option) {
       const smOption = {
-        url: `${this.form.url}/WMTS/`,
+        url: `${option?.url}/WMTS/`,
         format: "image/png",
-        projection: this.form.crs,
+        projection: option?.crs,
         tileGrid: new WMTSTileGrid({
-          origin: origin,
-          resolutions: resolutions,
-          matrixIds: matrixIds
+          origin: option?.origin,
+          resolutions: option?.resolutions,
+          matrixIds: option?.matrixIds
         }),
         style: "default",
         matrixSet: "default028mm",
@@ -134,21 +168,60 @@ export default {
       });
     },
 
+    // 初始化地图实例
     initMapObj() {
       this.map = new Map({
         target: "previewMap"
       });
     },
 
-    previewMap() {
+    //通过手动填写form获取切片信息
+    getMetaByFrom(form) {
+      const { resolutions, matrixIds } = tileGridExt.getResolutionByCalc(
+        form.maxZoom,
+        form.maxResolution
+      );
+      const url = form?.url;
+      const crs = form?.crs;
+      const origin = [...form.origin.split(",").map(p => Number(p))];
+      return { resolutions, matrixIds, origin, url, crs };
+    },
+
+    // 通过mapserver获取切片信息
+    getMetaByServer(url) {
+      return new Promise(reslove => {
+        axios.get(url, { params: { f: "json" } }).then(res => {
+          const { tileInfo } = res.data;
+          const obj = Object.assign(
+            {},
+            tileGridExt.getResolutionByJson(tileInfo),
+            {
+              url,
+              crs: `EPSG:${tileInfo.spatialReference?.latestWkid}`
+            }
+          );
+          reslove(obj);
+        });
+      });
+    },
+
+    async previewMap() {
+      const metaData = this.form.isArcGisService
+        ? await this.getMetaByServer(this.form.url)
+        : this.getMetaByFrom(this.form);
+      const layer =
+        this.form.sliceType === "WMTS"
+          ? await this.createWMTS(metaData)
+          : this.createWMS(metaData);
       const viewOption = {
         center: this.form.center.split(","),
         zoom: 5,
         maxZoom: this.form.maxZoom,
         minZoom: this.form.minZoom
       };
+      console.log(layer);
       this.map.setView(new View(viewOption));
-      this.map.addLayer(this.createWMTS());
+      this.map.addLayer(layer);
       console.log(this.map);
     }
   }

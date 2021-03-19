@@ -12,6 +12,22 @@ const tileGridExt = {
   },
 
   /**
+   *
+   * @param {*} tileInfo json内对象，包含resolution，level
+   * @returns {resolutions, matrixIds, origin}
+   */
+  getResolutionByJson: tileInfo => {
+    const matrixIds = [];
+    const resolutions = [];
+    tileInfo.lods.map(e => {
+      resolutions.push(e.resolution);
+      matrixIds.push(e.level);
+    });
+    const origin = [tileInfo?.origin?.x, tileInfo?.origin?.y];
+    return { resolutions, matrixIds, origin };
+  },
+
+  /**
    * 计算中心点
    * @param  {...any} bbox xmin, ymin, xmax, ymax;
    * @returns {} center[lng,lat]
