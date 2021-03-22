@@ -34,11 +34,12 @@
         <a-form-model-item label="切片原点(origin)">
           <a-input v-model="form.origin" placeholder="x,y" />
         </a-form-model-item>
-        <a-form-model-item label="最大分辨率">
+        <a-form-model-item label="起始分辨率">
           <a-input
             v-model="form.maxResolution"
             placeholder="0.7031250000000002"
-          />
+          >
+          </a-input>
         </a-form-model-item>
         <a-form-model-item label="坐标系">
           <a-radio-group v-model="form.crs" default-value="EPSG:3857">

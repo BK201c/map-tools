@@ -1,15 +1,15 @@
 <template>
   <div class="container">
-    <a-divider orientation="left">基础信息</a-divider>
+    <a-divider orientation="left">CT-Server</a-divider>
     <a-form-model
       :model="formBase"
       :label-col="labelCol"
       :wrapper-col="wrapperCol"
     >
-      <a-form-model-item label="CT-Server-Host">
+      <a-form-model-item label="Host">
         <a-input v-model="formBase.host" />
       </a-form-model-item>
-      <a-form-model-item label="CT-Server-Token">
+      <a-form-model-item label="Token">
         <a-input v-model="formBase.token" />
       </a-form-model-item>
     </a-form-model>
