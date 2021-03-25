@@ -50,6 +50,9 @@
       <a-form-model-item label="道路名">
         <a-input v-model="formLine.keyword" />
       </a-form-model-item>
+      <a-form-model-item label="统一设备标识">
+        <a-input v-model="formLine.gbid" />
+      </a-form-model-item>
       <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
         <a-button type="primary" @click="downloadLineData"> 下载轨迹 </a-button>
       </a-form-model-item>
@@ -81,6 +84,7 @@ export default {
       },
       formLine: {
         adminId: "320505",
+        gbid: "",
         keyword: "金山"
       }
     };
@@ -102,12 +106,11 @@ export default {
         this.formBase
       );
       console.log(data);
-      this.exportXslx(data.result.records);
+      this.exportXslx(data.result.records, this.formLine.gbid);
     },
 
     //导出xslx
-    exportXslx(lines) {
-      const gbid = "65010200031129111110";
+    exportXslx(lines, gbid) {
       const rowTitle = ["gbid", "lon", "lat"];
       const points = [
         ...lines.map(line =>
