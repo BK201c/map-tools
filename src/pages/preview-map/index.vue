@@ -31,8 +31,14 @@
         </a-radio-group>
       </a-form-model-item>
       <div v-if="!form.isArcGisService">
-        <a-form-model-item label="切片原点(origin)">
-          <a-input v-model="form.origin" placeholder="x,y" />
+        <a-form-model-item label="图层名称">
+          <a-input v-model="form.layerName" placeholder="mapName" />
+        </a-form-model-item>
+        <a-form-model-item label="矩形设定">
+          <a-input v-model="form.matrixSet" placeholder="matrixSet" />
+        </a-form-model-item>
+        <a-form-model-item label="切片原点">
+          <a-input v-model="form.origin" placeholder="x,y以英文逗号分割" />
         </a-form-model-item>
         <a-form-model-item label="起始分辨率">
           <a-input
@@ -43,13 +49,13 @@
         </a-form-model-item>
         <a-form-model-item label="坐标系">
           <a-radio-group v-model="form.crs" default-value="EPSG:3857">
-            <a-radio value="EPSG:3857">
+            <a-radio :value="3857">
               EPSG:3857
             </a-radio>
-            <a-radio value="EPSG:4326">
+            <a-radio :value="4326">
               EPSG:4326
             </a-radio>
-            <a-radio value="EPSG:4490">
+            <a-radio :value="4490">
               EPSG:4490
             </a-radio>
           </a-radio-group>
@@ -82,6 +88,7 @@
 
 <script>
 import tileGridExt from "@/utils/tilegrid-ext.js";
+import projExt from "@/utils/proj-ext.js";
 import Map from "ol/Map";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
@@ -100,13 +107,15 @@ export default {
           "https://services.arcgisonline.com/arcgis/rest/services/Demographics/USA_Population_Density/MapServer",
         token: "",
         center: "-11158582,4813697",
-        crs: "EPSG:3857",
+        crs: 3857,
         minZoom: 0,
         maxZoom: 20,
         sliceType: "WMTS",
         origin: "-2.0037508342787E7,2.0037508342787E7",
         isArcGisService: true,
-        maxResolution: 156543.03392800014
+        maxResolution: 156543.03392800014,
+        layerName: "Layers",
+        matrixSet: "default028mm"
       },
       map: null
     };
@@ -129,17 +138,17 @@ export default {
         const smOption = {
           url: `${option?.url}/WMTS/`,
           format: "image/png",
-          projection: option?.crs,
+          projection: projExt[option?.crs],
           tileGrid: new WMTSTileGrid({
             origin: option?.origin,
             resolutions: option?.resolutions,
             matrixIds: option?.matrixIds
           }),
           style: "default",
-          matrixSet: "default028mm",
-          layer: "0"
+          matrixSet: option.matrixSet || "default028mm",
+          layer: option.layerName || "Layers"
         };
-        console.log(smOption);
+        console.log(option, smOption);
         reslove(
           new TileLayer({
             source: new WMTS(smOption)
@@ -153,15 +162,15 @@ export default {
       const smOption = {
         url: `${option?.url}/WMTS/`,
         format: "image/png",
-        projection: option?.crs,
+        projection: projExt[option?.crs],
         tileGrid: new WMTSTileGrid({
           origin: option?.origin,
           resolutions: option?.resolutions,
           matrixIds: option?.matrixIds
         }),
         style: "default",
-        matrixSet: "default028mm",
-        layer: "0"
+        matrixSet: option.matrixSet || "default028mm",
+        layer: option.layerName || "Layers"
       };
       console.log(smOption);
       return new TileLayer({
@@ -198,7 +207,7 @@ export default {
             tileGridExt.getResolutionByJson(tileInfo),
             {
               url,
-              crs: `EPSG:${tileInfo.spatialReference?.latestWkid}`
+              crs: tileInfo.spatialReference?.latestWkid
             }
           );
           reslove(obj);
@@ -217,6 +226,7 @@ export default {
       const viewOption = {
         center: this.form.center.split(","),
         zoom: 5,
+        projection: projExt[this.form.crs],
         maxZoom: this.form.maxZoom,
         minZoom: this.form.minZoom
       };
