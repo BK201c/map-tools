@@ -32,7 +32,7 @@ const tileGridExt = {
    * @param  {...any} bbox xmin, ymin, xmax, ymax;
    * @returns {} center[lng,lat]
    */
-  cgetCenterByCalc: (...bbox) => {
+  getCenterByCalc: (...bbox) => {
     if (!(bbox instanceof Array)) return;
     const [xmin, ymin, xmax, ymax] = [...bbox.map(c => parseFloat(c))];
     return [(xmax + xmin) / 2, (ymax + ymin) / 2];

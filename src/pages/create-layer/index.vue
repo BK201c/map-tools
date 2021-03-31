@@ -19,12 +19,15 @@
       :label-col="labelCol"
       :wrapper-col="wrapperCol"
     >
-      <a-form-model-item label="目标范围">
+      <a-form-model-item label="地图中心点">
+        <a-input v-model="formPoint.center" placeholder="[lng,lat]" />
+      </a-form-model-item>
+      <!-- <a-form-model-item label="目标范围">
         <a-input
           v-model="formPoint.bbox"
           placeholder="[minLng, minLat,maxLng, maxLat] or [lng,lat]"
         />
-      </a-form-model-item>
+      </a-form-model-item> -->
       <a-form-model-item label="生成数量">
         <a-input v-model="formPoint.pointNum" />
       </a-form-model-item>
@@ -80,7 +83,8 @@ export default {
         pointNum: 200,
         appName: "app_tzn_test",
         serviceName: "tzn_008",
-        bbox: "120.496331,31.26383,120.54396,31.32881"
+        center: "120.54396,31.32881"
+        // bbox: "120.496331,31.26383,120.54396,31.32881",
       },
       formLine: {
         adminId: "320505",
@@ -133,23 +137,19 @@ export default {
     /**
      * 创建KMAP layer格式数据
      */
-    createLayerSource(pointsCollection, bbox) {
+    createLayerSource(coordsArray) {
       return new Promise(reslove => {
-        reslove([
-          ...pointsCollection.features.map(() =>
-            Object.assign(
-              {},
-              {
-                dataId: uuidv4(),
-                location: {
-                  type: "Point",
-                  coordinates: randomExt.randomCoordByBbox(bbox)
-                },
-                keyValueMap: randomExt.createRandomProps()
-              }
-            )
-          )
-        ]);
+        const feature = coords => ({
+          dataId: uuidv4(),
+          location: {
+            type: "Point",
+            coordinates: coords
+          },
+          keyValueMap: randomExt.createRandomProps()
+        });
+        const layer = [...coordsArray.map(coords => feature(coords))];
+        console.log(layer);
+        reslove(layer);
       });
     },
 
@@ -157,10 +157,10 @@ export default {
      * 推送点位
      */
     async pushPoints() {
-      const { appName, bbox, serviceName, pointNum } = this.formPoint;
+      const { appName, center, serviceName, pointNum } = this.formPoint;
       try {
-        const opts = await randomExt.createRandomPoints(pointNum, bbox);
-        const esDataEntityList = await this.createLayerSource(opts, bbox);
+        const opts = await randomExt.randomCoordByCenter(center, pointNum);
+        const esDataEntityList = await this.createLayerSource(opts);
         const params = { appName, serviceName, esDataEntityList };
         commonAPI.sendPointData(params, this.formBase).then(res => {
           if (res.data.status === 200) {

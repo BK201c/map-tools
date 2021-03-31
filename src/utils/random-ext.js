@@ -1,4 +1,3 @@
-import { randomPoint } from "@turf/random";
 const randomExt = {
   //生成图层随机状态
   createRandomProps() {
@@ -30,13 +29,6 @@ const randomExt = {
     return _customProps;
   },
 
-  //生成随机点位
-  createRandomPoints(sum = 200, bbox) {
-    return new Promise(reslove => {
-      reslove(randomPoint(sum, bbox.split(",")));
-    });
-  },
-
   /**
    * 根据Bbox范围生成随机点位
    * @params {minLng, maxLng, minLat, maxLat}
@@ -50,14 +42,15 @@ const randomExt = {
     return [lng, lat];
   },
 
-  //根据中心点位和距离限制(KM)返回正方形Bbox
-  randomBboxByCenter(center) {
+  //根据中心点位计数返回随机点位
+  randomCoordByCenter(centerStr, count = 100) {
+    const center = centerStr.split(",");
     const [lng, lat] = [parseFloat(center[0]), parseFloat(center[1])];
+    console.log(lng, lat);
     return [
-      lng - Math.random(),
-      lng + Math.random(),
-      lat - Math.random(),
-      lat + Math.random()
+      ...Array(count)
+        .fill([])
+        .map(() => [lng - Math.random(), lat - Math.random()])
     ];
   }
 };
