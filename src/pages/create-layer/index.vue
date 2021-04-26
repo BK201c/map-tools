@@ -19,15 +19,9 @@
       :label-col="labelCol"
       :wrapper-col="wrapperCol"
     >
-      <a-form-model-item label="地图中心点">
+      <a-form-model-item label="目标中心点">
         <a-input v-model="formPoint.center" placeholder="[lng,lat]" />
       </a-form-model-item>
-      <!-- <a-form-model-item label="目标范围">
-        <a-input
-          v-model="formPoint.bbox"
-          placeholder="[minLng, minLat,maxLng, maxLat] or [lng,lat]"
-        />
-      </a-form-model-item> -->
       <a-form-model-item label="生成数量">
         <a-input v-model="formPoint.pointNum" />
       </a-form-model-item>
@@ -81,10 +75,9 @@ export default {
       },
       formPoint: {
         pointNum: 200,
-        appName: "app_tzn_test",
+        appName: "best_practice",
         serviceName: "tzn_008",
         center: "120.54396,31.32881"
-        // bbox: "120.496331,31.26383,120.54396,31.32881",
       },
       formLine: {
         adminId: "320505",
