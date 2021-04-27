@@ -7,10 +7,10 @@
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
       >
-        <a-form-model-item label="服务">
+        <a-form-model-item label="服务地址">
           <a-textarea
             v-model="form.url"
-            placeholder="Autosize height with minimum and maximum number of lines"
+            placeholder=""
             :auto-size="{ minRows: 2, maxRows: 5 }"
           />
         </a-form-model-item>
@@ -19,13 +19,13 @@
             <a-radio value="WMTS" name="sliceType">
               WMTS
             </a-radio>
-            <a-radio value="WMS" name="sliceType">
-              WMS
+            <a-radio value="REST" name="sliceType">
+              REST
             </a-radio>
           </a-radio-group>
         </a-form-model-item>
-        <a-form-model-item label="手动导入">
-          <a-radio-group v-model="form.isArcGisService" :default-value="true">
+        <a-form-model-item label="手动输入">
+          <a-radio-group v-model="form.isArcGisService" :default-value="false">
             <a-radio :value="true">
               是
             </a-radio>
@@ -35,33 +35,21 @@
           </a-radio-group>
         </a-form-model-item>
         <div v-if="form.isArcGisService">
-          <a-upload
-            :file-list="fileList"
-            name="file"
-            :multiple="true"
-            action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-            :headers="headers"
-            accept=".json"
-            @change="handleChange"
-          >
-            <a-button>
-              上传
-            </a-button>
-          </a-upload>
-        </div>
-        <div v-if="!form.isArcGisService">
           <a-form-model-item label="layerName">
-            <a-input v-model="form.layerName" placeholder="图层名称" />
+            <a-input v-model="form.sourceParams.layer" placeholder="图层名称" />
           </a-form-model-item>
           <a-form-model-item label="matrixSet">
-            <a-input v-model="form.matrixSet" placeholder="矩形设定" />
+            <a-input
+              v-model="form.sourceParams.matrixSet"
+              placeholder="矩形设定"
+            />
           </a-form-model-item>
           <a-form-model-item label="style">
-            <a-input v-model="form.style" placeholder="图层样式" />
+            <a-input v-model="form.sourceParams.style" placeholder="图层样式" />
           </a-form-model-item>
           <a-form-model-item label="origin">
             <a-input
-              v-model="form.origin"
+              v-model="tileGrid.origin"
               placeholder="切片原点(x,y)以英文逗号分割"
             />
           </a-form-model-item>
@@ -70,31 +58,31 @@
             </a-input>
           </a-form-model-item>
           <a-form-model-item label="projection">
-            <a-radio-group v-model="form.crs" default-value="EPSG:3857">
-              <a-radio :value="3857">
-                EPSG:3857
-              </a-radio>
+            <a-radio-group
+              v-model="form.sourceParams.projection"
+              default-value="EPSG:4326"
+            >
               <a-radio :value="4326">
                 EPSG:4326
               </a-radio>
-              <a-radio :value="4490">
-                EPSG:4490
+              <a-radio :value="3857">
+                EPSG:3857
               </a-radio>
             </a-radio-group>
           </a-form-model-item>
           <a-form-model-item label="center">
-            <a-input v-model="form.center" placeholder="中心点 lng,lat" />
+            <a-input v-model="form.view.center" placeholder="中心点 lng,lat" />
           </a-form-model-item>
           <a-form-model-item label="层级范围">
             <a-input-number
-              v-model="form.minZoom"
+              v-model="form.view.minZoom"
               placeholder="最小层级"
               :min="0"
               :max="20"
             />
             <span>&nbsp; - &nbsp;</span>
             <a-input-number
-              v-model="form.maxZoom"
+              v-model="form.view.maxZoom"
               placeholder="最大层级"
               :min="0"
               :max="30"
@@ -102,8 +90,13 @@
           </a-form-model-item>
         </div>
         <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
-          <a-button type="primary" @click="previewMap">地图预览</a-button>
-          <a-button type="primary" @click="previewParams">参数预览</a-button>
+          <a-button type="primary" @click="previewMap">预览地图</a-button>
+          <a-button
+            type="primary"
+            style="margin-left: 10px"
+            @click="previewParams"
+            >预览参数</a-button
+          >
         </a-form-model-item>
       </a-form-model>
     </div>
@@ -112,7 +105,7 @@
         <div id="previewMap" ref="previewMap"></div>
       </div>
       <div class="preview-params" v-show="isParamsShow">
-        <pre><code class="language-json">{{mapParams}}</code></pre>
+        <pre><code class="language-json">{{tileGridParams}}</code></pre>
       </div>
     </div>
   </div>
@@ -120,7 +113,6 @@
 
 <script>
 import tileGridExt from "@/utils/tilegrid-ext.js";
-import projExt from "@/utils/proj-ext.js";
 import Map from "ol/Map";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
@@ -137,47 +129,60 @@ export default {
       labelCol: { span: 5 },
       wrapperCol: { span: 12 },
       formLayout: "horizontal",
+      tileGridParams: {
+        origin: "",
+        resolutions: [],
+        matrixIds: []
+      },
       form: {
         url:
-          "http://services.arcgisonline.com/arcgis/rest/services/Demographics/USA_Population_Density/MapServer",
+          "https://services.arcgisonline.com/arcgis/rest/services/Demographics/USA_Population_Density/MapServer",
         token: "",
-        center: "-11158582,4813697",
-        crs: 3857,
-        minZoom: 0,
-        maxZoom: 20,
         sliceType: "WMTS",
-        origin: "-2.0037508342787E7,2.0037508342787E7",
-        isArcGisService: true,
-        maxResolution: 156543.03392800014,
-        layerName: "Layers",
-        matrixSet: "default028mm",
-        style: "default"
+        isArcGisService: false,
+        maxResolution: "",
+        sourceParams: {
+          projection: "",
+          layer: "",
+          style: "",
+          matrixSet: ""
+        },
+        view: {
+          minZoom: "",
+          maxZoom: "",
+          center: ""
+        }
       },
       map: new Map(),
-      fileList: [],
-      mapParams: "",
-      headers: {
-        authorization: "authorization-text"
-      },
       isMapShow: false,
       isParamsShow: false
     };
   },
-  mounted() {
-    Prism.highlightAll();
-  },
+  mounted() {},
   components: {},
   methods: {
-    handleChange(info) {
-      if (info.file.status !== "uploading") {
-        console.log(info.file, info.fileList);
-      }
-      if (info.file.status === "done") {
-        this.$message.success(`${info.file.name} file uploaded successfully`);
-      } else if (info.file.status === "error") {
-        this.$message.error(`${info.file.name} file upload failed.`);
-      }
+    //切换参数填写方式
+    changeInput() {
+      this.form.isArcGisService = !this.form.isArcGisService;
     },
+
+    // 初始化地图实例
+    initMockMap() {
+      // const sourceParams = {
+      //   origin: [-2.0037508342787e7, 2.0037508342787e7],
+      //   projection: "EPSG:3857",
+      //   layer: "",
+      //   style: "default",
+      //   matrixSet: "default028mm",
+      //   resolutions: []
+      // };
+      // const view = {
+      //   minZoom: 0,
+      //   maxZoom: 20,
+      //   center: [-11158582, 4813697]
+      // };
+    },
+
     // 表单验证
     isValidatePass(form) {
       const bbox = form.bbox.split(",");
@@ -187,22 +192,12 @@ export default {
     },
 
     //创建wmts图层
-    createWMTS(option) {
+    createWMTS(sourceParams, tileGrid) {
       return new Promise(reslove => {
         const smOption = {
-          url: `${option?.url}/WMTS/`,
-          format: "image/png",
-          tileGrid: new WMTSTileGrid({
-            origin: option?.origin,
-            resolutions: option?.resolutions,
-            matrixIds: option?.matrixIds
-          }),
-          projection: projExt[option?.crs],
-          style: option.style || "default",
-          matrixSet: option.matrixSet || "default028mm",
-          layer: option.layerName || "Layers"
+          sourceParams,
+          tileGrid: new WMTSTileGrid(tileGrid)
         };
-        console.log(option, smOption);
         reslove(
           new TileLayer({
             source: new WMTS(smOption)
@@ -211,80 +206,61 @@ export default {
       });
     },
 
-    // 创建WMS切片图层
-    createWMS(option) {
-      const smOption = {
-        url: `${option?.url}/WMTS/`,
-        format: "image/png",
-        projection: projExt[option?.crs],
-        tileGrid: new WMTSTileGrid({
-          origin: option?.origin,
-          resolutions: option?.resolutions,
-          matrixIds: option?.matrixIds
-        }),
-        style: "default",
-        matrixSet: option.matrixSet || "default028mm",
-        layer: option.layerName || "Layers"
-      };
-      console.log(smOption);
-      return new TileLayer({
-        source: new WMTS(smOption)
-      });
-    },
-
-    // 初始化地图实例
-    initMapObj() {
-      this.map = new Map({
-        target: "previewMap"
-      });
-    },
-
-    //通过手动填写form获取切片信息
-    getMetaByFrom(form) {
-      const { resolutions, matrixIds } = tileGridExt.getResolutionByCalc(
-        form.maxZoom,
-        form.maxResolution
-      );
-      const url = form?.url;
-      const crs = form?.crs;
-      const origin = [...form.origin.split(",").map(p => Number(p))];
-      return { resolutions, matrixIds, origin, url, crs };
-    },
-
     // 通过mapserver获取切片信息
-    getMetaByServer(url) {
+    getGridByServer(url) {
       return new Promise(reslove => {
         axios.get(url, { params: { f: "json" } }).then(res => {
           const { tileInfo } = res.data;
-          const obj = Object.assign(
-            {},
-            tileGridExt.getResolutionByJson(tileInfo),
-            {
-              url,
-              crs: tileInfo.spatialReference?.latestWkid
-            }
-          );
-          reslove(obj);
+          const tileGrid = tileGridExt.getResolutionByJson(tileInfo);
+          console.log(tileGrid);
+          reslove(tileGrid);
         });
       });
     },
 
+    getGridByFrom() {
+      return new Promise(reslove => {
+        const { resolutions, matrixIds } = tileGridExt.getResolutionByCalc(
+          this.form.view.maxZoom,
+          this.form.maxResolution
+        );
+        const origin = this.tileGrid.origin.split(",");
+        reslove({ resolutions, matrixIds, origin });
+      });
+    },
+
     async previewMap() {
-      const metaData = this.form.isArcGisService
-        ? await this.getMetaByServer(this.form.url.trim())
-        : this.getMetaByFrom(this.form);
-      console.log(metaData);
+      const defaultParams = {
+        layer: "layers",
+        style: "deafult",
+        matrixSet: "default028mm"
+      };
+      const defaultView = {
+        minZoom: 0,
+        maxZoom: 20,
+        center: [120.34234, 31.11424],
+        projection: "EPSG:4326"
+      };
+      const tileGrid = this.form.isArcGisService
+        ? await this.getGridByServer(this.form.url.trim())
+        : this.getGridByFrom();
+
       const layer =
         this.form.sliceType === "WMTS"
-          ? await this.createWMTS(metaData)
-          : this.createWMS(metaData);
-      const viewOption = {
-        center: this.form.center.split(","),
-        zoom: 5,
-        projection: projExt[this.form.crs],
-        maxZoom: this.form.maxZoom,
-        minZoom: this.form.minZoom
-      };
+          ? await this.createWMTS(
+              Object.assign(defaultParams, this.sourceParams),
+              tileGrid
+            )
+          : this.createWMS(
+              Object.assign(defaultParams, this.sourceParams),
+              tileGrid
+            );
+      const viewOption = Object.assign(
+        {},
+        this.sourceParams.projection,
+        this.view,
+        defaultView
+      );
       this.isMapShow = true;
       this.$nextTick(() => {
         this.map.setTarget(this.$refs.previewMap);
@@ -294,9 +270,14 @@ export default {
     },
 
     async previewParams() {
-      this.mapParams = await this.getMetaByServer(this.form.url.trim());
-      this.isParamsShow = true;
       console.log(this.form);
+      await this.getGridByServer(this.form.url.trim()).then(res => {
+        this.tileGridParams = res;
+      });
+      this.$nextTick(() => {
+        this.isParamsShow = true;
+        Prism.highlightAll();
+      });
     }
   }
 };
@@ -310,6 +291,7 @@ export default {
 }
 .preview-box {
   flex-grow: 1;
+  padding: 0 15px;
   #previewMap {
     width: 100%;
     min-width: 200px;
