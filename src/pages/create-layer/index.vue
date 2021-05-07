@@ -81,7 +81,7 @@ export default {
       },
       formLine: {
         adminId: "320505",
-        gbid: "",
+        gbid: "65010200031129111110",
         keyword: "金山"
       }
     };
@@ -169,4 +169,4 @@ export default {
   }
 };
 </script>
-<style lang="scss"></style>
+<style lang="scss" scoped></style>
