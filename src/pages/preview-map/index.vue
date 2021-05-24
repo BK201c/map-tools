@@ -19,23 +19,25 @@
             <a-radio value="WMTS" name="sliceType">
               WMTS
             </a-radio>
-            <a-radio value="REST" name="sliceType">
-              REST
+            <a-radio value="WMS" name="sliceType">
+              WMS
             </a-radio>
           </a-radio-group>
         </a-form-model-item>
-        <a-form-model-item label="手动输入">
-          <a-radio-group
-            v-model="baseForm.isManualInput"
-            :default-value="false"
+        <a-form-model-item label="附加参数">
+          <a-upload-dragger
+            name="file"
+            accept=".json"
+            :before-upload="beforeUpload"
+            :remove="handleRemove"
           >
-            <a-radio :value="true">
-              是
-            </a-radio>
-            <a-radio :value="false">
-              否
-            </a-radio>
-          </a-radio-group>
+            <p class="ant-upload-drag-icon">
+              <a-icon type="inbox" />
+            </p>
+            <p class="ant-upload-text">
+              点击或拖拽文件到此处
+            </p>
+          </a-upload-dragger>
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
           <a-button type="primary" @click="previewMap">预览地图</a-button>
@@ -46,76 +48,7 @@
             >预览参数</a-button
           >
         </a-form-model-item>
-        <div v-if="baseForm.isManualInput">
-          <a-form-model-item label="MaxResolution">
-            <a-input
-              v-model="baseForm.maxResolution"
-              placeholder="0级对应分辨率"
-            >
-            </a-input>
-          </a-form-model-item>
-        </div>
       </a-form-model>
-      <div v-if="baseForm.isManualInput">
-        <a-form-model
-          :model="layerSourceForm"
-          :label-col="labelCol"
-          :wrapper-col="wrapperCol"
-        >
-          <a-form-model-item label="Projection">
-            <a-radio-group
-              v-model="layerSourceForm.projection"
-              default-value="EPSG:4326"
-            >
-              <a-radio :value="'EPSG:4326'">
-                EPSG:4326
-              </a-radio>
-              <a-radio :value="'EPSG:3857'">
-                EPSG:3857
-              </a-radio>
-            </a-radio-group>
-          </a-form-model-item>
-          <a-form-model-item label="LayerName">
-            <a-input v-model="layerSourceForm.layer" placeholder="图层名称" />
-          </a-form-model-item>
-          <a-form-model-item label="Style">
-            <a-input v-model="layerSourceForm.style" placeholder="图层样式" />
-          </a-form-model-item>
-          <a-form-model-item label="MatrixSet">
-            <a-input
-              v-model="layerSourceForm.matrixSet"
-              placeholder="矩形设定"
-            />
-          </a-form-model-item>
-          <a-form-model-item label="Origin">
-            <a-input
-              v-model="tileGridForm.origin"
-              placeholder="切片原点(x,y)以英文逗号分割"
-            />
-          </a-form-model-item>
-          <a-form-model-item label="Center">
-            <a-input
-              v-model="layerSourceForm.center"
-              placeholder="中心点 lng,lat"
-            />
-          </a-form-model-item>
-          <a-form-model-item label="层级范围">
-            <a-input-number
-              v-model="layerSourceForm.minZoom"
-              placeholder="最小层级"
-              :min="0"
-              :max="20"
-            />
-            <span>&nbsp; - &nbsp;</span>
-            <a-input-number
-              v-model="layerSourceForm.maxZoom"
-              placeholder="最大层级"
-              :min="0"
-              :max="30"
-            />
-          </a-form-model-item>
-        </a-form-model>
-      </div>
     </div>
     <div class="preview-box">
       <div class="preview-map" v-show="isMapShow">
@@ -129,13 +62,12 @@
 </template>
 
 <script>
-import tileGridExt from "@/utils/tilegrid-ext.js";
 import Map from "ol/Map";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
 import WMTSTileGrid from "ol/tilegrid/WMTS";
 import WMTS from "ol/source/WMTS";
-import axios from "axios";
+// import axios from "axios";
 import Prism from "prismjs";
 import "prismjs/themes/prism.css";
 import "prismjs/components/prism-json";
@@ -151,59 +83,67 @@ export default {
           "https://services.arcgisonline.com/arcgis/rest/services/Demographics/USA_Population_Density/MapServer",
         token: "",
         sliceType: "WMTS",
-        isManualInput: false,
-        maxResolution: ""
+        center: ""
       },
-      layerSourceForm: {
-        origin: "-180, 90",
-        minZoom: 0,
-        maxZoom: 20,
-        center: "120.34234, 31.11424",
-        projection: "EPSG:4326",
-        layer: "layers",
-        style: "deafult",
-        matrixSet: "default028mm",
-        format: "image/png",
-        resolutions: [],
-        matrixIds: []
-      },
+      mapParams: "",
       map: new Map(),
+      fileList: [],
       isMapShow: true,
-      isMapParamsShow: false,
-      mapParams: {}
+      isMapParamsShow: false
     };
   },
-  created() {
-    this.initMock();
+  created() {},
+  mounted() {
+    this.initMapObj();
   },
-  mounted() {},
   components: {},
   methods: {
-    initMock() {
-      this.layerSourceForm = {
-        origin: "-2.0037508342787E7,2.0037508342787E7",
-        minZoom: 0,
-        maxZoom: 20,
-        center: "-11158582,4813697",
-        projection: "EPSG:3857",
-        layer: "Layers",
-        style: "default",
-        matrixSet: "default028mm",
-        format: "image/PNG32"
-      };
+    // 移除上传文件
+    handleRemove(file) {
+      const index = this.fileList.indexOf(file);
+      const newFileList = this.fileList.slice();
+      newFileList.splice(index, 1);
+      this.fileList = newFileList;
     },
-    // 表单验证
-    isValidatePass(form) {
-      const bbox = form.bbox.split(",");
-      if (bbox.length !== 2 || bbox.length !== 4) {
-        this.$message.error("请输入正确的点位格式", 2);
-      }
+
+    beforeUpload(file) {
+      this.fileList = [...this.fileList, file];
+      console.log(file);
+      return false;
+    },
+    handleUpload() {
+      const { fileList } = this;
+      const formData = new FormData();
+      fileList.forEach(file => {
+        formData.append("files[]", file);
+      });
+
+      // You can use any AJAX library you like
+      // reqwest({
+      //   url: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
+      //   method: "post",
+      //   processData: false,
+      //   data: formData,
+      //   success: () => {
+      //     this.fileList = [];
+      //     this.$message.success("upload successfully.");
+      //   },
+      //   error: () => {
+      //     this.$message.error("upload failed.");
+      //   }
+      // });
+    },
+    initMapObj() {
+      this.map = new Map({
+        target: this.$refs.previewMap
+      });
     },
 
     //创建wmts图层
-    createWMTS(sourceOption, tileGrid) {
+    createWMTS(opiton) {
       return new Promise(reslove => {
-        const { layer, style, matrixSet, projection } = sourceOption;
+        const { layer, style, matrixSet, projection } = opiton;
+        const { tileGrid } = opiton;
         const smOption = {
           layer,
           style,
@@ -219,52 +159,25 @@ export default {
         );
       });
     },
-
-    // 通过mapserver获取切片信息
-    getGridByServer(url) {
+    getMeatByFile() {
       return new Promise(reslove => {
-        axios.get(url, { params: { f: "json" } }).then(res => {
-          const { tileInfo } = res.data;
-          const tileGrid = tileGridExt.getResolutionByJson(tileInfo);
-          reslove(tileGrid);
-        });
+        reslove("111");
       });
     },
-
-    getGridByFrom() {
-      return new Promise(reslove => {
-        const { resolutions, matrixIds } = tileGridExt.getResolutionByCalc(
-          this.layerSourceForm.maxZoom,
-          this.baseForm.maxResolution
-        );
-        const origin = this.layerSourceForm.origin
-          ?.split(",")
-          .map(v => Number(v));
-        reslove({ resolutions, matrixIds, origin });
-      });
-    },
-
     async previewMap() {
-      const tileGrid = this.baseForm.isManualInput
-        ? this.getGridByFrom()
-        : await this.getGridByServer(this.baseForm.url.trim());
-
+      this.mapParams = await this.getMeatByFile();
       const layer =
         this.baseForm.sliceType === "WMTS"
-          ? await this.createWMTS(this.layerSourceForm, tileGrid)
-          : this.createWMS(this.layerSourceForm, tileGrid);
+          ? await this.createWMTS(this.mapParams)
+          : this.createWMS(this.mapParams);
       const viewOption = {
-        center: this.layerSourceForm.center?.split(",").map(v => Number(v)),
-        minZoom: this.layerSourceForm.minZoom,
-        maxZoom: this.layerSourceForm.maxZoom,
-        projection: this.layerSourceForm.projection,
+        center: this.baseForm.center.trim().split(","),
+        minZoom: this.mapParams?.tileGrid.matrixIds[0] || 0,
+        maxZoom: this.mapParams?.tileGrid.matrixIds.length || 20,
+        projection: this.mapParams?.projection,
         zoom: 5
       };
-      console.log(viewOption);
-      // this.isMapShow = true;
-      console.log(this.map);
       this.$nextTick(() => {
-        this.map.setTarget(this.$refs.previewMap);
         this.map.setView(new View(viewOption));
         this.map.addLayer(layer);
       });
