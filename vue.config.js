@@ -22,7 +22,7 @@ module.exports = {
   // webpack 配置，键值对象时会合并配置，为方法时会改写配置
   // https://cli.vuejs.org/guide/webpack.html#simple-configuration
   configureWebpack: {
-    plugins: [],
+    plugins: []
   },
 
   // webpack 链接 API，用于生成和修改 webapck 配置
@@ -37,7 +37,7 @@ module.exports = {
 
     https: false,
 
-    hotOnly: true,
+    hotOnly: true
   },
 
   // 构建时开启多进程处理 babel 编译
@@ -47,5 +47,5 @@ module.exports = {
   pwa: {},
 
   // 第三方插件配置
-  pluginOptions: {},
+  pluginOptions: {}
 };

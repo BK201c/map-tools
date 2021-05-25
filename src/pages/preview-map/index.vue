@@ -25,19 +25,11 @@
           </a-radio-group>
         </a-form-model-item>
         <a-form-model-item label="附加参数">
-          <a-upload-dragger
-            name="file"
-            accept=".json"
-            :before-upload="beforeUpload"
-            :remove="handleRemove"
-          >
+          <div class="drag-position" id="dragBox" @click="readLocalJson">
             <p class="ant-upload-drag-icon">
               <a-icon type="inbox" />
             </p>
-            <p class="ant-upload-text">
-              点击或拖拽文件到此处
-            </p>
-          </a-upload-dragger>
+          </div>
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
           <a-button type="primary" @click="previewMap">预览地图</a-button>
@@ -89,7 +81,10 @@ export default {
       map: new Map(),
       fileList: [],
       isMapShow: true,
-      isMapParamsShow: false
+      isMapParamsShow: false,
+      dictorySelected: "",
+      isLoading: false,
+      tableData: []
     };
   },
   created() {},
@@ -98,44 +93,41 @@ export default {
   },
   components: {},
   methods: {
-    // 移除上传文件
-    handleRemove(file) {
-      const index = this.fileList.indexOf(file);
-      const newFileList = this.fileList.slice();
-      newFileList.splice(index, 1);
-      this.fileList = newFileList;
-    },
-
-    beforeUpload(file) {
-      this.fileList = [...this.fileList, file];
-      console.log(file);
-      return false;
-    },
-    handleUpload() {
-      const { fileList } = this;
-      const formData = new FormData();
-      fileList.forEach(file => {
-        formData.append("files[]", file);
-      });
-
-      // You can use any AJAX library you like
-      // reqwest({
-      //   url: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
-      //   method: "post",
-      //   processData: false,
-      //   data: formData,
-      //   success: () => {
-      //     this.fileList = [];
-      //     this.$message.success("upload successfully.");
-      //   },
-      //   error: () => {
-      //     this.$message.error("upload failed.");
-      //   }
-      // });
-    },
     initMapObj() {
       this.map = new Map({
         target: this.$refs.previewMap
+      });
+    },
+
+    readLocalJson() {
+      const { dialog } = require("electron").remote;
+      dialog
+        .showOpenDialog({
+          title: "请选择您喜欢的文件",
+          buttonLabel: "走你",
+          filters: [
+            { name: "Custom File Type", extensions: ["js", "html", "json"] }
+          ]
+        })
+        .then(result => {
+          console.log(result.canceled);
+          console.log(result.filePaths);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+
+    listingFile(filepath) {
+      this.isLoading = true;
+      const fs = require("fs");
+
+      fs.readFile(filepath, "utf8", (err, data) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        console.log(data);
       });
     },
 
@@ -201,6 +193,17 @@ export default {
 }
 .form-box {
   width: 600px;
+  .drag-position {
+    display: flex;
+    justify-content: center;
+    height: 160px;
+    border: 2px dashed #000;
+    border-radius: 5px;
+    min-width: 200px;
+    &:hover {
+      cursor: pointer;
+    }
+  }
 }
 .preview-box {
   flex-grow: 1;
