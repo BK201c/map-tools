@@ -7,12 +7,21 @@
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
       >
-        <a-form-model-item label="服务地址">
-          <a-textarea
-            v-model="baseForm.url"
-            placeholder=""
-            :auto-size="{ minRows: 2, maxRows: 5 }"
-          />
+        <a-form-model-item label="" :wrapperCol="{ span: 20, offset: 1 }">
+          <a-input v-model="baseForm.url" placeholder="地图服务地址">
+            <a-select
+              slot="addonBefore"
+              default-value="Http://"
+              style="width: 90px"
+            >
+              <a-select-option value="Http://">
+                Http://
+              </a-select-option>
+              <a-select-option value="Https://">
+                Https://
+              </a-select-option>
+            </a-select>
+          </a-input>
         </a-form-model-item>
         <a-form-model-item label="切片方式">
           <a-radio-group v-model="baseForm.sliceType" default-value="WMTS">
@@ -77,7 +86,7 @@ export default {
       formLayout: "horizontal",
       baseForm: {
         url:
-          "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
+          "t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
         token: "",
         sliceType: "WMTS",
         center: "121,31"
@@ -87,9 +96,7 @@ export default {
       fileList: [],
       isMapShow: true,
       isMapParamsShow: false,
-      dictorySelected: "",
-      isLoading: false,
-      tableData: []
+      dictorySelected: ""
     };
   },
   created() {},
@@ -104,6 +111,7 @@ export default {
       const newFileList = this.fileList.slice();
       newFileList.splice(index, 1);
       this.fileList = newFileList;
+      this.mapParams = "";
     },
 
     // 获取上传文件路径
@@ -165,6 +173,7 @@ export default {
       ];
     },
 
+    // 预览地图
     async preview() {
       const layer =
         this.baseForm.sliceType === "WMTS"
@@ -180,6 +189,7 @@ export default {
       this.map.addLayer(layer);
     },
 
+    // 预览地图参数
     async previewParams() {
       this.$nextTick(() => {
         this.isMapParamsShow = true;
