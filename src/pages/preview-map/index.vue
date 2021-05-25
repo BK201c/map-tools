@@ -25,11 +25,13 @@
           </a-radio-group>
         </a-form-model-item>
         <a-form-model-item label="附加参数">
-          <div class="drag-position" id="dragBox" @click="readLocalJson">
-            <p class="ant-upload-drag-icon">
-              <a-icon type="inbox" />
-            </p>
-          </div>
+          <a-upload
+            :file-list="fileList"
+            :remove="handleRemove"
+            :before-upload="beforeUpload"
+          >
+            <a-button> <a-icon type="upload" /> 选择上传 </a-button>
+          </a-upload>
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
           <a-button type="primary" @click="previewMap">预览地图</a-button>
@@ -78,7 +80,7 @@ export default {
         center: ""
       },
       mapParams: "",
-      map: new Map(),
+      map: "",
       fileList: [],
       isMapShow: true,
       isMapParamsShow: false,
@@ -99,35 +101,30 @@ export default {
       });
     },
 
-    readLocalJson() {
-      const { dialog } = require("electron").remote;
-      dialog
-        .showOpenDialog({
-          title: "请选择您喜欢的文件",
-          buttonLabel: "走你",
-          filters: [
-            { name: "Custom File Type", extensions: ["js", "html", "json"] }
-          ]
-        })
-        .then(result => {
-          console.log(result.canceled);
-          console.log(result.filePaths);
-        })
-        .catch(err => {
-          console.log(err);
-        });
+    // 移除上传文件
+    handleRemove(file) {
+      const index = this.fileList.indexOf(file);
+      const newFileList = this.fileList.slice();
+      newFileList.splice(index, 1);
+      this.fileList = newFileList;
     },
 
-    listingFile(filepath) {
-      this.isLoading = true;
-      const fs = require("fs");
+    // 获取上传文件路径
+    beforeUpload(file) {
+      this.fileList = [...this.fileList, file];
+      console.log(this.fileList);
+      return false;
+    },
 
-      fs.readFile(filepath, "utf8", (err, data) => {
+    readLocalJson(path) {
+      const fs = require("fs");
+      fs.readFile(path, "utf8", (err, data) => {
         if (err) {
           console.error(err);
           return;
         }
         console.log(data);
+        this.mapParams = data;
       });
     },
 

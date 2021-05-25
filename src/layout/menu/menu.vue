@@ -19,7 +19,7 @@
 export default {
   data() {
     return {
-      current: ["createLayer"]
+      current: ["previewMap"]
     };
   },
   created() {
