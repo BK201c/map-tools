@@ -4,6 +4,7 @@
   "private": true,
   "description": "a simple mapTools",
   "author": "jonson wei",
+  "license": "GPL",
   "scripts": {
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",

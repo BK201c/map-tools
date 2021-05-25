@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="form-box">
-      <a-divider orientation="left">服务参数</a-divider>
+      <a-divider orientation="left">底图参数</a-divider>
       <a-form-model
         :model="baseForm"
         :label-col="labelCol"
@@ -24,6 +24,9 @@
             </a-radio>
           </a-radio-group>
         </a-form-model-item>
+        <a-form-model-item label="初始中心点">
+          <a-input v-model="baseForm.center" />
+        </a-form-model-item>
         <a-form-model-item label="附加参数">
           <a-upload
             :file-list="fileList"
@@ -34,7 +37,7 @@
           </a-upload>
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
-          <a-button type="primary" @click="previewMap">预览地图</a-button>
+          <a-button type="primary" @click="preview">预览地图</a-button>
           <a-button
             type="primary"
             style="margin-left: 10px"
@@ -45,8 +48,8 @@
       </a-form-model>
     </div>
     <div class="preview-box">
-      <div class="preview-map" v-show="isMapShow">
-        <div id="previewMap" ref="previewMap"></div>
+      <div class="preview-map">
+        <div id="mapContainer" ref="mapContainer"></div>
       </div>
       <div class="preview-params" v-if="isMapParamsShow">
         <pre><code class="language-json">{{mapParams}}</code></pre>
@@ -74,10 +77,10 @@ export default {
       formLayout: "horizontal",
       baseForm: {
         url:
-          "https://services.arcgisonline.com/arcgis/rest/services/Demographics/USA_Population_Density/MapServer",
+          "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
         token: "",
         sliceType: "WMTS",
-        center: ""
+        center: "121,31"
       },
       mapParams: "",
       map: "",
@@ -95,12 +98,6 @@ export default {
   },
   components: {},
   methods: {
-    initMapObj() {
-      this.map = new Map({
-        target: this.$refs.previewMap
-      });
-    },
-
     // 移除上传文件
     handleRemove(file) {
       const index = this.fileList.indexOf(file);
@@ -112,10 +109,12 @@ export default {
     // 获取上传文件路径
     beforeUpload(file) {
       this.fileList = [...this.fileList, file];
-      console.log(this.fileList);
+      console.log(this.fileList, file);
+      this.readLocalJson(file?.path);
       return false;
     },
 
+    // 读取本地json文件
     readLocalJson(path) {
       const fs = require("fs");
       fs.readFile(path, "utf8", (err, data) => {
@@ -123,59 +122,65 @@ export default {
           console.error(err);
           return;
         }
-        console.log(data);
-        this.mapParams = data;
+        this.mapParams = JSON.parse(data);
+        console.log(this.mapParams);
       });
     },
 
     //创建wmts图层
     createWMTS(opiton) {
+      console.log(opiton);
       return new Promise(reslove => {
-        const { layer, style, matrixSet, projection } = opiton;
-        const { tileGrid } = opiton;
-        const smOption = {
-          layer,
-          style,
-          matrixSet,
-          projection,
-          tileGrid: new WMTSTileGrid(tileGrid)
+        const tileGrid = new WMTSTileGrid(opiton?.tileGrid);
+        const base = {
+          url: opiton.url,
+          layer: opiton.layer,
+          projection: opiton.projection,
+          format: opiton.format,
+          style: opiton.style,
+          matrixSet: opiton.matrixSet,
+          crossOrigin: opiton.crossOrigin || "anonymous"
         };
+        const smOption = Object.assign({}, base, { tileGrid });
+        const source = new WMTS(smOption);
         console.log(smOption);
-        reslove(
-          new TileLayer({
-            source: new WMTS(smOption)
-          })
-        );
+        reslove(new TileLayer({ source }));
       });
     },
-    getMeatByFile() {
-      return new Promise(reslove => {
-        reslove("111");
+
+    // 初始化地图对象
+    initMapObj() {
+      this.map = new Map({
+        target: this.$refs.mapContainer
       });
     },
-    async previewMap() {
-      this.mapParams = await this.getMeatByFile();
+
+    // 转换字符串为经纬度
+    formatStr2Arr(str) {
+      return [
+        ...str
+          .trim()
+          .split(",")
+          .map(p => Number(p))
+      ];
+    },
+
+    async preview() {
       const layer =
         this.baseForm.sliceType === "WMTS"
           ? await this.createWMTS(this.mapParams)
           : this.createWMS(this.mapParams);
       const viewOption = {
-        center: this.baseForm.center.trim().split(","),
+        center: this.formatStr2Arr(this.baseForm.center),
         minZoom: this.mapParams?.tileGrid.matrixIds[0] || 0,
         maxZoom: this.mapParams?.tileGrid.matrixIds.length || 20,
-        projection: this.mapParams?.projection,
         zoom: 5
       };
-      this.$nextTick(() => {
-        this.map.setView(new View(viewOption));
-        this.map.addLayer(layer);
-      });
+      this.map.setView(new View(viewOption));
+      this.map.addLayer(layer);
     },
 
     async previewParams() {
-      await this.getGridByServer(this.form.url.trim()).then(res => {
-        this.mapParams = res;
-      });
       this.$nextTick(() => {
         this.isMapParamsShow = true;
         Prism.highlightAll();
@@ -205,7 +210,7 @@ export default {
 .preview-box {
   flex-grow: 1;
   padding: 0 15px;
-  #previewMap {
+  #mapContainer {
     width: 100%;
     min-width: 200px;
     min-height: 100px;
