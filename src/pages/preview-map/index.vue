@@ -56,12 +56,14 @@
         </a-form-model-item>
       </a-form-model>
     </div>
-    <div class="preview-box">
-      <div class="preview-map">
-        <div id="mapContainer" ref="mapContainer"></div>
-      </div>
-      <div class="preview-params" v-show="isMapParamsShow">
-        <pre><code class="language-json">{{mapParams}}</code></pre>
+    <div class="preview-box" v-show="isMapParamsShow">
+      <div class="animate__animated animate__fadeInLeft">
+        <div class="preview-map">
+          <div id="mapContainer" ref="mapContainer"></div>
+        </div>
+        <div class="preview-params">
+          <pre><code class="language-json">{{paramsBox}}</code></pre>
+        </div>
       </div>
     </div>
   </div>
@@ -94,7 +96,8 @@ export default {
       isMapShow: true,
       isMapParamsShow: false,
       dictorySelected: "",
-      citys: []
+      citys: [],
+      paramsBox: ""
     };
   },
   created() {
@@ -184,9 +187,7 @@ export default {
 
     // 初始化地图对象
     initMapObj() {
-      this.map = new Map({
-        target: this.$refs.mapContainer
-      });
+      this.map = new Map();
     },
 
     // 参数验证
@@ -214,10 +215,14 @@ export default {
           maxZoom: 20,
           zoom: 8
         };
-        this.map.setView(new View(viewOption));
-        this.map.addLayer(layer);
         this.isMapParamsShow = true;
-        Prism.highlightAll();
+        this.paramsBox = this.mapParams;
+        this.$nextTick(() => {
+          this.map.setTarget(this.$refs.mapContainer);
+          this.map.setView(new View(viewOption));
+          this.map.addLayer(layer);
+          Prism.highlightAll();
+        });
       } catch (error) {
         console.log(error);
         this.$message.error("附加参数错误，请选择其它文件", 2);

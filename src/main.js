@@ -10,6 +10,7 @@ import Antd from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 import "./styles/scroll.scss";
 import "./styles/reset.css";
+import "animate.css";
 Vue.use(Antd);
 
 Vue.config.productionTip = false;

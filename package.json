@@ -1,6 +1,6 @@
 {
   "name": "map-tools",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "a simple mapTools",
   "author": "jonson wei",
@@ -18,6 +18,7 @@
   "dependencies": {
     "@turf/turf": "^6.3.0",
     "@types/ol": "^6.4.2",
+    "animate.css": "^4.1.1",
     "ant-design-vue": "^1.7.3",
     "aws-sdk": "^2.851.0",
     "axios": "^0.21.1",
