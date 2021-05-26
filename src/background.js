@@ -59,10 +59,11 @@ app.on("ready", async () => {
     } catch (e) {
       console.error("Vue Devtools failed to install:", e.toString());
     }
+  } else {
+    // 隐藏菜单栏
+    Menu.setApplicationMenu(null);
   }
   createWindow();
-  // 隐藏菜单栏
-  Menu.setApplicationMenu(null);
 });
 
 // Exit cleanly on request from parent process in development mode.

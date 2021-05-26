@@ -28,7 +28,7 @@ module.exports = {
   // webpack 链接 API，用于生成和修改 webapck 配置
   chainWebpack: config => {
     config.plugin("html").tap(args => {
-      args[0].title = "MapTools-V1.0.0";
+      args[0].title = "MapTools";
       return args;
     });
   },
@@ -54,7 +54,20 @@ module.exports = {
   // 第三方插件配置
   pluginOptions: {
     electronBuilder: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      builderOptions: {
+        electronDownload: {
+          mirror: "https://npm.taobao.org/mirrors/electron/"
+        },
+        appId: "com.mapTools.app",
+        copyright: "Copyright 2020-2021",
+        productName: "MapTools",
+        files: ["!dist/**/*"],
+        win: {
+          target: ["zip"],
+          icon: "./public/favicon.ico"
+        }
+      }
     }
   }
 };

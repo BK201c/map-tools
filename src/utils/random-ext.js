@@ -46,7 +46,6 @@ const randomExt = {
   randomCoordByCenter(centerStr, count = 100) {
     const center = centerStr.split(",");
     const [lng, lat] = [parseFloat(center[0]), parseFloat(center[1])];
-    console.log(lng, lat);
     return [
       ...Array(count)
         .fill([])
