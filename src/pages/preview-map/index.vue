@@ -41,6 +41,7 @@
             :file-list="fileList"
             :remove="handleRemove"
             :before-upload="beforeUpload"
+            accept=".json"
           >
             <a-button> <a-icon type="upload" /> 选择上传 </a-button>
           </a-upload>
@@ -173,20 +174,36 @@ export default {
       ];
     },
 
+    // 参数验证
+    checkParams() {
+      if (!this.mapParams && !this.baseForm.url) {
+        this.$message.error("服务地址不能为空", 2);
+        return false;
+      } else {
+        return true;
+      }
+    },
+
     // 预览地图
     async preview() {
-      const layer =
-        this.baseForm.sliceType === "WMTS"
-          ? await this.createWMTS(this.mapParams)
-          : this.createWMS(this.mapParams);
-      const viewOption = {
-        center: this.formatStr2Arr(this.baseForm.center),
-        minZoom: this.mapParams?.tileGrid.matrixIds[0] || 0,
-        maxZoom: this.mapParams?.tileGrid.matrixIds.length || 20,
-        zoom: 5
-      };
-      this.map.setView(new View(viewOption));
-      this.map.addLayer(layer);
+      if (!this.checkParams()) return;
+      try {
+        const layer =
+          this.baseForm.sliceType === "WMTS"
+            ? await this.createWMTS(this.mapParams)
+            : this.createWMS(this.mapParams);
+        const viewOption = {
+          center: this.formatStr2Arr(this.baseForm.center),
+          minZoom: this.mapParams?.tileGrid.matrixIds[0] || 0,
+          maxZoom: this.mapParams?.tileGrid.matrixIds.length || 20,
+          zoom: 5
+        };
+        this.map.setView(new View(viewOption));
+        this.map.addLayer(layer);
+      } catch (error) {
+        console.log(error);
+        this.$message.error("附加参数错误，请选择其它文件", 2);
+      }
     },
 
     // 预览地图参数

@@ -6,11 +6,11 @@
       mode="inline"
       @click="handleClick"
     >
-      <a-menu-item key="createLayer">
-        模拟数据
-      </a-menu-item>
       <a-menu-item key="previewMap">
         地图验证
+      </a-menu-item>
+      <a-menu-item key="createLayer">
+        模拟数据
       </a-menu-item>
     </a-menu>
   </div>
