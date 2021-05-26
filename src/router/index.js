@@ -1,11 +1,13 @@
 import VueRouter from "vue-router";
 
-import createLayer from "@/pages/create-layer/index.vue";
-import previewMap from "@/pages/preview-map/index.vue";
+import createLayer from "@/pages/create-layer/";
+import previewMap from "@/pages/preview-map/";
+import about from "@/pages/about/";
 const routes = [
   { path: "/", redirect: "/create-layer" },
+  { path: "/preview-map", name: "previewMap", component: previewMap },
   { path: "/create-layer", name: "createLayer", component: createLayer },
-  { path: "/preview-map", name: "previewMap", component: previewMap }
+  { path: "/about", name: "about", component: about }
 ];
 
 // 3. 创建 router 实例，然后传 `routes` 配置
