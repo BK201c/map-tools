@@ -26,7 +26,12 @@ module.exports = {
   },
 
   // webpack 链接 API，用于生成和修改 webapck 配置
-  chainWebpack: () => {},
+  chainWebpack: config => {
+    config.plugin("html").tap(args => {
+      args[0].title = "MapTools-V1.0.0";
+      return args;
+    });
+  },
 
   // All options for webpack-dev-server are supported
   // https://webpack.js.org/configuration/dev-server/
