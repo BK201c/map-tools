@@ -1,6 +1,6 @@
 <template>
   <section class="main-container">
-    <section class="sidebar">
+    <section class="sidebar-layout">
       <the-menu></the-menu>
     </section>
     <section class="content">
@@ -27,11 +27,8 @@ export default {
 
 <style scoped lang="scss">
 .main-container {
-  padding: {
-    top: 20px;
-    bottom: 20px;
-  }
   display: flex;
+  height: 100vh;
   justify-content: space-around;
   .content {
     flex-grow: 1;

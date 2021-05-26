@@ -8,6 +8,7 @@ import router from "./router";
 import "ol/ol.css";
 import Antd from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
+import "./styles/scroll.scss";
 Vue.use(Antd);
 
 Vue.config.productionTip = false;

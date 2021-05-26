@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="sidebar">
     <a-menu
       style="width: 185px"
       :default-selected-keys="current"
@@ -7,10 +7,12 @@
       @click="handleClick"
     >
       <a-menu-item key="previewMap">
-        地图验证
+        <a-icon type="file-search" />
+        底图验证
       </a-menu-item>
       <a-menu-item key="createLayer">
-        模拟数据
+        <a-icon type="database" />
+        数据推送
       </a-menu-item>
     </a-menu>
   </div>
@@ -32,3 +34,9 @@ export default {
   }
 };
 </script>
+<style lang="scss" scoped>
+.sidebar {
+  box-shadow: 1px 1px 9px 2px #e4e4e4;
+  height: 100%;
+}
+</style>
