@@ -28,13 +28,23 @@
             <a-radio value="WMTS" name="sliceType">
               WMTS
             </a-radio>
-            <a-radio value="WMS" name="sliceType">
+            <a-radio value="WMS" name="sliceType" :disabled="true">
               WMS
             </a-radio>
           </a-radio-group>
         </a-form-model-item>
-        <a-form-model-item label="初始中心点">
-          <a-input v-model="baseForm.center" />
+        <a-form-model-item label="初始位置">
+          <a-cascader
+            :field-names="{
+              label: 'name',
+              value: 'adcode',
+              children: 'children'
+            }"
+            :options="citys"
+            :show-search="{ filter }"
+            placeholder="选择地图中心点"
+            @change="onChange"
+          />
         </a-form-model-item>
         <a-form-model-item label="附加参数">
           <a-upload
@@ -74,7 +84,7 @@ import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
 import WMTSTileGrid from "ol/tilegrid/WMTS";
 import WMTS from "ol/source/WMTS";
-// import axios from "axios";
+import axios from "axios";
 import Prism from "prismjs";
 import "prismjs/themes/prism.css";
 import "prismjs/components/prism-json";
@@ -90,22 +100,47 @@ export default {
           "t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
         token: "",
         sliceType: "WMTS",
-        center: "121,31"
+        center: []
       },
       mapParams: "",
       map: "",
       fileList: [],
       isMapShow: true,
       isMapParamsShow: false,
-      dictorySelected: ""
+      dictorySelected: "",
+      citys: []
     };
   },
-  created() {},
+  created() {
+    this.initCitys();
+  },
   mounted() {
     this.initMapObj();
   },
   components: {},
   methods: {
+    // 初始化城市选择
+    initCitys() {
+      axios.get("./location.json").then(res => {
+        console.log(res);
+        this.citys = res.data;
+      });
+    },
+
+    // 城市选择
+    onChange(value, selectedOptions) {
+      this.baseForm.center = selectedOptions[1].center;
+      console.log(value, selectedOptions);
+    },
+
+    // 中心点搜索
+    filter(inputValue, path) {
+      return path.some(
+        option =>
+          option.name.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
+      );
+    },
+
     // 移除上传文件
     handleRemove(file) {
       const index = this.fileList.indexOf(file);
@@ -138,7 +173,6 @@ export default {
 
     //创建wmts图层
     createWMTS(opiton) {
-      console.log(opiton);
       return new Promise(reslove => {
         const tileGrid = new WMTSTileGrid(opiton?.tileGrid);
         const base = {
@@ -152,7 +186,6 @@ export default {
         };
         const smOption = Object.assign({}, base, { tileGrid });
         const source = new WMTS(smOption);
-        console.log(smOption);
         reslove(new TileLayer({ source }));
       });
     },
@@ -164,18 +197,9 @@ export default {
       });
     },
 
-    // 转换字符串为经纬度
-    formatStr2Arr(str) {
-      return [
-        ...str
-          .trim()
-          .split(",")
-          .map(p => Number(p))
-      ];
-    },
-
     // 参数验证
     checkParams() {
+      console.log(this.mapParams, this.baseForm);
       if (!this.mapParams && !this.baseForm.url) {
         this.$message.error("服务地址不能为空", 2);
         return false;
@@ -193,10 +217,11 @@ export default {
             ? await this.createWMTS(this.mapParams)
             : this.createWMS(this.mapParams);
         const viewOption = {
-          center: this.formatStr2Arr(this.baseForm.center),
-          minZoom: this.mapParams?.tileGrid.matrixIds[0] || 0,
-          maxZoom: this.mapParams?.tileGrid.matrixIds.length || 20,
-          zoom: 5
+          center: this.baseForm.center,
+          projection: this.mapParams.projection,
+          minZoom: 0,
+          maxZoom: 20,
+          zoom: 8
         };
         this.map.setView(new View(viewOption));
         this.map.addLayer(layer);
@@ -238,10 +263,10 @@ export default {
   flex-grow: 1;
   padding: 0 15px;
   #mapContainer {
-    width: 100%;
+    width: 550px;
     min-width: 200px;
     min-height: 100px;
-    height: 250px;
+    height: 300px;
     border: 1px solid #d5d5d5;
   }
   .preview-params {

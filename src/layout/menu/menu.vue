@@ -24,11 +24,9 @@ export default {
   },
   created() {
     this.current[0] = this.$route.name;
-    console.log(this.$route);
   },
   methods: {
     handleClick(e) {
-      console.log("click", e);
       this.$router.push({ name: e.key });
     }
   }
