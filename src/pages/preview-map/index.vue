@@ -62,7 +62,22 @@
           <div id="mapContainer" ref="mapContainer"></div>
         </div>
         <div class="preview-params">
-          <pre><code class="language-json">{{paramsBox}}</code></pre>
+          <div class="btn-group">
+            <a-tooltip>
+              <template slot="title">
+                下载参数
+              </template>
+              <a-button
+                type="primary"
+                icon="download"
+                size="small"
+                @click="downloadParams"
+              />
+            </a-tooltip>
+          </div>
+          <pre>
+            <code class="language-json">{{paramsBox}}</code>
+          </pre>
         </div>
       </div>
     </div>
@@ -79,6 +94,7 @@ import axios from "axios";
 import Prism from "prismjs";
 import "prismjs/themes/prism.css";
 import "prismjs/components/prism-json";
+const fs = require("fs");
 export default {
   name: "previewMap",
   data() {
@@ -108,8 +124,15 @@ export default {
   },
   components: {},
   methods: {
-    inputChange(e) {
-      console.log(e, this.mapParams);
+    downloadParams() {
+      const content = JSON.stringify(this.mapParams);
+      fs.writeFile("/Users/iw/test.json", content, err => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        //文件写入成功。
+      });
     },
 
     // 初始化城市选择
@@ -154,7 +177,6 @@ export default {
 
     // 读取本地json文件
     readLocalJson(path) {
-      const fs = require("fs");
       fs.readFile(path, "utf8", (err, data) => {
         if (err) {
           console.error(err);
@@ -265,9 +287,16 @@ export default {
     width: $width;
     min-width: 200px;
     max-height: 300px;
+    position: relative;
     pre {
       height: 300px;
       overflow-y: scroll;
+    }
+    .btn-group {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
     }
   }
 }

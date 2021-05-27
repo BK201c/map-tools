@@ -65,7 +65,7 @@ module.exports = {
         files: ["!dist/**/*"],
         win: {
           target: ["zip"],
-          icon: "./public/favicon.ico"
+          icon: "./public/logo.png"
         }
       }
     }
