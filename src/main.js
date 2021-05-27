@@ -1,9 +1,11 @@
 import Vue from "vue";
 import App from "./App.vue";
+
 import VueRouter from "vue-router";
 Vue.use(VueRouter);
 
 import router from "./router";
+import store from "./store";
 
 import "ol/ol.css";
 import Antd from "ant-design-vue";
@@ -17,5 +19,6 @@ Vue.config.productionTip = false;
 
 new Vue({
   render: h => h(App),
-  router
+  router,
+  store
 }).$mount("#app");
