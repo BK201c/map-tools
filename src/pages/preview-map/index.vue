@@ -95,6 +95,7 @@ import Prism from "prismjs";
 import "prismjs/themes/prism.css";
 import "prismjs/components/prism-json";
 const fs = require("fs");
+import { ipcRenderer } from "electron";
 export default {
   name: "previewMap",
   data() {
@@ -113,6 +114,7 @@ export default {
       isMapParamsShow: false,
       dictorySelected: "",
       citys: [],
+      appPath: "",
       paramsBox: ""
     };
   },
@@ -125,13 +127,15 @@ export default {
   components: {},
   methods: {
     downloadParams() {
+      ipcRenderer.send("app-get-locatPath");
       const content = JSON.stringify(this.mapParams);
-      fs.writeFile("/Users/iw/test.json", content, err => {
+      fs.writeFile(`${this.appPath}/params.json`, content, err => {
         if (err) {
           console.error(err);
           return;
         }
         //文件写入成功。
+        this.$message.success("文件已保存在程序所在目录");
       });
     },
 
@@ -184,6 +188,7 @@ export default {
         }
         const params = Object.assign({}, this.mapParams, JSON.parse(data));
         this.mapParams = params;
+        this.$message.success("参数已读取");
         console.log(this.mapParams);
       });
     },

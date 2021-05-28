@@ -8,15 +8,15 @@
     >
       <a-menu-item key="previewMap">
         <a-icon style="fontSize:18px" type="file-search" />
-        底图验证
+        <span>底图验证</span>
       </a-menu-item>
       <a-menu-item key="createLayer">
         <a-icon style="fontSize:18px" type="cloud-server" />
-        数据推送
+        <span>数据推送</span>
       </a-menu-item>
       <a-menu-item key="about">
         <a-icon style="fontSize:18px" type="smile" />
-        关于
+        <span>关于</span>
       </a-menu-item>
     </a-menu>
   </div>
