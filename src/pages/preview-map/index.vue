@@ -71,13 +71,16 @@
                 type="primary"
                 icon="download"
                 size="small"
+                :ghost="true"
                 @click="downloadParams"
-              />
+              >
+                下载参数
+              </a-button>
             </a-tooltip>
           </div>
-          <pre>
-            <code class="language-json">{{paramsBox}}</code>
-          </pre>
+          <div class="pre-box">
+            <pre><code class="language-json">{{paramsBox}}</code></pre>
+          </div>
         </div>
       </div>
     </div>
@@ -94,8 +97,8 @@ import axios from "axios";
 import Prism from "prismjs";
 import "prismjs/themes/prism.css";
 import "prismjs/components/prism-json";
-const fs = require("fs");
-import { ipcRenderer } from "electron";
+import fs from "fs";
+import { mapGetters } from "vuex";
 export default {
   name: "previewMap",
   data() {
@@ -114,7 +117,6 @@ export default {
       isMapParamsShow: false,
       dictorySelected: "",
       citys: [],
-      appPath: "",
       paramsBox: ""
     };
   },
@@ -125,13 +127,16 @@ export default {
     this.initMapObj();
   },
   components: {},
+  computed: {
+    ...mapGetters(["zipPath"])
+  },
   methods: {
     downloadParams() {
-      ipcRenderer.send("app-get-locatPath");
       const content = JSON.stringify(this.mapParams);
-      fs.writeFile(`${this.appPath}/params.json`, content, err => {
+      fs.writeFile(`${this.zipPath}/adapt_params.json`, content, err => {
         if (err) {
           console.error(err);
+          this.$message.success(err);
           return;
         }
         //文件写入成功。
@@ -280,27 +285,28 @@ export default {
 .preview-box {
   flex-grow: 1;
   padding: 0 15px;
-  $width: 550px;
+  $width: 350px;
   #mapContainer {
-    width: $width;
-    min-width: 200px;
+    min-width: $width;
     min-height: 100px;
     height: 300px;
     border: 1px solid #d5d5d5;
   }
   .preview-params {
-    width: $width;
-    min-width: 200px;
-    max-height: 300px;
     position: relative;
+    .pre-box {
+      min-width: $width;
+    }
     pre {
-      height: 300px;
+      padding-top: 45px;
+      width: 550px;
+      height: 350px;
       overflow-y: scroll;
     }
     .btn-group {
       position: absolute;
       top: 10px;
-      right: 10px;
+      left: 10px;
       z-index: 10;
     }
   }
