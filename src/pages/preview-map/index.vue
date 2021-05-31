@@ -294,19 +294,20 @@ export default {
   }
   .preview-params {
     position: relative;
+    width: 550px;
     .pre-box {
       min-width: $width;
     }
     pre {
-      padding-top: 45px;
       width: 550px;
+      padding-top: 45px;
       height: 350px;
       overflow-y: scroll;
     }
     .btn-group {
       position: absolute;
       top: 10px;
-      left: 10px;
+      right: 25px;
       z-index: 10;
     }
   }
