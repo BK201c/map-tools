@@ -131,6 +131,7 @@ export default {
     ...mapGetters(["zipPath"])
   },
   methods: {
+    //保存显示地图的参数文件
     downloadParams() {
       const content = JSON.stringify(this.mapParams);
       fs.writeFile(`${this.zipPath}/adapt_params.json`, content, err => {
