@@ -1,4 +1,4 @@
-const tileGridExt = {
+const calculator = {
   /**
    * 获取分辨率数组
    * @param {Number} level 层级数
@@ -39,4 +39,4 @@ const tileGridExt = {
   }
 };
 
-export default tileGridExt;
+export default calculator;
