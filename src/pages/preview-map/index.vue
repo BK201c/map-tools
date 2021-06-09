@@ -56,6 +56,15 @@
         </a-form-model-item>
       </a-form-model>
     </div>
+    <a-button
+      type="primary"
+      icon="download"
+      size="small"
+      :ghost="true"
+      @click="previewdddd"
+    >
+      预览
+    </a-button>
     <div class="preview-box" v-show="isMapParamsShow">
       <div class="animate__animated animate__fadeInLeft">
         <div class="preview-map">
@@ -99,6 +108,7 @@ import "prismjs/themes/prism.css";
 import "prismjs/components/prism-json";
 import fs from "fs";
 import { mapGetters } from "vuex";
+import filter from "@/utils/filter";
 export default {
   name: "previewMap",
   data() {
@@ -131,6 +141,12 @@ export default {
     ...mapGetters(["zipPath"])
   },
   methods: {
+    previewdddd() {
+      axios.get("./tiandi_4326_wmts.xml").then(res => {
+        let result = filter.readXML(res.data);
+        console.log(result);
+      });
+    },
     //保存显示地图的参数文件
     downloadParams() {
       const content = JSON.stringify(this.mapParams);

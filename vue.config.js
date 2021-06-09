@@ -55,6 +55,7 @@ module.exports = {
   pluginOptions: {
     electronBuilder: {
       nodeIntegration: true,
+      contextIsolation: false,
       builderOptions: {
         electronDownload: {
           mirror: "https://npm.taobao.org/mirrors/electron/"
