@@ -1,4 +1,12 @@
-import * as jsdom from "jsdom";
+import * as turf from "@turf/turf";
+
+export const isMercatorProjection = projection => {
+  const degreeIndex = ["EPSG:4326", "EPSG:4490", "wgs84"];
+  const mercatorIndex = ["EPSG:3857", "EPSG:900913"];
+  return (
+    mercatorIndex.includes(projection) && !degreeIndex.includes(projection)
+  );
+};
 /**
  *
  * @param {*比例尺} scale
@@ -7,6 +15,7 @@ import * as jsdom from "jsdom";
  * @returns 地面分辨率
  */
 const calcResolutionByScale = (scale, crs = 4326, dpi = 96) => {
+  console.log(scale, crs);
   // 一个像素等于多少米距离（单位米）,OGC标准下单位像素距离
   const defaultPixelMeter = 0.0254000508;
 
@@ -23,97 +32,49 @@ const calcResolutionByScale = (scale, crs = 4326, dpi = 96) => {
   const meter = 1;
 
   // 地图单位
-  let units;
-  const degreeIndex = [4326, 4490, "wgs84"];
-  const meterIndex = [3857, 90013];
-
-  if (meterIndex.includes(crs)) {
-    units = meter;
-  } else if (degreeIndex.includes(crs)) units = degreeMeter;
+  const units = isMercatorProjection(crs) ? meter : degreeMeter;
 
   return (defaultPixelMeter * scale) / (dpi * units);
 };
 
 //获取layer节点信息
-const filterLayerMeta = layerDomNode => {
-  const selectorMap = new Map([
-    ["layer", "ows:Title"],
-    ["style", "Style"],
-    ["format", "Format"],
-    ["tileMatrixSet", "TileMatrixSet"]
-  ]);
-  let obj = {};
-  selectorMap.forEach(
-    (v, k) =>
-      (obj[k] = layerDomNode?.getElementsByTagName(v)[0]?.textContent.trim())
-  );
-  return obj;
+export const filterLayerInfo = layer => {
+  return new Promise((resolve, reject) => {
+    let obj = {
+      layer: layer.Identifier,
+      style: layer.Style[0]?.Identifier,
+      format: layer.Format[0],
+      matrixSet: layer.TileMatrixSetLink[0]?.TileMatrixSet
+    };
+    if (!layer) {
+      reject(layer, "提供了错误的参数");
+    }
+    resolve(obj);
+  });
 };
 
 //获取tileGrid信息
-const filterTileGridMeta = tileMatrixSetDomNode => {
-  const scale = [];
+export const filterTileGridInfo = TileMatrixSet => {
   const matrixIds = [];
-  let origin = [];
-  let crs = tileMatrixSetDomNode
-    .getElementsByTagName("ows:SupportedCRS")[0]
-    .textContent.split("::")[1];
-  const tileMatrixList = tileMatrixSetDomNode.getElementsByTagName(
-    "TileMatrix"
-  );
-  origin = tileMatrixList[0]
-    .getElementsByTagName("TopLeftCorner")
-    .split(" ")
-    .reverse();
-  for (const tileMatrix of tileMatrixList) {
-    scale.push(
-      tileMatrix.getElementsByTagName("ScaleDenominator")[0].textContent
+  const resolutions = [];
+  const projection = "EPSG:" + TileMatrixSet.SupportedCRS?.split("::")[1];
+  const origin = TileMatrixSet.TileMatrix[0]?.TopLeftCorner.reverse();
+  TileMatrixSet.TileMatrix.forEach(matrix => {
+    matrixIds.push(Number(matrix.Identifier));
+    resolutions.push(
+      calcResolutionByScale(matrix?.ScaleDenominator, projection)
     );
-    matrixIds.push(
-      tileMatrix.getElementsByTagName("ows:Identifier")[0].textContent
-    );
-  }
-  const resolutions = [...scale.map(s => calcResolutionByScale(s, crs))];
+  });
   return {
     origin,
-    crs,
+    projection,
     matrixIds,
     resolutions
   };
 };
 
-const filter = {
-  readXML: xmlStr => {
-    const { JSDOM } = jsdom;
-    const { window } = new JSDOM(xmlStr);
-    const xmlDoc = window.document;
-    console.log(xmlDoc);
-
-    //获取DOM节点
-    const htmlNode = (dom, tagSelector) =>
-      dom.getElementsByTagName(tagSelector);
-
-    try {
-      // 获取layer
-      const [layer] = htmlNode(xmlDoc, "Contents Layer");
-      const layerMeta = filterLayerMeta(layer);
-      const tileMatrixSetList = htmlNode(xmlDoc, "Contents TileMatrixSet");
-      let tileGrid = {};
-      debugger;
-      for (const currentTileMatrixSet of tileMatrixSetList) {
-        if (
-          htmlNode(currentTileMatrixSet, "ows:Identifier")[0]?.textContent ===
-          layerMeta.tileMatrixSet
-        ) {
-          tileGrid = filterTileGridMeta(currentTileMatrixSet);
-        }
-      }
-      console.log(tileGrid);
-      return tileGrid;
-    } catch (error) {
-      console.log(error);
-    }
-  }
+export const lonLat2Mercator = point => {
+  var pt = turf.point(point);
+  var converted = turf.toMercator(pt);
+  return turf.getCoord(converted);
 };
-
-export default filter;

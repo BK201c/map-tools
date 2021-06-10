@@ -12,11 +12,11 @@
           </a-input>
         </a-form-model-item>
         <a-form-model-item label="切片方式">
-          <a-radio-group v-model="mapParams.serviceType" default-value="WMTS">
-            <a-radio value="WMTS" name="serviceType">
+          <a-radio-group v-model="mapParams.serviceType" default-value="wmts">
+            <a-radio value="wmts" name="serviceType">
               WMTS
             </a-radio>
-            <a-radio value="WMS" name="serviceType" :disabled="true">
+            <a-radio value="wms" name="serviceType" :disabled="true">
               WMS
             </a-radio>
           </a-radio-group>
@@ -28,6 +28,7 @@
               value: 'adcode',
               children: 'children'
             }"
+            :default-value="[320000, 320500]"
             :options="citys"
             :show-search="{ filter }"
             placeholder="搜索或选择中心点"
@@ -56,15 +57,6 @@
         </a-form-model-item>
       </a-form-model>
     </div>
-    <a-button
-      type="primary"
-      icon="download"
-      size="small"
-      :ghost="true"
-      @click="previewdddd"
-    >
-      预览
-    </a-button>
     <div class="preview-box" v-show="isMapParamsShow">
       <div class="animate__animated animate__fadeInLeft">
         <div class="preview-map">
@@ -72,7 +64,20 @@
         </div>
         <div class="preview-params">
           <div class="btn-group">
-            <a-tooltip>
+            <a-tooltip style="margin-left:10px">
+              <template slot="title">
+                一键复制
+              </template>
+              <a-button
+                type="primary"
+                icon="copy"
+                size="small"
+                :ghost="true"
+                @click="downloadParams"
+              >
+              </a-button>
+            </a-tooltip>
+            <a-tooltip style="margin-left:10px">
               <template slot="title">
                 下载参数
               </template>
@@ -83,7 +88,6 @@
                 :ghost="true"
                 @click="downloadParams"
               >
-                下载参数
               </a-button>
             </a-tooltip>
           </div>
@@ -108,7 +112,8 @@ import "prismjs/themes/prism.css";
 import "prismjs/components/prism-json";
 import fs from "fs";
 import { mapGetters } from "vuex";
-import filter from "@/utils/filter";
+import * as filter from "@/utils/filter";
+import WMTSCapabilities from "ol/format/WMTSCapabilities";
 export default {
   name: "previewMap",
   data() {
@@ -117,8 +122,8 @@ export default {
       wrapperCol: { span: 12 },
       formLayout: "horizontal",
       mapParams: {
-        url: "",
-        serviceType: "WMTS"
+        url: "http://10.68.8.20/kmap-server/ogc/service/wmts",
+        serviceType: "wmts"
       },
       map: "",
       fileList: [],
@@ -141,10 +146,46 @@ export default {
     ...mapGetters(["zipPath"])
   },
   methods: {
-    previewdddd() {
-      axios.get("./tiandi_4326_wmts.xml").then(res => {
-        let result = filter.readXML(res.data);
-        console.log(result);
+    getLayerInfoByServer() {
+      const url = this.mapParams.url;
+      return new Promise(reslove => {
+        axios
+          .get(url, {
+            params: {
+              SERVICE: "WMTS",
+              REQUEST: "GetCapabilities",
+              VERSION: "1.0.0"
+            }
+          })
+          .then(async res => {
+            const parser = new WMTSCapabilities();
+            const { Contents } = parser.read(res.data);
+            const layerMeta = await filter.filterLayerInfo(Contents.Layer[0]);
+            const [TileMatrixSet] = Contents.TileMatrixSet.filter(
+              e => e.Identifier === layerMeta.matrixSet
+            );
+            const tileGrid = await filter.filterTileGridInfo(TileMatrixSet);
+            this.mapParams = Object.assign(
+              {},
+              {
+                ...layerMeta,
+                url,
+                serviceType: this.mapParams.serviceType,
+                projection: tileGrid.projection,
+                tileGrid: {
+                  resolutions: tileGrid.resolutions,
+                  matrixIds: tileGrid.matrixIds,
+                  origin: tileGrid.origin
+                }
+              }
+            );
+            console.log(this.mapParams);
+            reslove(true);
+          })
+          .catch(function(error) {
+            this.$message.error("接口请求错误");
+            console.log(error);
+          });
       });
     },
     //保存显示地图的参数文件
@@ -242,7 +283,7 @@ export default {
     // 参数验证
     checkParams() {
       console.log(this.mapParams);
-      if (!this.mapParams.url) this.$message.error("服务地址不能为空", 2);
+      if (!this.mapParams.url) this.$message.error("地图服务地址不能为空", 2);
 
       if (!this.center.length) this.$message.error("中心点必选", 2);
 
@@ -253,17 +294,22 @@ export default {
     async preview() {
       if (!this.checkParams()) return;
       try {
+        await this.getLayerInfoByServer();
         const layer =
-          this.mapParams.serviceType === "WMTS"
+          this.mapParams.serviceType === "wmts"
             ? await this.createWMTS(this.mapParams)
             : this.createWMS(this.mapParams);
+        const center = filter.isMercatorProjection(this.mapParams.projection)
+          ? filter.lonLat2Mercator(this.center)
+          : this.center;
         const viewOption = {
-          center: this.center,
+          center: center,
           projection: this.mapParams.projection,
           minZoom: 0,
           maxZoom: 20,
           zoom: 8
         };
+        console.log(viewOption);
         this.isMapParamsShow = true;
         this.paramsBox = this.mapParams;
         this.$nextTick(() => {
