@@ -28,7 +28,6 @@
               value: 'adcode',
               children: 'children'
             }"
-            :default-value="[320000, 320500]"
             :options="citys"
             :show-search="{ filter }"
             placeholder="搜索或选择中心点"
@@ -86,20 +85,20 @@
                 icon="download"
                 size="small"
                 :ghost="true"
-                @click="downloadParams"
+                @click="downloadParams('json')"
               >
               </a-button>
             </a-tooltip>
             <a-tooltip style="margin-left:10px">
               <template slot="title">
-                下载元数据XML
+                下载元数据
               </template>
               <a-button
                 type="primary"
-                icon="download"
+                icon="file-excel"
                 size="small"
                 :ghost="true"
-                @click="downloadParams"
+                @click="downloadParams('xml')"
               >
               </a-button>
             </a-tooltip>
@@ -124,6 +123,8 @@ import Prism from "prismjs";
 import "prismjs/themes/prism.css";
 import "prismjs/components/prism-json";
 import fs from "fs";
+import formater from "@/utils/formater";
+import { clipboard } from "electron";
 import { mapGetters } from "vuex";
 import * as filter from "@/utils/filter";
 import WMTSCapabilities from "ol/format/WMTSCapabilities";
@@ -160,9 +161,8 @@ export default {
     ...mapGetters(["zipPath"])
   },
   methods: {
-    // 一键复制
+    // 一键复制参数
     copyParams() {
-      const { clipboard } = require("electron");
       clipboard.writeText(JSON.stringify(this.mapParams));
       setTimeout(() => {
         const text = clipboard.readText();
@@ -185,6 +185,7 @@ export default {
             }
           })
           .then(async res => {
+            this.originMetaXml = res.data;
             const parser = new WMTSCapabilities();
             const { Contents } = parser.read(res.data);
             const layerMeta = await filter.filterLayerInfo(Contents.Layer[0]);
@@ -215,17 +216,27 @@ export default {
           });
       });
     },
+
     //保存显示地图的参数文件
-    downloadParams() {
-      const content = JSON.stringify(this.mapParams);
-      fs.writeFile(`${this.zipPath}/adapt_params.json`, content, err => {
+    downloadParams(type) {
+      let content;
+      const dataPx = formater.date(new Date(), "yyyy年MM月dd日_hh时mm分ss秒");
+      if (type === "json") {
+        content = JSON.stringify(this.mapParams);
+      } else if (type === "xml") {
+        content = this.originMetaXml;
+      }
+      const paths = this.zipPath || "C:/";
+      console.log(this.zipPath, paths);
+      const fullPath = `${paths}/adapt_params_${dataPx}.${type}`;
+      fs.writeFile(fullPath, content, err => {
         if (err) {
           console.error(err);
           this.$message.success(err);
           return;
         }
         //文件写入成功。
-        this.$message.success("文件已保存在程序所在目录");
+        this.$message.success("文件已保存在程序解压目录");
       });
     },
 

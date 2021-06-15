@@ -15,7 +15,6 @@ import "animate.css";
 Vue.use(Antd);
 
 Vue.config.productionTip = false;
-import "./permission";
 
 new Vue({
   render: h => h(App),

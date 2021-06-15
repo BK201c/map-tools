@@ -11,6 +11,8 @@
 
 <script>
 import menu from "@/layout/menu/menu";
+import store from "@/store";
+import { ipcRenderer } from "electron";
 export default {
   data() {
     return {};
@@ -18,7 +20,13 @@ export default {
   name: "",
   components: { "the-menu": menu },
   computed: {},
-  created() {},
+  created() {
+    // 获取程序当前所在目录
+    ipcRenderer.on("app-update-zipPath", (event, arg) => {
+      console.log(event, arg);
+      store.commit("app/SET_ZIP_PATH", arg);
+    });
+  },
   mounted() {},
   watch: {},
   methods: {}
