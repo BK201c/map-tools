@@ -44,16 +44,18 @@
             un-checked-children="关"
           />
         </a-form-model-item>
-        <a-form-model-item label="调试参数" v-if="isAdvanced">
-          <a-upload
-            :file-list="fileList"
-            :remove="handleRemove"
-            :before-upload="beforeUpload"
-            accept=".json"
-          >
-            <a-button> <a-icon type="upload" /> 选择上传 </a-button>
-          </a-upload>
-        </a-form-model-item>
+        <div class="advanced-items" v-if="isAdvanced">
+          <a-form-model-item label="调试参数">
+            <a-upload
+              :file-list="fileList"
+              :remove="handleRemove"
+              :before-upload="beforeUpload"
+              accept=".json"
+            >
+              <a-button> <a-icon type="upload" /> 选择上传 </a-button>
+            </a-upload>
+          </a-form-model-item>
+        </div>
         <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
           <a-button
             type="primary"
@@ -136,6 +138,7 @@ import { clipboard } from "electron";
 import { mapGetters } from "vuex";
 import * as filter from "@/utils/filter";
 import WMTSCapabilities from "ol/format/WMTSCapabilities";
+// import { URL } from "url";
 export default {
   name: "previewMap",
   data() {
@@ -181,16 +184,22 @@ export default {
       }, 300);
     },
 
+    // 检测和分割携带参数的URL
+    // checkUrl() {
+    //   return;
+    // },
+
     //通过服务器获取xml文件，同时解析元数据信息
     async getLayerInfoByServer() {
-      const url = this.mapParams.url;
+      let url = this.mapParams.url;
+      let params = {
+        SERVICE: "WMTS",
+        REQUEST: "GetCapabilities",
+        VERSION: "1.0.0"
+      };
       return axios
         .get(url, {
-          params: {
-            SERVICE: "WMTS",
-            REQUEST: "GetCapabilities",
-            VERSION: "1.0.0"
-          }
+          params
         })
         .then(async res => {
           this.originMetaXml = res.data;

@@ -25,10 +25,7 @@ export const isMercatorProjection = projection => {
  * @param {*像素密度} dpi
  * @returns 地面分辨率
  */
-const calcResolutionByScale = (scale, crs = 4326, dpi = 90.71428571428572) => {
-  // OGC标准中没有规定屏幕分辨率（pixel/inch），而是用像元大小（0.28mm=0.00028m）来界定，WMTS 1.0.0接口，每英寸像元数为：1inch/(0.00028m/0.0254(m/inch))=0.0254/0.00028≈90.714
-  // ppi = 90.71428571428572
-
+const calcResolutionByScale = (scale, crs = 4326) => {
   // 一个像素等于多少米距离（单位米）,OGC标准下单位像素距离
   const defaultPixelMeter = 0.0254;
 
@@ -46,6 +43,9 @@ const calcResolutionByScale = (scale, crs = 4326, dpi = 90.71428571428572) => {
 
   // 地图单位
   const units = isMercatorProjection(crs) ? meter : degreeMeter;
+
+  // OGC标准中没有规定屏幕分辨率（pixel/inch），而是用像元大小（0.28mm=0.00028m）来界定，WMTS 1.0.0接口，每英寸像元数为：1inch/(0.00028m/0.0254(m/inch))=0.0254/0.00028≈90.714
+  const dpi = isMercatorProjection(crs) ? 90.71428571428572 : 96;
 
   return (defaultPixelMeter * scale) / (dpi * units);
 };
@@ -76,11 +76,7 @@ export const filterTileGridInfo = TileMatrixSet => {
   TileMatrixSet.TileMatrix.forEach(matrix => {
     matrixIds.push(Number(matrix.Identifier));
     resolutions.push(
-      calcResolutionByScale(
-        matrix?.ScaleDenominator,
-        projection,
-        90.71428571428572
-      )
+      calcResolutionByScale(matrix?.ScaleDenominator, projection)
     );
   });
   return {
