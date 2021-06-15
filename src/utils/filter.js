@@ -30,7 +30,7 @@ const calcResolutionByScale = (scale, crs = 4326) => {
   const defaultPixelMeter = 0.0254;
 
   //天地图等三方服务商单位像素距离
-  // const otherPixelMeter = 0.025399998;
+  // const defaultPixelMeter = 0.025399998;
 
   //地球半径
   const erathRadius = 6378137;
@@ -45,7 +45,7 @@ const calcResolutionByScale = (scale, crs = 4326) => {
   const units = isMercatorProjection(crs) ? meter : degreeMeter;
 
   // OGC标准中没有规定屏幕分辨率（pixel/inch），而是用像元大小（0.28mm=0.00028m）来界定，WMTS 1.0.0接口，每英寸像元数为：1inch/(0.00028m/0.0254(m/inch))=0.0254/0.00028≈90.714
-  const dpi = isMercatorProjection(crs) ? 90.71428571428572 : 96;
+  const dpi = isMercatorProjection(crs) ? defaultPixelMeter / 0.00028 : 96;
 
   return (defaultPixelMeter * scale) / (dpi * units);
 };
@@ -70,9 +70,10 @@ export const filterLayerInfo = layer => {
 export const filterTileGridInfo = TileMatrixSet => {
   const matrixIds = [];
   const resolutions = [];
-  const projection = "EPSG:" + TileMatrixSet.SupportedCRS?.split("::")[1];
+  let projection = "EPSG:" + TileMatrixSet.SupportedCRS?.split("::")[1];
   let origin = TileMatrixSet.TileMatrix[0]?.TopLeftCorner.reverse();
   if (projection === "EPSG:3857") origin = origin.reverse();
+  if (projection === "EPSG:4490") projection = "EPSG:4326";
   TileMatrixSet.TileMatrix.forEach(matrix => {
     matrixIds.push(Number(matrix.Identifier));
     resolutions.push(

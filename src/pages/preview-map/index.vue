@@ -7,11 +7,8 @@
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
       >
-        <a-form-model-item
-          label="主机地址"
-          :wrapperCol="{ span: 16, offset: 0 }"
-        >
-          <a-input v-model="mapParams.url" placeholder="底图服务地址">
+        <a-form-model-item label="Url" :wrapperCol="{ span: 16, offset: 0 }">
+          <a-input v-model="mapParams.url" placeholder="栅格服务地址">
           </a-input>
         </a-form-model-item>
         <a-form-model-item label="切片方式">
@@ -138,7 +135,6 @@ import { clipboard } from "electron";
 import { mapGetters } from "vuex";
 import * as filter from "@/utils/filter";
 import WMTSCapabilities from "ol/format/WMTSCapabilities";
-// import { URL } from "url";
 export default {
   name: "previewMap",
   data() {
@@ -147,7 +143,8 @@ export default {
       wrapperCol: { span: 12 },
       formLayout: "horizontal",
       mapParams: {
-        url: "http://10.68.8.20/kmap-server/ogc/service/wmts",
+        url:
+          "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
         serviceType: "wmts"
       },
       map: "",
@@ -383,11 +380,10 @@ export default {
 @import "~@/styles/scroll.scss";
 .container {
   display: flex;
-  width: 100%;
-  height: 100%;
 }
 .form-box {
-  width: $formWidth;
+  width: $formWidth - 20px;
+  box-sizing: border-box;
   .drag-position {
     display: flex;
     justify-content: center;
@@ -402,17 +398,18 @@ export default {
 }
 .preview-box {
   flex-grow: 1;
-  padding: 0 15px;
+  margin-top: 25px;
+  padding-left: 10px;
+  width: $preWidth;
+  box-sizing: border-box;
   #mapContainer {
+    width: $preWidth;
     height: 300px;
     border: 1px solid #d5d5d5;
   }
   .preview-params {
     position: relative;
-    width: 550px;
-    .pre-box {
-      min-width: $preWidth;
-    }
+    width: $preWidth;
     pre {
       width: $preWidth;
       padding-top: 45px;
