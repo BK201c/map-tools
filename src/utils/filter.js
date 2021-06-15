@@ -1,5 +1,15 @@
+/**
+ * 以下所有参考数值均基于OGC标准下计算。
+ * https://docs.opengeospatial.org/is/13-082r2/13-082r2.html#21
+ */
+
 import * as turf from "@turf/turf";
 
+/**
+ * 判断是否是web墨卡托平面坐标
+ * @param {*} projection
+ * @returns boolen
+ */
 export const isMercatorProjection = projection => {
   const degreeIndex = ["EPSG:4326", "EPSG:4490", "wgs84"];
   const mercatorIndex = ["EPSG:3857", "EPSG:900913"];
@@ -7,6 +17,7 @@ export const isMercatorProjection = projection => {
     mercatorIndex.includes(projection) && !degreeIndex.includes(projection)
   );
 };
+
 /**
  *
  * @param {*比例尺} scale
@@ -14,10 +25,12 @@ export const isMercatorProjection = projection => {
  * @param {*像素密度} dpi
  * @returns 地面分辨率
  */
-const calcResolutionByScale = (scale, crs = 4326, dpi = 96) => {
-  console.log(scale, crs);
+const calcResolutionByScale = (scale, crs = 4326, dpi = 90.71428571428572) => {
+  // OGC标准中没有规定屏幕分辨率（pixel/inch），而是用像元大小（0.28mm=0.00028m）来界定，WMTS 1.0.0接口，每英寸像元数为：1inch/(0.00028m/0.0254(m/inch))=0.0254/0.00028≈90.714
+  // ppi = 90.71428571428572
+
   // 一个像素等于多少米距离（单位米）,OGC标准下单位像素距离
-  const defaultPixelMeter = 0.0254000508;
+  const defaultPixelMeter = 0.0254;
 
   //天地图等三方服务商单位像素距离
   // const otherPixelMeter = 0.025399998;
@@ -58,11 +71,16 @@ export const filterTileGridInfo = TileMatrixSet => {
   const matrixIds = [];
   const resolutions = [];
   const projection = "EPSG:" + TileMatrixSet.SupportedCRS?.split("::")[1];
-  const origin = TileMatrixSet.TileMatrix[0]?.TopLeftCorner.reverse();
+  let origin = TileMatrixSet.TileMatrix[0]?.TopLeftCorner.reverse();
+  if (projection === "EPSG:3857") origin = origin.reverse();
   TileMatrixSet.TileMatrix.forEach(matrix => {
     matrixIds.push(Number(matrix.Identifier));
     resolutions.push(
-      calcResolutionByScale(matrix?.ScaleDenominator, projection)
+      calcResolutionByScale(
+        matrix?.ScaleDenominator,
+        projection,
+        90.71428571428572
+      )
     );
   });
   return {

@@ -73,13 +73,26 @@
                 icon="copy"
                 size="small"
                 :ghost="true"
-                @click="downloadParams"
+                @click="copyParams"
               >
               </a-button>
             </a-tooltip>
             <a-tooltip style="margin-left:10px">
               <template slot="title">
                 下载参数
+              </template>
+              <a-button
+                type="primary"
+                icon="download"
+                size="small"
+                :ghost="true"
+                @click="downloadParams"
+              >
+              </a-button>
+            </a-tooltip>
+            <a-tooltip style="margin-left:10px">
+              <template slot="title">
+                下载元数据XML
               </template>
               <a-button
                 type="primary"
@@ -132,7 +145,8 @@ export default {
       isMapParamsShow: false,
       dictorySelected: "",
       citys: [],
-      paramsBox: ""
+      paramsBox: "",
+      originMetaXml: ""
     };
   },
   created() {
@@ -146,6 +160,19 @@ export default {
     ...mapGetters(["zipPath"])
   },
   methods: {
+    // 一键复制
+    copyParams() {
+      const { clipboard } = require("electron");
+      clipboard.writeText(JSON.stringify(this.mapParams));
+      setTimeout(() => {
+        const text = clipboard.readText();
+        if (text !== "" && text !== null) {
+          this.$message.success("已复制到剪贴板");
+        }
+      }, 300);
+    },
+
+    //通过服务器获取xml文件，同时解析元数据信息
     getLayerInfoByServer() {
       const url = this.mapParams.url;
       return new Promise(reslove => {
