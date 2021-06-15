@@ -173,48 +173,44 @@ export default {
     },
 
     //通过服务器获取xml文件，同时解析元数据信息
-    getLayerInfoByServer() {
+    async getLayerInfoByServer() {
       const url = this.mapParams.url;
-      return new Promise(reslove => {
-        axios
-          .get(url, {
-            params: {
-              SERVICE: "WMTS",
-              REQUEST: "GetCapabilities",
-              VERSION: "1.0.0"
-            }
-          })
-          .then(async res => {
-            this.originMetaXml = res.data;
-            const parser = new WMTSCapabilities();
-            const { Contents } = parser.read(res.data);
-            const layerMeta = await filter.filterLayerInfo(Contents.Layer[0]);
-            const [TileMatrixSet] = Contents.TileMatrixSet.filter(
-              e => e.Identifier === layerMeta.matrixSet
-            );
-            const tileGrid = await filter.filterTileGridInfo(TileMatrixSet);
-            this.mapParams = Object.assign(
-              {},
-              {
-                ...layerMeta,
-                url,
-                serviceType: this.mapParams.serviceType,
-                projection: tileGrid.projection,
-                tileGrid: {
-                  resolutions: tileGrid.resolutions,
-                  matrixIds: tileGrid.matrixIds,
-                  origin: tileGrid.origin
-                }
+      return axios
+        .get(url, {
+          params: {
+            SERVICE: "WMTS",
+            REQUEST: "GetCapabilities",
+            VERSION: "1.0.0"
+          }
+        })
+        .then(async res => {
+          this.originMetaXml = res.data;
+          const parser = new WMTSCapabilities();
+          const { Contents } = parser.read(res.data);
+          const layerMeta = await filter.filterLayerInfo(Contents.Layer[0]);
+          const [TileMatrixSet] = Contents.TileMatrixSet.filter(
+            e => e.Identifier === layerMeta.matrixSet
+          );
+          const tileGrid = await filter.filterTileGridInfo(TileMatrixSet);
+          this.mapParams = Object.assign(
+            {},
+            {
+              ...layerMeta,
+              url,
+              serviceType: this.mapParams.serviceType,
+              projection: tileGrid.projection,
+              tileGrid: {
+                resolutions: tileGrid.resolutions,
+                matrixIds: tileGrid.matrixIds,
+                origin: tileGrid.origin
               }
-            );
-            console.log(this.mapParams);
-            reslove(true);
-          })
-          .catch(function(error) {
-            this.$message.error("接口请求错误");
-            console.log(error);
-          });
-      });
+            }
+          );
+          console.log(this.mapParams);
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
     },
 
     //保存显示地图的参数文件
@@ -358,7 +354,7 @@ export default {
         });
       } catch (error) {
         console.log(error);
-        this.$message.error("附加参数错误，请选择其它文件", 2);
+        this.$message.error("参数错误,请确认后重试");
       }
     }
   }
