@@ -1,13 +1,16 @@
 <template>
   <div class="container">
     <div class="form-box">
-      <a-divider orientation="left">服务参数</a-divider>
+      <a-divider orientation="left">底图参数</a-divider>
       <a-form-model
         :model="mapParams"
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
       >
-        <a-form-model-item label="Host" :wrapperCol="{ span: 16, offset: 0 }">
+        <a-form-model-item
+          label="主机地址"
+          :wrapperCol="{ span: 16, offset: 0 }"
+        >
           <a-input v-model="mapParams.url" placeholder="底图服务地址">
           </a-input>
         </a-form-model-item>
@@ -34,7 +37,14 @@
             @change="onChange"
           />
         </a-form-model-item>
-        <a-form-model-item label="附加参数">
+        <a-form-model-item label="专业模式">
+          <a-switch
+            v-model="isAdvanced"
+            checked-children="开"
+            un-checked-children="关"
+          />
+        </a-form-model-item>
+        <a-form-model-item label="调试参数" v-if="isAdvanced">
           <a-upload
             :file-list="fileList"
             :remove="handleRemove"
@@ -57,55 +67,53 @@
       </a-form-model>
     </div>
     <div class="preview-box" v-show="isMapParamsShow">
-      <div class="animate__animated animate__fadeInLeft">
-        <div class="preview-map">
-          <div id="mapContainer" ref="mapContainer"></div>
+      <div class="preview-map animate__animated animate__fadeInTopRight">
+        <div id="mapContainer" ref="mapContainer"></div>
+      </div>
+      <div class="preview-params animate__animated animate__fadeInBottomRight">
+        <div class="btn-group">
+          <a-tooltip style="margin-left:10px">
+            <template slot="title">
+              一键复制
+            </template>
+            <a-button
+              type="primary"
+              icon="copy"
+              size="small"
+              :ghost="true"
+              @click="copyParams"
+            >
+            </a-button>
+          </a-tooltip>
+          <a-tooltip style="margin-left:10px">
+            <template slot="title">
+              下载参数
+            </template>
+            <a-button
+              type="primary"
+              icon="download"
+              size="small"
+              :ghost="true"
+              @click="downloadParams('json')"
+            >
+            </a-button>
+          </a-tooltip>
+          <a-tooltip style="margin-left:10px">
+            <template slot="title">
+              下载元数据
+            </template>
+            <a-button
+              type="primary"
+              icon="file-excel"
+              size="small"
+              :ghost="true"
+              @click="downloadParams('xml')"
+            >
+            </a-button>
+          </a-tooltip>
         </div>
-        <div class="preview-params">
-          <div class="btn-group">
-            <a-tooltip style="margin-left:10px">
-              <template slot="title">
-                一键复制
-              </template>
-              <a-button
-                type="primary"
-                icon="copy"
-                size="small"
-                :ghost="true"
-                @click="copyParams"
-              >
-              </a-button>
-            </a-tooltip>
-            <a-tooltip style="margin-left:10px">
-              <template slot="title">
-                下载参数
-              </template>
-              <a-button
-                type="primary"
-                icon="download"
-                size="small"
-                :ghost="true"
-                @click="downloadParams('json')"
-              >
-              </a-button>
-            </a-tooltip>
-            <a-tooltip style="margin-left:10px">
-              <template slot="title">
-                下载元数据
-              </template>
-              <a-button
-                type="primary"
-                icon="file-excel"
-                size="small"
-                :ghost="true"
-                @click="downloadParams('xml')"
-              >
-              </a-button>
-            </a-tooltip>
-          </div>
-          <div class="pre-box">
-            <pre><code class="language-json">{{paramsBox}}</code></pre>
-          </div>
+        <div class="pre-box">
+          <pre><code class="language-json">{{paramsBox}}</code></pre>
         </div>
       </div>
     </div>
@@ -147,7 +155,8 @@ export default {
       dictorySelected: "",
       citys: [],
       paramsBox: "",
-      originMetaXml: ""
+      originMetaXml: "",
+      isAdvanced: false
     };
   },
   created() {
@@ -361,12 +370,15 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+@import "~@/styles/_var.scss";
 @import "~@/styles/scroll.scss";
 .container {
   display: flex;
+  width: 100%;
+  height: 100%;
 }
 .form-box {
-  width: 600px;
+  width: $formWidth;
   .drag-position {
     display: flex;
     justify-content: center;
@@ -382,10 +394,7 @@ export default {
 .preview-box {
   flex-grow: 1;
   padding: 0 15px;
-  $width: 350px;
   #mapContainer {
-    min-width: $width;
-    min-height: 100px;
     height: 300px;
     border: 1px solid #d5d5d5;
   }
@@ -393,10 +402,10 @@ export default {
     position: relative;
     width: 550px;
     .pre-box {
-      min-width: $width;
+      min-width: $preWidth;
     }
     pre {
-      width: 550px;
+      width: $preWidth;
       padding-top: 45px;
       height: 350px;
       overflow-y: scroll;

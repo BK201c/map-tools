@@ -1,0 +1,5 @@
+$mainWidth: 1380px; //渲染容器内总宽度
+$sidebarWidth: 185px; //侧边栏宽度
+$contentWidth: $mainWidth - $sidebarWidth; //侧边栏对应内容宽度
+$formWidth: 600px; //内容内-表单宽度
+$preWidth: $contentWidth - $formWidth;

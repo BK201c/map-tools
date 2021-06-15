@@ -1,9 +1,9 @@
 <template>
   <section class="main-container">
-    <section class="sidebar-layout">
+    <section class="layout-sidebar">
       <the-menu></the-menu>
     </section>
-    <section class="content">
+    <section class="layout-content">
       <router-view></router-view>
     </section>
   </section>
@@ -34,13 +34,21 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import "~@/styles/_var.scss";
 .main-container {
   display: flex;
   height: 100vh;
-  justify-content: space-around;
-  .content {
-    flex-grow: 1;
-    padding: 0 15px;
+  width: $mainWidth;
+  overflow: hidden;
+  .layout {
+    &-sidebar {
+      width: $sidebarWidth;
+    }
+    &-content {
+      width: $contentWidth;
+      flex-grow: 1;
+      padding-left: 10px;
+    }
   }
 }
 </style>

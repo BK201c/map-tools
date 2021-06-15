@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar">
     <a-menu
-      style="width: 185px"
+      style="border-right:none"
       :default-selected-keys="current"
       mode="inline"
       @click="handleClick"
@@ -42,8 +42,12 @@ export default {
 .sidebar {
   box-shadow: 1px 1px 9px 2px #e4e4e4;
   height: 100%;
+  width: 100%;
   & >>> .anticon {
     font-size: 30px;
+  }
+  & >>> .ant-menu ant-menu-inline ant-menu-root ant-menu-light {
+    border-right: none;
   }
 }
 </style>
