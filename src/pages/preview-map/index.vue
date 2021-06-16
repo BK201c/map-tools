@@ -242,7 +242,7 @@ export default {
           return;
         }
         //文件写入成功。
-        this.$message.success("文件已保存在程序解压目录");
+        this.$message.success("文件已保存在程序根目录");
       });
     },
 
