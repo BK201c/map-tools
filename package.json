@@ -16,7 +16,7 @@
   },
   "husky": {
     "hooks": {
-      "post-commit": "exec < /dev/tty && node scripts/check-version.js"
+      "post-commit": "exec < /dev && node scripts/check-version.js"
     }
   },
   "main": "background.js",

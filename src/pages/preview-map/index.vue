@@ -234,7 +234,7 @@ export default {
       }
       const paths = this.zipPath || "C:/";
       console.log(this.zipPath, paths);
-      const fullPath = `${paths}/downloads/adapt_params_${dataPx}.${type}`;
+      const fullPath = `${paths}/adapt_params_${dataPx}.${type}`;
       fs.writeFile(fullPath, content, err => {
         if (err) {
           console.error(err);
