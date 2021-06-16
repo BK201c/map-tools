@@ -175,6 +175,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 .container {
-  overflow: scroll;
+  overflow-y: scroll;
 }
 </style>

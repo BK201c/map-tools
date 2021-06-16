@@ -8,11 +8,11 @@
     >
       <a-menu-item key="previewMap">
         <a-icon style="fontSize:18px" type="file-search" />
-        <span>底图验证</span>
+        <span>地图验证</span>
       </a-menu-item>
       <a-menu-item key="createLayer">
         <a-icon style="fontSize:18px" type="cloud-server" />
-        <span>数据推送</span>
+        <span>数据模拟</span>
       </a-menu-item>
       <a-menu-item key="about">
         <a-icon style="fontSize:18px" type="smile" />
