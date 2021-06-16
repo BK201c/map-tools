@@ -39,6 +39,7 @@
             v-model="isAdvanced"
             checked-children="开"
             un-checked-children="关"
+            @change="openDevtools"
           />
         </a-form-model-item>
         <div class="advanced-items" v-if="isAdvanced">
@@ -131,7 +132,7 @@ import "prismjs/themes/prism.css";
 import "prismjs/components/prism-json";
 import fs from "fs";
 import formater from "@/utils/formater";
-import { clipboard } from "electron";
+import { clipboard, ipcRenderer } from "electron";
 import { mapGetters } from "vuex";
 import * as filter from "@/utils/filter";
 import WMTSCapabilities from "ol/format/WMTSCapabilities";
@@ -170,6 +171,14 @@ export default {
     ...mapGetters(["zipPath"])
   },
   methods: {
+    //高级模式打开谷歌开发者工具
+    openDevtools(checked) {
+      if (this.mapParams.url === "0096")
+        setTimeout(() => {
+          ipcRenderer.send("app-open-devtools", checked);
+        }, 200);
+    },
+
     // 一键复制参数
     copyParams() {
       clipboard.writeText(JSON.stringify(this.mapParams));

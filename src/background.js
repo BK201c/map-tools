@@ -35,6 +35,11 @@ async function createWindow() {
     const appPath = app.getAppPath();
     return isDevelopment ? appPath : path.dirname(appPath);
   });
+  ipcMain.on("app-open-devtools", (event, args) => {
+    win.webContents.isDevToolsOpened() && !args
+      ? win.webContents.closeDevTools()
+      : win.webContents.openDevTools();
+  });
 }
 
 // Quit when all windows are closed.
