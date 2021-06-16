@@ -1,59 +1,63 @@
 <template>
   <div class="container">
-    <a-divider orientation="left">CT-Server</a-divider>
-    <a-form-model
-      :model="formBase"
-      :label-col="labelCol"
-      :wrapper-col="wrapperCol"
-    >
-      <a-form-model-item label="Host">
-        <a-input v-model="formBase.host" />
-      </a-form-model-item>
-      <a-form-model-item label="Token">
-        <a-input v-model="formBase.token" />
-      </a-form-model-item>
-    </a-form-model>
-    <a-divider orientation="left">随机点位</a-divider>
-    <a-form-model
-      :model="formPoint"
-      :label-col="labelCol"
-      :wrapper-col="wrapperCol"
-    >
-      <a-form-model-item label="目标中心点">
-        <a-input v-model="formPoint.center" placeholder="[lng,lat]" />
-      </a-form-model-item>
-      <a-form-model-item label="生成数量">
-        <a-input v-model="formPoint.pointNum" />
-      </a-form-model-item>
-      <a-form-model-item label="项目标识">
-        <a-input v-model="formPoint.appName" placeholder="appName" />
-      </a-form-model-item>
-      <a-form-model-item label="图层标识">
-        <a-input v-model="formPoint.serviceName" placeholder="serviceName" />
-      </a-form-model-item>
-      <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
-        <a-button type="primary" @click="pushPoints"> 推送点位 </a-button>
-      </a-form-model-item>
-    </a-form-model>
-    <a-divider orientation="left">实时轨迹</a-divider>
-    <a-form-model
-      :model="formLine"
-      :label-col="labelCol"
-      :wrapper-col="wrapperCol"
-    >
-      <a-form-model-item label="行政编码">
-        <a-input v-model="formLine.adminId" />
-      </a-form-model-item>
-      <a-form-model-item label="道路名">
-        <a-input v-model="formLine.keyword" />
-      </a-form-model-item>
-      <a-form-model-item label="统一设备标识">
-        <a-input v-model="formLine.gbid" />
-      </a-form-model-item>
-      <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
-        <a-button type="primary" @click="downloadLineData"> 下载轨迹 </a-button>
-      </a-form-model-item>
-    </a-form-model>
+    <div class="form-box">
+      <a-divider orientation="left">CT-Server</a-divider>
+      <a-form-model
+        :model="formBase"
+        :label-col="labelCol"
+        :wrapper-col="wrapperCol"
+      >
+        <a-form-model-item label="Host">
+          <a-input v-model="formBase.host" />
+        </a-form-model-item>
+        <a-form-model-item label="Token">
+          <a-input v-model="formBase.token" />
+        </a-form-model-item>
+      </a-form-model>
+      <a-divider orientation="left">随机点位</a-divider>
+      <a-form-model
+        :model="formPoint"
+        :label-col="labelCol"
+        :wrapper-col="wrapperCol"
+      >
+        <a-form-model-item label="目标中心点">
+          <a-input v-model="formPoint.center" placeholder="[lng,lat]" />
+        </a-form-model-item>
+        <a-form-model-item label="生成数量">
+          <a-input v-model="formPoint.pointNum" />
+        </a-form-model-item>
+        <a-form-model-item label="项目标识">
+          <a-input v-model="formPoint.appName" placeholder="appName" />
+        </a-form-model-item>
+        <a-form-model-item label="图层标识">
+          <a-input v-model="formPoint.serviceName" placeholder="serviceName" />
+        </a-form-model-item>
+        <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
+          <a-button type="primary" @click="pushPoints"> 推送点位 </a-button>
+        </a-form-model-item>
+      </a-form-model>
+      <a-divider orientation="left">实时轨迹</a-divider>
+      <a-form-model
+        :model="formLine"
+        :label-col="labelCol"
+        :wrapper-col="wrapperCol"
+      >
+        <a-form-model-item label="行政编码">
+          <a-input v-model="formLine.adminId" />
+        </a-form-model-item>
+        <a-form-model-item label="道路名">
+          <a-input v-model="formLine.keyword" />
+        </a-form-model-item>
+        <a-form-model-item label="统一设备标识">
+          <a-input v-model="formLine.gbid" />
+        </a-form-model-item>
+        <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
+          <a-button type="primary" @click="downloadLineData">
+            下载轨迹
+          </a-button>
+        </a-form-model-item>
+      </a-form-model>
+    </div>
   </div>
 </template>
 
@@ -169,4 +173,8 @@ export default {
   }
 };
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.container {
+  overflow: scroll;
+}
+</style>

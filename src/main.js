@@ -11,6 +11,7 @@ import Antd from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 import "./styles/scroll.scss";
 import "./styles/reset.css";
+import "./styles/common.scss";
 import "animate.css";
 Vue.use(Antd);
 

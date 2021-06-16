@@ -39,10 +39,11 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+@import "~@/styles/_var.scss";
 .sidebar {
   box-shadow: 1px 1px 9px 2px #e4e4e4;
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: $sidebarWidth;
   & >>> .anticon {
     font-size: 30px;
   }

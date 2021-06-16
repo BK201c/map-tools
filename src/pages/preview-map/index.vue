@@ -7,7 +7,7 @@
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
       >
-        <a-form-model-item label="Url" :wrapperCol="{ span: 16, offset: 0 }">
+        <a-form-model-item label="URL" :wrapperCol="{ span: 16, offset: 0 }">
           <a-input v-model="mapParams.url" placeholder="栅格服务地址">
           </a-input>
         </a-form-model-item>
@@ -49,7 +49,7 @@
               :before-upload="beforeUpload"
               accept=".json"
             >
-              <a-button> <a-icon type="upload" /> 选择上传 </a-button>
+              <a-button> <a-icon type="upload" /> 上传 </a-button>
             </a-upload>
           </a-form-model-item>
         </div>
@@ -181,11 +181,6 @@ export default {
       }, 300);
     },
 
-    // 检测和分割携带参数的URL
-    // checkUrl() {
-    //   return;
-    // },
-
     //通过服务器获取xml文件，同时解析元数据信息
     async getLayerInfoByServer() {
       let url = this.mapParams.url;
@@ -239,7 +234,7 @@ export default {
       }
       const paths = this.zipPath || "C:/";
       console.log(this.zipPath, paths);
-      const fullPath = `${paths}/adapt_params_${dataPx}.${type}`;
+      const fullPath = `${paths}/downloads/adapt_params_${dataPx}.${type}`;
       fs.writeFile(fullPath, content, err => {
         if (err) {
           console.error(err);
@@ -301,7 +296,6 @@ export default {
         const params = Object.assign({}, this.mapParams, JSON.parse(data));
         this.mapParams = params;
         this.$message.success("参数已读取");
-        console.log(this.mapParams);
       });
     },
 
@@ -380,21 +374,11 @@ export default {
 @import "~@/styles/scroll.scss";
 .container {
   display: flex;
+  padding: 0 10px;
 }
 .form-box {
   width: $formWidth - 20px;
   box-sizing: border-box;
-  .drag-position {
-    display: flex;
-    justify-content: center;
-    height: 160px;
-    border: 2px dashed #000;
-    border-radius: 5px;
-    min-width: 200px;
-    &:hover {
-      cursor: pointer;
-    }
-  }
 }
 .preview-box {
   flex-grow: 1;

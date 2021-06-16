@@ -35,6 +35,7 @@ export default {
 
 <style scoped lang="scss">
 @import "~@/styles/_var.scss";
+$blank: 10px;
 .main-container {
   display: flex;
   height: 100vh;
@@ -47,7 +48,6 @@ export default {
     &-content {
       width: $contentWidth;
       flex-grow: 1;
-      padding-left: 10px;
     }
   }
 }
