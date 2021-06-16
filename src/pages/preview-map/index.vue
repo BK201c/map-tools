@@ -226,15 +226,15 @@ export default {
     //保存显示地图的参数文件
     downloadParams(type) {
       let content;
-      const dataPx = formater.date(new Date(), "yyyy年MM月dd日_hh时mm分ss秒");
+      const dataPx = formater.date(new Date(), "yyyy-MM-dd_hh.mm.ss");
       if (type === "json") {
         content = JSON.stringify(this.mapParams);
       } else if (type === "xml") {
         content = this.originMetaXml;
       }
       const paths = this.zipPath || "C:/";
-      console.log(this.zipPath, paths);
-      const fullPath = `${paths}/adapt_params_${dataPx}.${type}`;
+      const fileName = `adapt_params_${dataPx}.${type}`;
+      const fullPath = `${paths}/${fileName}`;
       fs.writeFile(fullPath, content, err => {
         if (err) {
           console.error(err);
@@ -242,7 +242,7 @@ export default {
           return;
         }
         //文件写入成功。
-        this.$message.success("文件已保存在程序根目录");
+        this.$message.success(`${fileName} 已保存至程序的resources目录`);
       });
     },
 
@@ -256,7 +256,6 @@ export default {
     // 城市选择
     onChange(value, selectedOptions) {
       this.center = selectedOptions[1].center;
-      console.log(value, selectedOptions);
     },
 
     // 中心点搜索

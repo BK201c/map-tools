@@ -1,6 +1,7 @@
 "use strict";
 
-import { app, protocol, BrowserWindow, Menu } from "electron";
+import { app, protocol, BrowserWindow, Menu, ipcMain } from "electron";
+import path from "path";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -30,8 +31,10 @@ async function createWindow() {
     // Load the index.html when not in development
     win.loadURL("app://./index.html");
   }
-  const appPath = app.getAppPath();
-  win.webContents.send("app-update-zipPath", appPath);
+  ipcMain.handle("app-update-zipPath", async () => {
+    const appPath = app.getAppPath();
+    return isDevelopment ? appPath : path.dirname(appPath);
+  });
 }
 
 // Quit when all windows are closed.
