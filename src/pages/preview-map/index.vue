@@ -170,7 +170,7 @@ export default {
       map: "",
       fileList: [],
       center: [],
-      isMapParamsShow: true,
+      isMapParamsShow: false,
       dictorySelected: "",
       citys: [],
       paramsBox: "",
@@ -195,7 +195,7 @@ export default {
       this.isMapFullScreen = !this.isMapFullScreen;
       setTimeout(() => {
         this.map.updateSize();
-      }, 300);
+      }, 400);
     },
 
     //高级模式打开谷歌开发者工具
@@ -394,66 +394,5 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-@import "~@/styles/_var.scss";
-@import "~@/styles/scroll.scss";
-.container {
-  display: flex;
-  padding: 0 10px;
-}
-.form-box {
-  width: $formWidth - 20px;
-  box-sizing: border-box;
-}
-.map-container {
-  width: $preWidth;
-  height: 300px;
-  transition: all 0.35s ease-in-out;
-}
-.preview-map {
-  position: relative;
-  .btn-group {
-    position: fixed;
-    left: 0.5em;
-    bottom: 0.5em;
-    z-index: 999;
-  }
-  .map-btn {
-    font-size: 26px;
-    color: #1890ff;
-    background-color: #d9d9d9b8;
-    border-radius: 3px;
-    padding: 3px;
-    transition: all 0.2s ease-in-out;
-    &:hover {
-      transform: scale(1.2);
-    }
-  }
-}
-.preview-box {
-  flex-grow: 1;
-  margin-top: 25px;
-  margin-left: 10px;
-  width: $preWidth;
-  box-sizing: border-box;
-  .map-full {
-    height: calc(100vh - 50px);
-    width: calc(100vw - 185px);
-  }
-  .preview-params {
-    position: relative;
-    width: $preWidth;
-    pre {
-      width: $preWidth;
-      padding-top: 45px;
-      height: 350px;
-      overflow-y: scroll;
-    }
-    .btn-group {
-      position: absolute;
-      top: 10px;
-      right: 25px;
-      z-index: 10;
-    }
-  }
-}
+@import "~@/styles/preview.scss";
 </style>
