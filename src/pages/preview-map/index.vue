@@ -1,6 +1,9 @@
 <template>
   <div class="container">
-    <div class="form-box">
+    <div
+      class="form-box animate__animated animate__fadeInRight"
+      v-show="!isMapFullScreen"
+    >
       <a-divider orientation="left">底图参数</a-divider>
       <a-form-model
         :model="mapParams"
@@ -68,9 +71,25 @@
     </div>
     <div class="preview-box" v-show="isMapParamsShow">
       <div class="preview-map animate__animated animate__fadeInTopRight">
-        <div id="mapContainer" ref="mapContainer"></div>
+        <div
+          id="mapContainer"
+          class="map-container"
+          :class="{ 'map-full': isMapFullScreen }"
+          ref="mapContainer"
+        >
+          <div class="btn-group">
+            <a-icon
+              class="map-btn"
+              :type="isMapFullScreen ? 'fullscreen-exit' : 'fullscreen'"
+              @click="setMapFullScreen"
+            />
+          </div>
+        </div>
       </div>
-      <div class="preview-params animate__animated animate__fadeInBottomRight">
+      <div
+        class="preview-params animate__animated animate__fadeInBottomRight"
+        v-show="!isMapFullScreen"
+      >
         <div class="btn-group">
           <a-tooltip style="margin-left:10px">
             <template slot="title">
@@ -152,13 +171,13 @@ export default {
       map: "",
       fileList: [],
       center: [],
-      isMapShow: true,
-      isMapParamsShow: false,
+      isMapParamsShow: true,
       dictorySelected: "",
       citys: [],
       paramsBox: "",
       originMetaXml: "",
-      isAdvanced: false
+      isAdvanced: false,
+      isMapFullScreen: false
     };
   },
   created() {
@@ -172,6 +191,14 @@ export default {
     ...mapGetters(["zipPath"])
   },
   methods: {
+    //设置全屏地图
+    setMapFullScreen() {
+      this.isMapFullScreen = !this.isMapFullScreen;
+      setTimeout(() => {
+        this.map.updateSize();
+      }, 300);
+    },
+
     //高级模式打开谷歌开发者工具
     openDevtools(checked) {
       if (this.mapParams.url === "0096")
@@ -378,16 +405,39 @@ export default {
   width: $formWidth - 20px;
   box-sizing: border-box;
 }
+.map-container {
+  width: $preWidth;
+  height: 300px;
+  border: 1px solid #d5d5d5;
+  position: relative;
+  transition: all 0.35s ease-in-out;
+  .btn-group {
+    position: absolute;
+    left: 0.5em;
+    bottom: 0.5em;
+    z-index: 99;
+  }
+  .map-btn {
+    font-size: 26px;
+    color: #1890ff;
+    background-color: #d9d9d9b8;
+    border-radius: 3px;
+    padding: 3px;
+    transition: all 0.2s ease-in-out;
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+}
 .preview-box {
   flex-grow: 1;
   margin-top: 25px;
-  padding-left: 10px;
+  margin-left: 10px;
   width: $preWidth;
   box-sizing: border-box;
-  #mapContainer {
-    width: $preWidth;
-    height: 300px;
-    border: 1px solid #d5d5d5;
+  .map-full {
+    height: calc(100vh - 50px);
+    width: 100%;
   }
   .preview-params {
     position: relative;
