@@ -130,13 +130,13 @@ import {
   WMTSCapabilities
 } from "@/core/ol";
 import { ipcRenderer, fs, clipboard } from "@/core/electron";
-import axios from "axios";
 import Prism from "prismjs";
 import "prismjs/themes/prism.css";
 import "prismjs/components/prism-json";
 import formater from "@/utils/formater";
 import { mapGetters } from "vuex";
 import * as filter from "@/utils/filter";
+import { initCityList, getXmlByMapServer } from "@/api/commonAPI";
 export default {
   name: "previewMap",
   data() {
@@ -162,7 +162,7 @@ export default {
     };
   },
   created() {
-    this.initCitys();
+    initCityList().then(res => (this.citys = res));
   },
   mounted() {
     this.initMapObj();
@@ -194,19 +194,16 @@ export default {
     //通过服务器获取xml文件，同时解析元数据信息
     async getLayerInfoByServer() {
       let url = this.mapParams.url.trim();
-      let params = {
+      const query = {
         SERVICE: "WMTS",
         REQUEST: "GetCapabilities",
         VERSION: "1.0.0"
       };
-      return axios
-        .get(url, {
-          params
-        })
-        .then(async res => {
-          this.originMetaXml = res.data;
+      return getXmlByMapServer(url, query)
+        .then(async xml => {
+          this.originMetaXml = xml;
           const parser = new WMTSCapabilities();
-          const { Contents } = parser.read(res.data);
+          const { Contents } = parser.read(xml);
           const layerMeta = await filter.filterLayerInfo(Contents.Layer[0]);
           const [TileMatrixSet] = Contents.TileMatrixSet.filter(
             e => e.Identifier === layerMeta.matrixSet
@@ -226,7 +223,6 @@ export default {
               }
             }
           );
-          console.log(this.mapParams);
         })
         .catch(function(error) {
           console.log(error);
@@ -253,13 +249,6 @@ export default {
         }
         //文件写入成功。
         this.$message.success(`${fileName} 已保存至程序的resources目录`);
-      });
-    },
-
-    // 初始化城市选择
-    initCitys() {
-      axios.get("./location.json").then(res => {
-        this.citys = res.data;
       });
     },
 

@@ -11,8 +11,8 @@
 
 <script>
 import menu from "@/layout/menu/menu";
-import store from "@/store";
-import { ipcRenderer } from "electron";
+// import store from "@/store";
+// import { ipcRenderer } from "electron";
 export default {
   data() {
     return {};
@@ -22,11 +22,11 @@ export default {
   computed: {},
   created() {},
   mounted() {
-    setTimeout(() => {
-      ipcRenderer.invoke("app-update-zipPath").then(result => {
-        store.commit("app/SET_ZIP_PATH", result);
-      });
-    }, 500);
+    // setTimeout(() => {
+    //   ipcRenderer.invoke("app-update-zipPath").then(result => {
+    //     store.commit("app/SET_ZIP_PATH", result);
+    //   });
+    // }, 500);
   },
   watch: {},
   methods: {}

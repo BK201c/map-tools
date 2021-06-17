@@ -64,10 +64,10 @@
 <script>
 import { v4 as uuidv4 } from "uuid";
 import XLSX from "xlsx";
-import commonAPI from "@/api/commonAPI.js";
+import * as commonAPI from "@/api/commonAPI.js";
 import mock from "@/utils/mock.js";
 export default {
-  name: "HelloWorld",
+  name: "createLayer",
   data() {
     return {
       labelCol: { span: 5 },

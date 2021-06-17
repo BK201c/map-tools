@@ -4,13 +4,14 @@
  */
 
 import * as turf from "@turf/turf";
+import { WMTSCapabilities } from "@/core/ol";
 
 /**
  * 判断是否是web墨卡托平面坐标
  * @param {*} projection
  * @returns boolen
  */
-export const isMercatorProjection = projection => {
+const isMercatorProjection = projection => {
   const degreeIndex = ["EPSG:4326", "EPSG:4490", "wgs84"];
   const mercatorIndex = ["EPSG:3857", "EPSG:900913"];
   return (
@@ -51,7 +52,7 @@ const calcResolutionByScale = (scale, crs = 4326) => {
 };
 
 //获取layer节点信息
-export const filterLayerInfo = layer => {
+const filterLayerInfo = layer => {
   return new Promise((resolve, reject) => {
     let obj = {
       layer: layer.Identifier,
@@ -67,7 +68,7 @@ export const filterLayerInfo = layer => {
 };
 
 //获取tileGrid信息
-export const filterTileGridInfo = TileMatrixSet => {
+const filterTileGridInfo = TileMatrixSet => {
   const matrixIds = [];
   const resolutions = [];
   let projection = "EPSG:" + TileMatrixSet.SupportedCRS?.split("::")[1];
@@ -88,8 +89,34 @@ export const filterTileGridInfo = TileMatrixSet => {
   };
 };
 
-export const lonLat2Mercator = point => {
+const filterLayerSourceInfo = async (xml, index = 0) => {
+  const parser = new WMTSCapabilities();
+  const { Contents } = parser.read(xml);
+  const layerMeta = await filterLayerInfo(Contents.Layer[index]);
+  const [TileMatrixSet] = Contents.TileMatrixSet.filter(
+    e => e.Identifier === layerMeta.matrixSet
+  );
+  const tileGrid = filterTileGridInfo(TileMatrixSet);
+  return {
+    ...layerMeta,
+    tileGrid: {
+      resolutions: tileGrid.resolutions,
+      matrixIds: tileGrid.matrixIds,
+      origin: tileGrid.origin
+    }
+  };
+};
+
+const lonLat2Mercator = point => {
   var pt = turf.point(point);
   var converted = turf.toMercator(pt);
   return turf.getCoord(converted);
+};
+
+export {
+  isMercatorProjection,
+  filterLayerInfo,
+  filterTileGridInfo,
+  filterLayerSourceInfo,
+  lonLat2Mercator
 };
