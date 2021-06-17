@@ -121,21 +121,22 @@
 </template>
 
 <script>
-import Map from "ol/Map";
-import View from "ol/View";
-import TileLayer from "ol/layer/Tile";
-import WMTSTileGrid from "ol/tilegrid/WMTS";
-import WMTS from "ol/source/WMTS";
+import {
+  Map,
+  View,
+  TileLayer,
+  WMTSTileGrid,
+  WMTS,
+  WMTSCapabilities
+} from "@/core/ol";
+import { ipcRenderer, fs, clipboard } from "@/core/electron";
 import axios from "axios";
 import Prism from "prismjs";
 import "prismjs/themes/prism.css";
 import "prismjs/components/prism-json";
-import fs from "fs";
 import formater from "@/utils/formater";
-import { clipboard, ipcRenderer } from "electron";
 import { mapGetters } from "vuex";
 import * as filter from "@/utils/filter";
-import WMTSCapabilities from "ol/format/WMTSCapabilities";
 export default {
   name: "previewMap",
   data() {

@@ -1,4 +1,4 @@
-const randomExt = {
+const mock = {
   //生成图层随机状态
   createRandomProps() {
     let _customProps = {};
@@ -54,4 +54,4 @@ const randomExt = {
   }
 };
 
-export default randomExt;
+export default mock;

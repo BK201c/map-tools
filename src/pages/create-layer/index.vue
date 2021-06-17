@@ -65,7 +65,7 @@
 import { v4 as uuidv4 } from "uuid";
 import XLSX from "xlsx";
 import commonAPI from "@/api/commonAPI.js";
-import randomExt from "@/utils/random-ext.js";
+import mock from "@/utils/mock.js";
 export default {
   name: "HelloWorld",
   data() {
@@ -142,7 +142,7 @@ export default {
             type: "Point",
             coordinates: coords
           },
-          keyValueMap: randomExt.createRandomProps()
+          keyValueMap: mock.createRandomProps()
         });
         const layer = [...coordsArray.map(coords => feature(coords))];
         console.log(layer);
@@ -156,7 +156,7 @@ export default {
     async pushPoints() {
       const { appName, center, serviceName, pointNum } = this.formPoint;
       try {
-        const opts = await randomExt.randomCoordByCenter(center, pointNum);
+        const opts = await mock.randomCoordByCenter(center, pointNum);
         const esDataEntityList = await this.createLayerSource(opts);
         const params = { appName, serviceName, esDataEntityList };
         commonAPI.sendPointData(params, this.formBase).then(res => {
