@@ -76,14 +76,13 @@
           class="map-container"
           :class="{ 'map-full': isMapFullScreen }"
           ref="mapContainer"
-        >
-          <div class="btn-group">
-            <a-icon
-              class="map-btn"
-              :type="isMapFullScreen ? 'fullscreen-exit' : 'fullscreen'"
-              @click="setMapFullScreen"
-            />
-          </div>
+        ></div>
+        <div class="btn-group">
+          <a-icon
+            class="map-btn"
+            :type="isMapFullScreen ? 'fullscreen-exit' : 'fullscreen'"
+            @click="setMapFullScreen"
+          />
         </div>
       </div>
       <div
@@ -408,14 +407,15 @@ export default {
 .map-container {
   width: $preWidth;
   height: 300px;
-  border: 1px solid #d5d5d5;
-  position: relative;
   transition: all 0.35s ease-in-out;
+}
+.preview-map {
+  position: relative;
   .btn-group {
-    position: absolute;
+    position: fixed;
     left: 0.5em;
     bottom: 0.5em;
-    z-index: 99;
+    z-index: 999;
   }
   .map-btn {
     font-size: 26px;
@@ -437,7 +437,7 @@ export default {
   box-sizing: border-box;
   .map-full {
     height: calc(100vh - 50px);
-    width: 100%;
+    width: calc(100vw - 185px);
   }
   .preview-params {
     position: relative;
