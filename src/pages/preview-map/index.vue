@@ -238,7 +238,7 @@ export default {
       } else if (type === "xml") {
         content = this.originMetaXml;
       }
-      const paths = this.zipPath || "C:/";
+      const paths = this.zipPath;
       const fileName = `adapt_params_${dataPx}.${type}`;
       const fullPath = `${paths}/${fileName}`;
       fs.writeFile(fullPath, content, err => {
