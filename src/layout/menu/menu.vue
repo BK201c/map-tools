@@ -33,6 +33,7 @@ export default {
   },
   methods: {
     handleClick(e) {
+      if (this.$route.name === e.key) return;
       this.$router.push({ name: e.key });
     }
   }

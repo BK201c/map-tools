@@ -192,7 +192,7 @@ export default {
 
     //通过服务器获取xml文件，同时解析元数据信息
     async getLayerInfoByServer() {
-      let url = this.mapParams.url;
+      let url = this.mapParams.url.trim();
       let params = {
         SERVICE: "WMTS",
         REQUEST: "GetCapabilities",
