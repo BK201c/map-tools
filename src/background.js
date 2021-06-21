@@ -6,6 +6,8 @@ import { createWindow } from "./window";
 import "./ipc/main";
 const isDevelopment = process.env.NODE_ENV !== "production";
 
+app.commandLine.appendSwitch("disable-web-security");
+
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: "app", privileges: { secure: true, standard: true } }
