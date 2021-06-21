@@ -51,22 +51,6 @@ const calcResolutionByScale = (scale, crs = 4326) => {
   return (defaultPixelMeter * scale) / (dpi * units);
 };
 
-//获取layer节点信息
-const filterLayerInfo = layer => {
-  return new Promise((resolve, reject) => {
-    let obj = {
-      layer: layer.Identifier,
-      style: layer.Style[0]?.Identifier,
-      format: layer.Format[0],
-      matrixSet: layer.TileMatrixSetLink[0]?.TileMatrixSet
-    };
-    if (!layer) {
-      reject(layer, "提供了错误的参数");
-    }
-    resolve(obj);
-  });
-};
-
 //获取tileGrid信息
 const filterTileGridInfo = TileMatrixSet => {
   const matrixIds = [];
@@ -89,22 +73,48 @@ const filterTileGridInfo = TileMatrixSet => {
   };
 };
 
-const filterLayerSourceInfo = async (xml, index = 0) => {
+// 获取图层组信息
+const filterLayerSources = xml => {
   const parser = new WMTSCapabilities();
-  const { Contents } = parser.read(xml);
-  const layerMeta = await filterLayerInfo(Contents.Layer[index]);
-  const [TileMatrixSet] = Contents.TileMatrixSet.filter(
-    e => e.Identifier === layerMeta.matrixSet
-  );
-  const tileGrid = filterTileGridInfo(TileMatrixSet);
-  return {
-    ...layerMeta,
-    tileGrid: {
-      resolutions: tileGrid.resolutions,
-      matrixIds: tileGrid.matrixIds,
-      origin: tileGrid.origin
-    }
-  };
+  console.log(parser.read(xml));
+  const { Contents, OperationsMetadata } = parser.read(xml);
+  const metaLayers = [
+    ...Contents.Layer.map(layer =>
+      Object.assign(
+        {},
+        {
+          layer: layer.Identifier,
+          url: OperationsMetadata.GetTile.DCP.HTTP.Get[0].href,
+          style: layer.Style[0]?.Identifier,
+          format: layer.Format[0],
+          matrixSet: layer.TileMatrixSetLink[0]?.TileMatrixSet
+        }
+      )
+    )
+  ];
+
+  const tileGrids = [
+    ...metaLayers.map(meta => {
+      const [TileMatrixSet] = Contents.TileMatrixSet.filter(
+        e => e.Identifier === meta.matrixSet
+      );
+      const tileGrid = filterTileGridInfo(TileMatrixSet);
+      return Object.assign(
+        {},
+        {
+          ...meta,
+          projection: tileGrid.projection,
+          tileGrid: {
+            resolutions: tileGrid.resolutions,
+            matrixIds: tileGrid.matrixIds,
+            origin: tileGrid.origin
+          }
+        }
+      );
+    })
+  ];
+
+  return tileGrids;
 };
 
 const lonLat2Mercator = point => {
@@ -113,10 +123,4 @@ const lonLat2Mercator = point => {
   return turf.getCoord(converted);
 };
 
-export {
-  isMercatorProjection,
-  filterLayerInfo,
-  filterTileGridInfo,
-  filterLayerSourceInfo,
-  lonLat2Mercator
-};
+export { isMercatorProjection, filterLayerSources, lonLat2Mercator };

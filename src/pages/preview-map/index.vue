@@ -34,7 +34,7 @@
             :options="citys"
             :show-search="{ filter }"
             placeholder="搜索或选择中心点"
-            @change="onChange"
+            @change="changeCity"
           />
         </a-form-model-item>
         <a-form-model-item label="专业模式">
@@ -83,6 +83,19 @@
             :type="isMapFullScreen ? 'fullscreen-exit' : 'fullscreen'"
             @click="setMapFullScreen"
           />
+        </div>
+        <div class="map-tools">
+          <h2>图层</h2>
+          <a-radio-group v-model="checkedLayer" @change="changeLayer">
+            <a-radio
+              v-for="layer in layerSources"
+              :key="layer.layer"
+              :style="radioStyle"
+              :value="layer.layer"
+            >
+              {{ layer.layer }}
+            </a-radio>
+          </a-radio-group>
         </div>
       </div>
       <div
@@ -137,19 +150,10 @@
 </template>
 
 <script>
-import {
-  Map,
-  View,
-  TileLayer,
-  WMTSTileGrid,
-  WMTS,
-  WMTSCapabilities
-} from "@/core/ol";
+import { Map, View, TileLayer, WMTSTileGrid, WMTS } from "@/core/ol";
 import { ipcRenderer, fs, clipboard } from "@/core/electron";
 import Prism from "prismjs";
-// import "prismjs/themes/prism.css";
 import "prismjs/components/prism-json";
-// import prism from "./components/c-prism.vue";
 import formater from "@/utils/formater";
 import { mapGetters } from "vuex";
 import * as filter from "@/utils/filter";
@@ -163,12 +167,20 @@ export default {
       formLayout: "horizontal",
       mapParams: {
         url:
-          "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
+          // "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
+          "http://172.20.208.1:8080/PGIS.xml",
         serviceType: "wmts"
       },
       map: "",
       fileList: [],
       center: [],
+      layerSources: [],
+      radioStyle: {
+        display: "block",
+        height: "30px",
+        lineHeight: "30px"
+      },
+      checkedLayer: {},
       isMapParamsShow: false,
       dictorySelected: "",
       citys: [],
@@ -227,27 +239,8 @@ export default {
       return getXmlByMapServer(url, query)
         .then(async xml => {
           this.originMetaXml = xml;
-          const parser = new WMTSCapabilities();
-          const { Contents } = parser.read(xml);
-          const layerMeta = await filter.filterLayerInfo(Contents.Layer[0]);
-          const [TileMatrixSet] = Contents.TileMatrixSet.filter(
-            e => e.Identifier === layerMeta.matrixSet
-          );
-          const tileGrid = await filter.filterTileGridInfo(TileMatrixSet);
-          this.mapParams = Object.assign(
-            {},
-            {
-              ...layerMeta,
-              url,
-              serviceType: this.mapParams.serviceType,
-              projection: tileGrid.projection,
-              tileGrid: {
-                resolutions: tileGrid.resolutions,
-                matrixIds: tileGrid.matrixIds,
-                origin: tileGrid.origin
-              }
-            }
-          );
+          this.layerSources = filter.filterLayerSources(xml);
+          console.log(this.layerSources);
         })
         .catch(function(error) {
           console.log(error);
@@ -277,8 +270,12 @@ export default {
       });
     },
 
+    changeLayer(e) {
+      console.log(e);
+    },
+
     // 城市选择
-    onChange(value, selectedOptions) {
+    changeCity(value, selectedOptions) {
       this.center = selectedOptions[1].center;
     },
 
@@ -324,21 +321,19 @@ export default {
 
     //创建wmts图层
     createWMTS(opiton) {
-      return new Promise(reslove => {
-        const tileGrid = new WMTSTileGrid(opiton?.tileGrid);
-        const base = {
-          url: opiton.url,
-          layer: opiton.layer,
-          projection: opiton.projection,
-          format: opiton.format,
-          style: opiton.style,
-          matrixSet: opiton.matrixSet,
-          crossOrigin: opiton.crossOrigin || "anonymous"
-        };
-        const smOption = Object.assign({}, base, { tileGrid });
-        const source = new WMTS(smOption);
-        reslove(new TileLayer({ source }));
-      });
+      const tileGrid = new WMTSTileGrid(opiton?.tileGrid);
+      const base = {
+        url: opiton.url,
+        layer: opiton.layer,
+        projection: opiton.projection,
+        format: opiton.format,
+        style: opiton.style,
+        matrixSet: opiton.matrixSet,
+        crossOrigin: opiton.crossOrigin || "anonymous"
+      };
+      const smOption = Object.assign({}, base, { tileGrid });
+      const source = new WMTS(smOption);
+      return new TileLayer({ source });
     },
 
     // 初始化地图对象
@@ -365,12 +360,9 @@ export default {
       if (!this.checkParams()) return;
       try {
         this.isMapParamsShow = true;
-        await this.getLayerInfoByServer();
         this.cleanAllLayer(this.map);
-        const layer =
-          this.mapParams.serviceType === "wmts"
-            ? await this.createWMTS(this.mapParams)
-            : this.createWMS(this.mapParams);
+        await this.getLayerInfoByServer();
+        const layers = [...this.layerSources.map(s => this.createWMTS(s))];
         const center = filter.isMercatorProjection(this.mapParams.projection)
           ? filter.lonLat2Mercator(this.center)
           : this.center;
@@ -381,11 +373,12 @@ export default {
           maxZoom: 20,
           zoom: 8
         };
+
         console.log(viewOption);
         this.$nextTick(() => {
           this.map.setTarget(this.$refs.mapContainer);
           this.map.setView(new View(viewOption));
-          this.map.addLayer(layer);
+          this.map.addLayer(...layers);
         });
         const rawHtml = Prism.highlight(
           JSON.stringify(this.mapParams),
