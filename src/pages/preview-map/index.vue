@@ -53,7 +53,7 @@
               :before-upload="beforeUpload"
               accept=".json"
             >
-              <a-button> <a-icon type="upload" /> 上传 </a-button>
+              <a-button> <a-icon type="upload" /> 导入 </a-button>
             </a-upload>
           </a-form-model-item>
         </div>
