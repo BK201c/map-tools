@@ -37,6 +37,7 @@
   flex-grow: 1;
   margin-top: 25px;
   margin-left: 10px;
+  font-size: 14px;
   width: $preWidth;
   box-sizing: border-box;
   .map-full {
@@ -46,10 +47,10 @@
   .preview-params {
     position: relative;
     width: $preWidth;
-    pre {
+    height: 350px;
+    pre-box {
       width: $preWidth;
       padding-top: 45px;
-      height: 350px;
       overflow-y: scroll;
     }
     .btn-group {

@@ -20,3 +20,16 @@
     }
   }
 }
+.preview-params {
+  pre {
+    padding-top: 25px;
+  }
+}
+code[class*="language-"],
+pre[class*="language-"] {
+  white-space: pre-wrap !important;
+  // white-space: normal !important;
+  word-break: break-word !important;
+  // word-spacing: normal !important;
+  // word-break: normal !important;
+}

@@ -3,7 +3,6 @@
     <div class="form-box">
       <a-divider orientation="left">CT-Server</a-divider>
       <a-form-model
-        class="animate__animated animate__fadeInRight"
         :model="formBase"
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
@@ -20,7 +19,6 @@
         :model="formPoint"
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
-        class="animate__animated animate__fadeInRight animate__delay-1s"
       >
         <a-form-model-item label="目标中心点">
           <a-input v-model="formPoint.center" placeholder="[lng,lat]" />
@@ -43,7 +41,6 @@
         :model="formLine"
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
-        class="animate__animated animate__fadeInRight animate__delay-2s"
       >
         <a-form-model-item label="行政编码">
           <a-input v-model="formLine.adminId" />

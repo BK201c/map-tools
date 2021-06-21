@@ -69,7 +69,7 @@
         </a-form-model-item>
       </a-form-model>
     </div>
-    <div class="preview-box" v-show="isMapParamsShow">
+    <div class="preview-box" v-if="isMapParamsShow">
       <div class="preview-map animate__animated animate__fadeInTopRight">
         <div
           id="mapContainer"
@@ -130,9 +130,7 @@
             </a-button>
           </a-tooltip>
         </div>
-        <div class="pre-box">
-          <pre><code class="language-json">{{paramsBox}}</code></pre>
-        </div>
+        <div class="pre-box" v-html="previewParams"></div>
       </div>
     </div>
   </div>
@@ -149,8 +147,9 @@ import {
 } from "@/core/ol";
 import { ipcRenderer, fs, clipboard } from "@/core/electron";
 import Prism from "prismjs";
-import "prismjs/themes/prism.css";
+// import "prismjs/themes/prism.css";
 import "prismjs/components/prism-json";
+// import prism from "./components/c-prism.vue";
 import formater from "@/utils/formater";
 import { mapGetters } from "vuex";
 import * as filter from "@/utils/filter";
@@ -173,10 +172,10 @@ export default {
       isMapParamsShow: false,
       dictorySelected: "",
       citys: [],
-      paramsBox: "",
       originMetaXml: "",
       isAdvanced: false,
-      isMapFullScreen: false
+      isMapFullScreen: false,
+      previewParams: null
     };
   },
   created() {
@@ -347,6 +346,10 @@ export default {
       this.map = new Map();
     },
 
+    cleanAllLayer(map) {
+      map.getLayers()?.forEach(l => map.removeLayer(l));
+    },
+
     // 参数验证
     checkParams() {
       console.log(this.mapParams);
@@ -361,7 +364,9 @@ export default {
     async preview() {
       if (!this.checkParams()) return;
       try {
+        this.isMapParamsShow = true;
         await this.getLayerInfoByServer();
+        this.cleanAllLayer(this.map);
         const layer =
           this.mapParams.serviceType === "wmts"
             ? await this.createWMTS(this.mapParams)
@@ -377,14 +382,17 @@ export default {
           zoom: 8
         };
         console.log(viewOption);
-        this.isMapParamsShow = true;
-        this.paramsBox = this.mapParams;
         this.$nextTick(() => {
           this.map.setTarget(this.$refs.mapContainer);
           this.map.setView(new View(viewOption));
           this.map.addLayer(layer);
-          Prism.highlightAll();
         });
+        const rawHtml = Prism.highlight(
+          JSON.stringify(this.mapParams),
+          Prism.languages.json,
+          "json"
+        );
+        this.previewParams = `<pre style="height:350px;padding-top: 40px;" class="language-json"><code style="height:350px">${rawHtml}</code></pre>`;
       } catch (error) {
         console.log(error);
         this.$message.error("参数错误,请确认后重试");
