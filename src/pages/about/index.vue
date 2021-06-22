@@ -36,10 +36,10 @@ export default {
           des: "文档"
         },
         {
-          des: "版本：v1.1.1"
+          des: "版本：v1.2.0-beta"
         },
         {
-          des: "更新日期：2021-06-18"
+          des: "更新日期：2021-06-22"
         },
         {
           des: "Copyright 2020-2021 By Jonson"
