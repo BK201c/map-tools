@@ -74,7 +74,7 @@ const filterTileGridInfo = TileMatrixSet => {
 };
 
 // 获取图层组信息
-const filterLayerSources = xml => {
+const filterLayerSource = xml => {
   const parser = new WMTSCapabilities();
   console.log(parser.read(xml));
   const { Contents, OperationsMetadata } = parser.read(xml);
@@ -123,4 +123,4 @@ const lonLat2Mercator = point => {
   return turf.getCoord(converted);
 };
 
-export { isMercatorProjection, filterLayerSources, lonLat2Mercator };
+export { isMercatorProjection, filterLayerSource, lonLat2Mercator };

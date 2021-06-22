@@ -40,6 +40,9 @@
     background-color: #d9d9d9b8;
     padding: 10px;
     border-radius: 3px;
+    max-height: 280px;
+    overflow: auto;
+
     h2 {
       color: #12334e;
       border-left: 4px solid #1890ff;

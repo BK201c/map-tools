@@ -86,9 +86,12 @@
         </div>
         <div class="map-tools">
           <h2>图层</h2>
-          <a-radio-group v-model="checkedLayer" @change="changeLayer">
+          <a-radio-group
+            @change="changeLayer"
+            :default-value="layerSource[0].layer"
+          >
             <a-radio
-              v-for="layer in layerSources"
+              v-for="layer in layerSource"
               :key="layer.layer"
               :style="radioStyle"
               :value="layer.layer"
@@ -143,7 +146,12 @@
             </a-button>
           </a-tooltip>
         </div>
-        <div class="pre-box" v-html="previewParams"></div>
+        <div class="pre-box">
+          <pre
+            style="height:350px;padding-top: 40px;"
+            class="language-json"
+          ><code style="height:350px">{{previewParams}}</code></pre>
+        </div>
       </div>
     </div>
   </div>
@@ -166,21 +174,18 @@ export default {
       wrapperCol: { span: 12 },
       formLayout: "horizontal",
       mapParams: {
-        url:
-          // "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
-          "http://172.20.208.1:8080/PGIS.xml",
+        url: "http://10.68.8.20/kmap-server/ogc/service/wmts",
         serviceType: "wmts"
       },
-      map: "",
+      map: {},
       fileList: [],
       center: [],
-      layerSources: [],
+      layerSource: [],
       radioStyle: {
         display: "block",
         height: "30px",
         lineHeight: "30px"
       },
-      checkedLayer: {},
       isMapParamsShow: false,
       dictorySelected: "",
       citys: [],
@@ -219,7 +224,7 @@ export default {
 
     // 一键复制参数
     copyParams() {
-      clipboard.writeText(JSON.stringify(this.mapParams));
+      clipboard.writeText(JSON.stringify(this.previewParams));
       setTimeout(() => {
         const text = clipboard.readText();
         if (text !== "" && text !== null) {
@@ -239,8 +244,8 @@ export default {
       return getXmlByMapServer(url, query)
         .then(async xml => {
           this.originMetaXml = xml;
-          this.layerSources = filter.filterLayerSources(xml);
-          console.log(this.layerSources);
+          this.layerSource = filter.filterLayerSource(xml);
+          console.log(this.layerSource);
         })
         .catch(function(error) {
           console.log(error);
@@ -252,7 +257,7 @@ export default {
       let content;
       const dataPx = formater.date(new Date(), "yyyy-MM-dd_hh.mm.ss");
       if (type === "json") {
-        content = JSON.stringify(this.mapParams);
+        content = JSON.stringify(this.previewParams);
       } else if (type === "xml") {
         content = this.originMetaXml;
       }
@@ -270,13 +275,53 @@ export default {
       });
     },
 
+    //设置需要显示的图层
+    setTargetLayer(id) {
+      this.map
+        .getLayers()
+        .getArray()
+        .forEach(layer =>
+          layer.get("id") === id
+            ? layer?.setVisible(true)
+            : layer?.setVisible(false)
+        );
+
+      const [targetLayerSouce] = this.layerSource.filter(
+        source => source?.layer === id
+      );
+
+      const center = filter.isMercatorProjection(targetLayerSouce.projection)
+        ? filter.lonLat2Mercator(this.center)
+        : this.center;
+
+      const viewOption = {
+        center: center,
+        projection: targetLayerSouce.projection,
+        minZoom: 0,
+        maxZoom: 20,
+        zoom: 8
+      };
+      console.log(viewOption);
+      this.highlightParams(targetLayerSouce);
+      this.map.setView(new View(viewOption));
+    },
+
+    // 显示参数
+    highlightParams(params) {
+      this.previewParams = params;
+      setTimeout(() => {
+        Prism.highlightAll();
+      }, 500);
+    },
+
+    //切换图层
     changeLayer(e) {
-      console.log(e);
+      this.setTargetLayer(e.target.value);
     },
 
     // 城市选择
     changeCity(value, selectedOptions) {
-      this.center = selectedOptions[1].center;
+      this.center = selectedOptions[1]?.center;
     },
 
     // 中心点搜索
@@ -319,8 +364,8 @@ export default {
       });
     },
 
-    //创建wmts图层
-    createWMTS(opiton) {
+    //创建wmts图层，默认设置图层名称为图层id
+    createWMTS(opiton, id = opiton.layer) {
       const tileGrid = new WMTSTileGrid(opiton?.tileGrid);
       const base = {
         url: opiton.url,
@@ -333,7 +378,9 @@ export default {
       };
       const smOption = Object.assign({}, base, { tileGrid });
       const source = new WMTS(smOption);
-      return new TileLayer({ source });
+      const layer = new TileLayer({ source, visible: false });
+      layer.set("id", id);
+      return layer;
     },
 
     // 初始化地图对象
@@ -361,31 +408,12 @@ export default {
       try {
         this.isMapParamsShow = true;
         this.cleanAllLayer(this.map);
+        this.previewParams = null;
         await this.getLayerInfoByServer();
-        const layers = [...this.layerSources.map(s => this.createWMTS(s))];
-        const center = filter.isMercatorProjection(this.mapParams.projection)
-          ? filter.lonLat2Mercator(this.center)
-          : this.center;
-        const viewOption = {
-          center: center,
-          projection: this.mapParams.projection,
-          minZoom: 0,
-          maxZoom: 20,
-          zoom: 8
-        };
-
-        console.log(viewOption);
-        this.$nextTick(() => {
-          this.map.setTarget(this.$refs.mapContainer);
-          this.map.setView(new View(viewOption));
-          this.map.addLayer(...layers);
-        });
-        const rawHtml = Prism.highlight(
-          JSON.stringify(this.mapParams),
-          Prism.languages.json,
-          "json"
-        );
-        this.previewParams = `<pre style="height:350px;padding-top: 40px;" class="language-json"><code style="height:350px">${rawHtml}</code></pre>`;
+        const layers = [...this.layerSource.map(s => this.createWMTS(s))];
+        this.map.setTarget(this.$refs.mapContainer);
+        this.map.addLayer(...layers);
+        this.setTargetLayer(this.layerSource[0]?.layer);
       } catch (error) {
         console.log(error);
         this.$message.error("参数错误,请确认后重试");
