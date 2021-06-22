@@ -230,6 +230,30 @@ export default {
       }, 300);
     },
 
+    //支持瓦片鉴权验证
+    tileLoader(tile, src) {
+      const headers = this.mapParams?.headers;
+      const client = new XMLHttpRequest();
+
+      client.open("GET", src);
+      client.responseType = "arraybuffer";
+      if (headers !== "") {
+        for (const key in headers) {
+          client.setRequestHeader(key, headers[key]);
+        }
+      }
+
+      client.onload = function() {
+        const arrayBufferView = new Uint8Array(this.response);
+        const blob = new Blob([arrayBufferView], { type: "image/png" });
+        const urlCreator = window.URL || window.webkitURL;
+        const imageUrl = urlCreator.createObjectURL(blob);
+        tile.getImage().src = imageUrl;
+      };
+
+      client.send();
+    },
+
     //通过服务器获取xml文件，同时解析元数据信息
     async getLayerInfoByServer() {
       const url = this.mapParams.url.trim();
@@ -302,6 +326,9 @@ export default {
       console.log("source", targetLayerSouce);
       console.log("view", viewOption);
       const source = this.createWMTS(targetLayerSouce);
+      if (targetLayerSouce.headers !== "") {
+        source.setTileLoadFunction(this.tileLoader);
+      }
       this.map.addLayer(new TileLayer({ source }));
       this.highlightParams(targetLayerSouce);
       this.map.setView(new View(viewOption));
@@ -341,9 +368,16 @@ export default {
       };
     },
 
+    //限制上传数量
+    handleChange(info) {
+      let fileList = [...info.fileList];
+      fileList = fileList.slice(-2);
+      this.fileList = fileList;
+    },
+
     // 获取上传文件路径
     beforeUpload(file) {
-      this.fileList = [...this.fileList, file];
+      this.fileList = [file];
       console.log(this.fileList, file);
       this.readLocalJson(file?.path);
       return false;
