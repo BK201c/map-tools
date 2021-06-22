@@ -170,7 +170,7 @@ export default {
       wrapperCol: { span: 12 },
       formLayout: "horizontal",
       mapParams: {
-        url: "http://10.68.8.20/kmap-server/ogc/service/wmts",
+        url: "http://10.67.14.50:8080/PGIS%20copy.xml",
         serviceType: "wmts"
       },
       map: {},
@@ -262,7 +262,7 @@ export default {
         content = this.originMetaXml;
       }
       const paths = this.zipPath;
-      const fileName = `adapt_params_${dataPx}.${type}`;
+      const fileName = `adapt_${this.previewParams.layer}_${dataPx}.${type}`;
       const fullPath = `${paths}/${fileName}`;
       fs.writeFile(fullPath, content, err => {
         if (err) {
@@ -277,16 +277,8 @@ export default {
 
     //设置需要显示的图层
     setTargetLayer(id) {
+      this.cleanAllLayer();
       this.selectedLayerId = id;
-      this.map
-        .getLayers()
-        .getArray()
-        .forEach(layer =>
-          layer.get("id") === id
-            ? layer?.setVisible(true)
-            : layer?.setVisible(false)
-        );
-
       const [targetLayerSouce] = this.layerSource.filter(
         source => source?.layer === id
       );
@@ -302,9 +294,10 @@ export default {
         maxZoom: 20,
         zoom: 8
       };
-      console.log(viewOption);
+      const layer = this.createWMTS(targetLayerSouce);
       this.highlightParams(targetLayerSouce);
       this.map.setView(new View(viewOption));
+      this.map.addLayer(layer);
     },
 
     // 显示参数
@@ -376,7 +369,7 @@ export default {
       };
       const smOption = Object.assign({}, base, { tileGrid });
       const source = new WMTS(smOption);
-      const layer = new TileLayer({ source, visible: false });
+      const layer = new TileLayer({ source });
       layer.set("id", id);
       return layer;
     },
@@ -386,13 +379,12 @@ export default {
       this.map = new Map();
     },
 
-    cleanAllLayer(map) {
-      map.getLayers()?.forEach(l => map.removeLayer(l));
+    cleanAllLayer() {
+      this.map.getLayers()?.forEach(l => this.map.removeLayer(l));
     },
 
     // 参数验证
     checkParams() {
-      console.log(this.mapParams);
       if (!this.mapParams.url) this.$message.error("地图服务地址不能为空", 2);
 
       if (!this.center.length) this.$message.error("中心点必选", 2);
@@ -405,12 +397,9 @@ export default {
       if (!this.checkParams()) return;
       try {
         this.isMapParamsShow = true;
-        this.cleanAllLayer(this.map);
         this.previewParams = null;
         await this.getLayerInfoByServer();
-        const layers = [...this.layerSource.map(s => this.createWMTS(s))];
         this.map.setTarget(this.$refs.mapContainer);
-        this.map.addLayer(...layers);
         this.setTargetLayer(this.layerSource[0]?.layer);
       } catch (error) {
         console.log(error);

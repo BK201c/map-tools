@@ -55,10 +55,13 @@ const calcResolutionByScale = (scale, crs = 4326) => {
 const filterTileGridInfo = TileMatrixSet => {
   const matrixIds = [];
   const resolutions = [];
+  let origin = [
+    TileMatrixSet.TileMatrix[0].TopLeftCorner[1],
+    TileMatrixSet.TileMatrix[0].TopLeftCorner[0]
+  ];
   let projection = "EPSG:" + TileMatrixSet.SupportedCRS?.split("::")[1];
-  let origin = TileMatrixSet.TileMatrix[0]?.TopLeftCorner.reverse();
-  if (projection === "EPSG:3857") origin = origin.reverse();
   if (projection === "EPSG:4490") projection = "EPSG:4326";
+  if (projection === "EPSG:3857") origin.reverse();
   TileMatrixSet.TileMatrix.forEach(matrix => {
     matrixIds.push(Number(matrix.Identifier));
     resolutions.push(
@@ -98,16 +101,16 @@ const filterLayerSource = xml => {
       const [TileMatrixSet] = Contents.TileMatrixSet.filter(
         e => e.Identifier === meta.matrixSet
       );
-      const tileGrid = filterTileGridInfo(TileMatrixSet);
+      const grid = filterTileGridInfo(TileMatrixSet);
       return Object.assign(
         {},
         {
           ...meta,
-          projection: tileGrid.projection,
+          projection: grid.projection,
           tileGrid: {
-            resolutions: tileGrid.resolutions,
-            matrixIds: tileGrid.matrixIds,
-            origin: tileGrid.origin
+            resolutions: grid.resolutions,
+            matrixIds: grid.matrixIds,
+            origin: grid.origin
           }
         }
       );
