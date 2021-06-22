@@ -166,6 +166,7 @@ import formater from "@/utils/formater";
 import { mapGetters } from "vuex";
 import * as filter from "@/utils/filter";
 import { initCityList, getXmlByMapServer } from "@/api/commonAPI";
+import { URL } from "url";
 export default {
   name: "previewMap",
   data() {
@@ -235,7 +236,8 @@ export default {
 
     //通过服务器获取xml文件，同时解析元数据信息
     async getLayerInfoByServer() {
-      let url = this.mapParams.url.trim();
+      const url = this.mapParams.url.trim();
+      const myURL = new URL(url);
       const query = {
         SERVICE: "WMTS",
         REQUEST: "GetCapabilities",
@@ -245,6 +247,8 @@ export default {
         .then(async xml => {
           this.originMetaXml = xml;
           this.layerSource = filter.filterLayerSource(xml);
+          if (myURL.search !== "")
+            this.layerSource.forEach(source => (source.url = url));
           console.log(this.layerSource);
         })
         .catch(function(error) {
