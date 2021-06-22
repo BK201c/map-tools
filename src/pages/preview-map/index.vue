@@ -252,6 +252,11 @@ export default {
         });
     },
 
+    //通过手动模式直接上传切片元数据
+    async getLayerInfoByFile() {
+      this.layerSource[0] = this.mapParams;
+    },
+
     //保存显示地图的参数文件
     downloadParams(type) {
       let content;
@@ -294,10 +299,12 @@ export default {
         maxZoom: 20,
         zoom: 8
       };
-      const layer = this.createWMTS(targetLayerSouce);
+      console.log("source", targetLayerSouce);
+      console.log("view", viewOption);
+      const source = this.createWMTS(targetLayerSouce);
+      this.map.addLayer(new TileLayer({ source }));
       this.highlightParams(targetLayerSouce);
       this.map.setView(new View(viewOption));
-      this.map.addLayer(layer);
     },
 
     // 显示参数
@@ -356,7 +363,7 @@ export default {
     },
 
     //创建wmts图层，默认设置图层名称为图层id
-    createWMTS(opiton, id = opiton.layer) {
+    createWMTS(opiton) {
       const tileGrid = new WMTSTileGrid(opiton?.tileGrid);
       const base = {
         url: opiton.url,
@@ -368,10 +375,7 @@ export default {
         crossOrigin: opiton.crossOrigin || "anonymous"
       };
       const smOption = Object.assign({}, base, { tileGrid });
-      const source = new WMTS(smOption);
-      const layer = new TileLayer({ source });
-      layer.set("id", id);
-      return layer;
+      return new WMTS(smOption);
     },
 
     // 初始化地图对象
@@ -398,7 +402,9 @@ export default {
       try {
         this.isMapParamsShow = true;
         this.previewParams = null;
-        await this.getLayerInfoByServer();
+        this.fileList.length === 0
+          ? await this.getLayerInfoByServer()
+          : await this.getLayerInfoByFile();
         this.map.setTarget(this.$refs.mapContainer);
         this.setTargetLayer(this.layerSource[0]?.layer);
       } catch (error) {

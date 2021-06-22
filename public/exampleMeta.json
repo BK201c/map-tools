@@ -1,5 +1,5 @@
 {
-  "url": "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
+  "url": "http://120.52.31.39/cloudapi/service/api/egis/base/v1/wmts",
   "serviceType": "wmts",
   "crossOrigin": "anonymous",
   "projection": "EPSG:4326",
@@ -8,6 +8,9 @@
   "style": "default",
   "matrixSet": "c",
   "wrapX": true,
+  "headers": {
+    "Authorization": "Basic MjJhNDJmNjVjOGM0NDcyNGI1NzAzZWZkNTRiZjU3ODI6YWE5MDAxNTMyYmQzNDI3OWE5N2UzYjAxYmY2MTczZjk="
+  },
   "tileGrid": {
     "resolutions": [
       0.7031250000000002,
