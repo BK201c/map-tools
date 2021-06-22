@@ -86,10 +86,7 @@
         </div>
         <div class="map-tools">
           <h2>图层</h2>
-          <a-radio-group
-            @change="changeLayer"
-            :default-value="layerSource[0].layer"
-          >
+          <a-radio-group @change="changeLayer" v-model="selectedLayerId">
             <a-radio
               v-for="layer in layerSource"
               :key="layer.layer"
@@ -160,8 +157,6 @@
 <script>
 import { Map, View, TileLayer, WMTSTileGrid, WMTS } from "@/core/ol";
 import { ipcRenderer, fs, clipboard } from "@/core/electron";
-import Prism from "prismjs";
-import "prismjs/components/prism-json";
 import formater from "@/utils/formater";
 import { mapGetters } from "vuex";
 import * as filter from "@/utils/filter";
@@ -193,7 +188,8 @@ export default {
       originMetaXml: "",
       isAdvanced: false,
       isMapFullScreen: false,
-      previewParams: null
+      previewParams: null,
+      selectedLayerId: ""
     };
   },
   created() {
@@ -281,6 +277,7 @@ export default {
 
     //设置需要显示的图层
     setTargetLayer(id) {
+      this.selectedLayerId = id;
       this.map
         .getLayers()
         .getArray()
@@ -313,9 +310,6 @@ export default {
     // 显示参数
     highlightParams(params) {
       this.previewParams = params;
-      setTimeout(() => {
-        Prism.highlightAll();
-      }, 500);
     },
 
     //切换图层
