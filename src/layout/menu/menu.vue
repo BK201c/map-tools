@@ -15,7 +15,7 @@
         <span>数据模拟</span>
       </a-menu-item>
       <a-menu-item key="about">
-        <a-icon style="fontSize:18px" type="smile" />
+        <a-icon style="fontSize:18px" type="info-circle" />
         <span>关于</span>
       </a-menu-item>
     </a-menu>

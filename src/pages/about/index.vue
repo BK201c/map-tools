@@ -14,6 +14,8 @@
 
 <script>
 import logo from "@/asset/img/logo.png";
+import config from "../../../package.json";
+import formater from "@/utils/formater";
 export default {
   data() {
     return {
@@ -33,16 +35,16 @@ export default {
     init() {
       this.items = [
         {
-          des: "文档"
+          des: `版本：v${config.version}`
         },
         {
-          des: "版本：v1.3.0"
+          des: `发布日期：${formater.date(new Date(), "yyyy-MM-dd")}`
         },
         {
-          des: "更新日期：2021-06-22"
+          des: "Copyright 2020-2021"
         },
         {
-          des: "Copyright 2020-2021 By Jonson"
+          des: "By KmapTeam Jonson"
         }
       ];
     }
