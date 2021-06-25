@@ -72,21 +72,20 @@
     </div>
     <div class="preview-box" v-if="isMapParamsShow">
       <div class="preview-map animate__animated animate__fadeInTopRight">
-        <!-- <div
+        <div
           id="mapContainer"
           class="map-container"
           :class="{ 'map-full': isMapFullScreen }"
           ref="mapContainer"
-        ></div> -->
-        <!-- <c-map :layerSouces="layerSouces" width="300px" height="300px"></c-map> -->
-        <!-- <div class="btn-group">
+        ></div>
+        <div class="btn-group">
           <a-icon
             class="map-btn"
             :type="isMapFullScreen ? 'fullscreen-exit' : 'fullscreen'"
             @click="setMapFullScreen"
           />
-        </div> -->
-        <!-- <div class="map-tools">
+        </div>
+        <div class="map-tools">
           <h2>图层</h2>
           <a-radio-group @change="changeLayer" v-model="selectedLayerId">
             <a-radio
@@ -98,19 +97,58 @@
               {{ layer.layer }}
             </a-radio>
           </a-radio-group>
-        </div> -->
+        </div>
       </div>
       <div
         class="preview-params animate__animated animate__fadeInBottomRight"
-        v-if="!isMapFullScreen"
+        v-show="!isMapFullScreen"
       >
+        <div class="btn-group">
+          <a-tooltip style="margin-left:10px">
+            <template slot="title">
+              一键复制
+            </template>
+            <a-button
+              type="primary"
+              icon="copy"
+              size="small"
+              :ghost="true"
+              @click="copyParams"
+            >
+            </a-button>
+          </a-tooltip>
+          <a-tooltip style="margin-left:10px">
+            <template slot="title">
+              下载参数
+            </template>
+            <a-button
+              type="primary"
+              icon="download"
+              size="small"
+              :ghost="true"
+              @click="downloadParams('json')"
+            >
+            </a-button>
+          </a-tooltip>
+          <a-tooltip style="margin-left:10px">
+            <template slot="title">
+              下载元数据
+            </template>
+            <a-button
+              type="primary"
+              icon="file-excel"
+              size="small"
+              :ghost="true"
+              @click="downloadParams('xml')"
+            >
+            </a-button>
+          </a-tooltip>
+        </div>
         <div class="pre-box">
-          <c-prism-btn
-            :json="previewParams"
-            :xml="originMetaXml"
-            :path="zipPath"
-          ></c-prism-btn>
-          <c-prism :code="previewParams"> </c-prism>
+          <pre
+            style="height:350px;padding-top: 40px;"
+            class="language-json"
+          ><code style="height:350px">{{previewParams}}</code></pre>
         </div>
       </div>
     </div>
@@ -118,13 +156,13 @@
 </template>
 
 <script>
-import { ipcRenderer, fs } from "@/core/electron";
+import { Map, View, TileLayer, WMTSTileGrid, WMTS } from "@/core/ol";
+import { ipcRenderer, fs, clipboard } from "@/core/electron";
+import formater from "@/utils/formater";
 import { mapGetters } from "vuex";
 import * as filter from "@/utils/filter";
 import { initCityList, getXmlByMapServer } from "@/api/commonAPI";
 import { URL } from "url";
-// import cmap from "./components/c-map.jsx";
-
 export default {
   name: "previewMap",
   data() {
@@ -136,8 +174,8 @@ export default {
         url: "http://10.68.8.20/kmap-server/ogc/service/wmts",
         serviceType: "wmts"
       },
-      fileList: [],
       map: {},
+      fileList: [],
       center: [],
       layerSource: [],
       radioStyle: {
@@ -146,6 +184,7 @@ export default {
         lineHeight: "30px"
       },
       isMapParamsShow: false,
+      dictorySelected: "",
       citys: [],
       originMetaXml: "",
       isAdvanced: false,
@@ -157,22 +196,63 @@ export default {
   created() {
     initCityList().then(res => (this.citys = res));
   },
-  mounted() {},
-  components: {
-    // "c-map": cmap,
-    "c-prism": () => import("./components/c-prism/c-prism.jsx"),
-    "c-prism-btn": () => import("./components/c-prism/c-prism-btn.jsx")
+  mounted() {
+    this.initMapObj();
   },
+  components: {},
   computed: {
     ...mapGetters(["zipPath"])
   },
   methods: {
+    //设置全屏地图
+    setMapFullScreen() {
+      this.isMapFullScreen = !this.isMapFullScreen;
+      setTimeout(() => {
+        this.map.updateSize();
+      }, 400);
+    },
+
     //高级模式打开谷歌开发者工具
     openDevtools(checked) {
       if (this.mapParams.url === "0096")
         setTimeout(() => {
           ipcRenderer.send("app-open-devtools", checked);
         }, 200);
+    },
+
+    // 一键复制参数
+    copyParams() {
+      clipboard.writeText(JSON.stringify(this.previewParams));
+      setTimeout(() => {
+        const text = clipboard.readText();
+        if (text !== "" && text !== null) {
+          this.$message.success("已复制到剪贴板");
+        }
+      }, 300);
+    },
+
+    //支持瓦片鉴权验证
+    tileLoader(tile, src) {
+      const headers = this.mapParams?.headers;
+      const client = new XMLHttpRequest();
+
+      client.open("GET", src);
+      client.responseType = "arraybuffer";
+      if (headers !== "") {
+        for (const key in headers) {
+          client.setRequestHeader(key, headers[key]);
+        }
+      }
+
+      client.onload = function() {
+        const arrayBufferView = new Uint8Array(this.response);
+        const blob = new Blob([arrayBufferView], { type: "image/png" });
+        const urlCreator = window.URL || window.webkitURL;
+        const imageUrl = urlCreator.createObjectURL(blob);
+        tile.getImage().src = imageUrl;
+      };
+
+      client.send();
     },
 
     //通过服务器获取xml文件，同时解析元数据信息
@@ -199,12 +279,70 @@ export default {
 
     //通过手动模式直接上传切片元数据
     async getLayerInfoByFile() {
-      this.layerSource = [this.mapParams];
+      this.layerSource[0] = this.mapParams;
+    },
+
+    //保存显示地图的参数文件
+    downloadParams(type) {
+      let content;
+      const dataPx = formater.date(new Date(), "yyyy-MM-dd_hh.mm.ss");
+      if (type === "json") {
+        content = JSON.stringify(this.previewParams);
+      } else if (type === "xml") {
+        content = this.originMetaXml;
+      }
+      const paths = this.zipPath;
+      const fileName = `adapt_${this.previewParams.layer}_${dataPx}.${type}`;
+      const fullPath = `${paths}/${fileName}`;
+      fs.writeFile(fullPath, content, err => {
+        if (err) {
+          console.error(err);
+          this.$message.success(err);
+          return;
+        }
+        //文件写入成功。
+        this.$message.success(`${fileName} 已保存至程序的resources目录`);
+      });
+    },
+
+    //设置需要显示的图层
+    setTargetLayer(id) {
+      this.cleanAllLayer();
+      this.selectedLayerId = id;
+      const [targetLayerSouce] = this.layerSource.filter(
+        source => source?.layer === id
+      );
+
+      const center = filter.isMercatorProjection(targetLayerSouce.projection)
+        ? filter.lonLat2Mercator(this.center)
+        : this.center;
+
+      const viewOption = {
+        center: center,
+        projection: targetLayerSouce.projection,
+        minZoom: 0,
+        maxZoom: 20,
+        zoom: 8
+      };
+      console.log("source", targetLayerSouce);
+      console.log("view", viewOption);
+      const source = this.createWMTS(targetLayerSouce);
+      if (targetLayerSouce.headers !== "") {
+        source.setTileLoadFunction(this.tileLoader);
+      }
+      this.map.addLayer(new TileLayer({ source }));
+      this.highlightParams(targetLayerSouce);
+      this.map.setView(new View(viewOption));
     },
 
     // 显示参数
     highlightParams(params) {
-      this.previewParams = JSON.stringify(params);
+      this.previewParams = params;
+    },
+
+    //切换图层
+    changeLayer(e) {
+      this.setTargetLayer(e.target.value);
     },
 
     // 城市选择
@@ -259,6 +397,31 @@ export default {
       });
     },
 
+    //创建wmts图层，默认设置图层名称为图层id
+    createWMTS(opiton) {
+      const tileGrid = new WMTSTileGrid(opiton?.tileGrid);
+      const base = {
+        url: opiton.url,
+        layer: opiton.layer,
+        projection: opiton.projection,
+        format: opiton.format,
+        style: opiton.style,
+        matrixSet: opiton.matrixSet,
+        crossOrigin: opiton.crossOrigin || "anonymous"
+      };
+      const smOption = Object.assign({}, base, { tileGrid });
+      return new WMTS(smOption);
+    },
+
+    // 初始化地图对象
+    initMapObj() {
+      this.map = new Map();
+    },
+
+    cleanAllLayer() {
+      this.map.getLayers()?.forEach(l => this.map.removeLayer(l));
+    },
+
     // 参数验证
     checkParams() {
       if (!this.mapParams.url) this.$message.error("地图服务地址不能为空", 2);
@@ -272,11 +435,13 @@ export default {
     async preview() {
       if (!this.checkParams()) return;
       try {
+        this.isMapParamsShow = true;
+        this.previewParams = null;
         this.fileList.length === 0
           ? await this.getLayerInfoByServer()
           : await this.getLayerInfoByFile();
-        this.highlightParams(this.layerSource[0]);
-        this.isMapParamsShow = true;
+        this.map.setTarget(this.$refs.mapContainer);
+        this.setTargetLayer(this.layerSource[0]?.layer);
       } catch (error) {
         console.log(error);
         this.$message.error("参数错误,请确认后重试");
