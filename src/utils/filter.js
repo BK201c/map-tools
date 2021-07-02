@@ -5,19 +5,7 @@
 
 import * as turf from "@turf/turf";
 import { WMTSCapabilities } from "@/core/ol";
-
-/**
- * 判断是否是web墨卡托平面坐标
- * @param {*} projection
- * @returns boolen
- */
-const isMercatorProjection = projection => {
-  const degreeIndex = ["EPSG:4326", "EPSG:4490", "wgs84"];
-  const mercatorIndex = ["EPSG:3857", "EPSG:900913"];
-  return (
-    mercatorIndex.includes(projection) && !degreeIndex.includes(projection)
-  );
-};
+import { isMercatorProjection } from "./validation";
 
 /**
  *
@@ -126,4 +114,4 @@ const lonLat2Mercator = point => {
   return turf.getCoord(converted);
 };
 
-export { isMercatorProjection, filterLayerSource, lonLat2Mercator };
+export { filterLayerSource, lonLat2Mercator };

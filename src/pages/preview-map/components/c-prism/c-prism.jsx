@@ -7,8 +7,7 @@ export default {
       default: "json"
     },
     code: {
-      type: String,
-      default: ""
+      default: () => ""
     }
   },
   data() {
@@ -16,13 +15,16 @@ export default {
   },
   watch: {},
   computed: {},
-  created() {
-    console.log(this.$props.code);
-  },
+  created() {},
   methods: {},
   render() {
     const { language, code } = this.$props;
-    const rawHtml = Prism.highlight(code, Prism.languages[language], language);
+    const codeString = code instanceof String ? code : JSON.stringify(code);
+    const rawHtml = Prism.highlight(
+      codeString,
+      Prism.languages[language],
+      language
+    );
     if (rawHtml === "") return <a-empty />;
     return (
       <pre className={`language-${language}`}>

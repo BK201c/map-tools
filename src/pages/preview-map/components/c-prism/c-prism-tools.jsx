@@ -4,12 +4,10 @@ export default {
   name: "c-prism-btn",
   props: {
     xml: {
-      type: String,
-      default: ""
+      default: () => ""
     },
     json: {
-      type: String,
-      default: ""
+      default: () => ""
     },
     path: {
       type: String,

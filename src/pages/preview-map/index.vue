@@ -10,8 +10,14 @@
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
       >
-        <a-form-model-item label="URL" :wrapperCol="{ span: 16, offset: 0 }">
-          <a-input v-model="mapParams.url" placeholder="栅格服务地址">
+        <a-form-model-item
+          label="服务地址"
+          :wrapperCol="{ span: 16, offset: 0 }"
+        >
+          <a-input
+            v-model="mapParams.url"
+            placeholder="http://xxx.xxxxx.com/vec_c/wmts"
+          >
           </a-input>
         </a-form-model-item>
         <a-form-model-item label="切片方式">
@@ -72,47 +78,18 @@
     </div>
     <div class="preview-box" v-if="isMapParamsShow">
       <div class="preview-map animate__animated animate__fadeInTopRight">
-        <!-- <div
-          id="mapContainer"
-          class="map-container"
-          :class="{ 'map-full': isMapFullScreen }"
-          ref="mapContainer"
-        ></div> -->
-        <!-- <c-map :layerSouces="layerSouces" width="300px" height="300px"></c-map> -->
-        <!-- <div class="btn-group">
-          <a-icon
-            class="map-btn"
-            :type="isMapFullScreen ? 'fullscreen-exit' : 'fullscreen'"
-            @click="setMapFullScreen"
-          />
-        </div> -->
-        <!-- <div class="map-tools">
-          <h2>图层</h2>
-          <a-radio-group @change="changeLayer" v-model="selectedLayerId">
-            <a-radio
-              v-for="layer in layerSource"
-              :key="layer.layer"
-              :style="radioStyle"
-              :value="layer.layer"
-            >
-              {{ layer.layer }}
-            </a-radio>
-          </a-radio-group>
-        </div> -->
+        <c-map
+          :layerSource="layerSource"
+          :center="center"
+          @change="source => (this.previewParams = source)"
+          width="200px"
+          height="300px"
+        ></c-map>
       </div>
-      <div
+      <c-prism
         class="preview-params animate__animated animate__fadeInBottomRight"
-        v-if="!isMapFullScreen"
-      >
-        <div class="pre-box">
-          <c-prism-btn
-            :json="previewParams"
-            :xml="originMetaXml"
-            :path="zipPath"
-          ></c-prism-btn>
-          <c-prism :code="previewParams"> </c-prism>
-        </div>
-      </div>
+        :code="previewParams"
+      ></c-prism>
     </div>
   </div>
 </template>
@@ -120,11 +97,10 @@
 <script>
 import { ipcRenderer, fs } from "@/core/electron";
 import { mapGetters } from "vuex";
-import * as filter from "@/utils/filter";
+import { filterLayerSource } from "@/utils/filter";
 import { initCityList, getXmlByMapServer } from "@/api/commonAPI";
 import { URL } from "url";
-// import cmap from "./components/c-map.jsx";
-
+import upload from "@/mixins/upload.js";
 export default {
   name: "previewMap",
   data() {
@@ -133,25 +109,19 @@ export default {
       wrapperCol: { span: 12 },
       formLayout: "horizontal",
       mapParams: {
-        url: "http://10.68.8.20/kmap-server/ogc/service/wmts",
+        url:
+          "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
+        // "http://10.67.14.50:8080/PGIS%20copy.xml",
         serviceType: "wmts"
       },
-      fileList: [],
-      map: {},
       center: [],
       layerSource: [],
-      radioStyle: {
-        display: "block",
-        height: "30px",
-        lineHeight: "30px"
-      },
       isMapParamsShow: false,
       citys: [],
       originMetaXml: "",
       isAdvanced: false,
       isMapFullScreen: false,
-      previewParams: null,
-      selectedLayerId: ""
+      previewParams: null
     };
   },
   created() {
@@ -159,10 +129,10 @@ export default {
   },
   mounted() {},
   components: {
-    // "c-map": cmap,
-    "c-prism": () => import("./components/c-prism/c-prism.jsx"),
-    "c-prism-btn": () => import("./components/c-prism/c-prism-btn.jsx")
+    "c-map": () => import("./components/c-map/c-map"),
+    "c-prism": () => import("./components/c-prism/c-prism")
   },
+  mixins: [upload],
   computed: {
     ...mapGetters(["zipPath"])
   },
@@ -187,10 +157,9 @@ export default {
       return getXmlByMapServer(url, query)
         .then(async xml => {
           this.originMetaXml = xml;
-          this.layerSource = filter.filterLayerSource(xml);
+          this.layerSource = filterLayerSource(xml);
           if (myURL.search !== "")
             this.layerSource.forEach(source => (source.url = url));
-          console.log(this.layerSource);
         })
         .catch(function(error) {
           console.log(error);
@@ -199,12 +168,8 @@ export default {
 
     //通过手动模式直接上传切片元数据
     async getLayerInfoByFile() {
+      this.readLocalJson(this.fileList[0]?.path);
       this.layerSource = [this.mapParams];
-    },
-
-    // 显示参数
-    highlightParams(params) {
-      this.previewParams = JSON.stringify(params);
     },
 
     // 城市选择
@@ -218,32 +183,6 @@ export default {
         option =>
           option.name.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
       );
-    },
-
-    // 移除上传文件
-    handleRemove(file) {
-      const index = this.fileList.indexOf(file);
-      const newFileList = this.fileList.slice();
-      newFileList.splice(index, 1);
-      this.fileList = newFileList;
-      this.mapParams = {
-        serviceType: "WMTS"
-      };
-    },
-
-    //限制上传数量
-    handleChange(info) {
-      let fileList = [...info.fileList];
-      fileList = fileList.slice(-2);
-      this.fileList = fileList;
-    },
-
-    // 获取上传文件路径
-    beforeUpload(file) {
-      this.fileList = [file];
-      console.log(this.fileList, file);
-      this.readLocalJson(file?.path);
-      return false;
     },
 
     // 读取本地json文件
@@ -263,20 +202,20 @@ export default {
     checkParams() {
       if (!this.mapParams.url) this.$message.error("地图服务地址不能为空", 2);
 
-      if (!this.center.length) this.$message.error("中心点必选", 2);
+      if (!this.center.length) this.$message.error("初始位置必选", 2);
 
       return !!this.mapParams.url && !!this.center.length;
     },
 
     // 预览地图
     async preview() {
-      if (!this.checkParams()) return;
+      // if (!this.checkParams()) return;
       try {
+        this.isMapParamsShow = true;
         this.fileList.length === 0
           ? await this.getLayerInfoByServer()
           : await this.getLayerInfoByFile();
-        this.highlightParams(this.layerSource[0]);
-        this.isMapParamsShow = true;
+        this.previewParams = this.layerSource[0];
       } catch (error) {
         console.log(error);
         this.$message.error("参数错误,请确认后重试");

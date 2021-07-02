@@ -13,8 +13,7 @@ module.exports = {
           "bash",
           "nginx",
           "sql",
-          "json",
-          "jsx"
+          "json"
         ],
         theme: "okaidia"
       }

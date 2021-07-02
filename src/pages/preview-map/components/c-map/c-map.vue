@@ -1,5 +1,23 @@
+<template>
+  <div class="map-container" :width="width" :height="height" ref="map">
+    <div className="map-tools">
+      <h2>图层</h2>
+      <a-radio-group :value="selectedLayerId" @change="changeLayer">
+        <a-radio
+          :value="source.layer"
+          v-for="source of layerSource"
+          :key="source.layer"
+        >
+          {{ source.layer }}
+        </a-radio>
+      </a-radio-group>
+    </div>
+  </div>
+</template>
+<script>
 import { Map, View, TileLayer, WMTSTileGrid, WMTS } from "@/core/ol";
-import * as filter from "@/utils/filter";
+import { isMercatorProjection } from "@/utils/validation";
+import { lonLat2Mercator } from "@/utils/filter";
 export default {
   name: "c-map",
   props: {
@@ -22,36 +40,48 @@ export default {
   },
   data() {
     return {
+      map: {},
       selectedLayerId: "",
       radioStyle: {
         display: "block",
         height: "30px",
         lineHeight: "30px"
-      },
-      map: null
+      }
     };
   },
   watch: {},
   computed: {},
+  components: {},
   created() {},
   mounted() {
     this.initMapObj();
   },
   methods: {
+    // 切换图层
+    changeLayer(e) {
+      this.cleanAllLayer();
+      this.selectedLayerId = e.target.value;
+      const [source] = this.$props.layerSource.filter(
+        source => source.layer === this.selectedLayerId
+      );
+      this.setTargetLayer(source);
+      this.$emit("change", source);
+    },
+
     //支持瓦片鉴权验证
     tileLoader(tile, src) {
-      const headers = this.$props.layerSource[0]?.headers;
       const client = new XMLHttpRequest();
 
       client.open("GET", src);
       client.responseType = "arraybuffer";
-      if (headers !== "") {
-        for (const key in headers) {
-          client.setRequestHeader(key, headers[key]);
-        }
-      }
+      // const headers = this.source[0]?.headers;
+      // if (headers !== "") {
+      //   for (const key in headers) {
+      //     client.setRequestHeader(key, headers[key]);
+      //   }
+      // }
 
-      client.onload = function() {
+      client.onload = () => {
         const arrayBufferView = new Uint8Array(this.response);
         const blob = new Blob([arrayBufferView], { type: "image/png" });
         const urlCreator = window.URL || window.webkitURL;
@@ -61,9 +91,10 @@ export default {
 
       client.send();
     },
+
     //清空全部地图
     cleanAllLayer() {
-      this.map.getLayers()?.forEach(l => this.map.removeLayer(l));
+      this.map?.getLayers()?.forEach(l => this.map.removeLayer(l));
     },
 
     //设置全屏地图
@@ -75,42 +106,32 @@ export default {
     },
 
     //设置需要显示的图层
-    setTargetLayer(id) {
-      this.cleanAllLayer();
-      this.selectedLayerId = id;
-      const [targetLayerSouce] = this.$props.layerSource.filter(
-        source => source?.layer === id
-      );
+    setTargetLayer(source) {
+      const layer = new TileLayer({ source: this.createWmts(source) });
+      const view = this.createView(source.projection);
+      console.log("settedSource", source, view);
+      this.map.addLayer(layer);
+      this.map.setView(view);
+    },
 
-      const center = filter.isMercatorProjection(targetLayerSouce.projection)
-        ? filter.lonLat2Mercator(this.center)
+    //创建视图
+    createView(projection) {
+      const center = isMercatorProjection(projection)
+        ? lonLat2Mercator(this.center)
         : this.center;
 
       const viewOption = {
         center: center,
-        projection: targetLayerSouce.projection,
+        projection: projection,
         minZoom: 0,
         maxZoom: 20,
         zoom: 8
       };
-      console.log("source", targetLayerSouce);
-      console.log("view", viewOption);
-      const source = this.createWMTS(targetLayerSouce);
-      if (targetLayerSouce.headers !== "") {
-        source.setTileLoadFunction(this.tileLoader);
-      }
-      this.map.addLayer(new TileLayer({ source }));
-      this.highlightParams(targetLayerSouce);
-      this.map.setView(new View(viewOption));
-    },
-
-    //切换图层
-    changeLayer(e) {
-      this.setTargetLayer(e.target.value);
+      return new View(viewOption);
     },
 
     //创建wmts图层，默认设置图层名称为图层id
-    createWMTS(opiton) {
+    createWmts(opiton) {
       const tileGrid = new WMTSTileGrid(opiton?.tileGrid);
       const base = {
         url: opiton.url,
@@ -121,6 +142,10 @@ export default {
         matrixSet: opiton.matrixSet,
         crossOrigin: opiton.crossOrigin || "anonymous"
       };
+      // const base = { ...opiton };
+      if (opiton.headers !== "") {
+        base.tileLoadFunction = this.tileLoader;
+      }
       const smOption = Object.assign({}, base, { tileGrid });
       return new WMTS(smOption);
     },
@@ -130,10 +155,9 @@ export default {
       this.map = new Map({
         target: this.$el
       });
+      // this.selectedLayerId = this.layerSource[0].layer;
+      // this.setTargetLayer(this.layerSource[0]);
     }
-  },
-  render() {
-    const { width, height } = this.$props;
-    return <div style={(width, height)}></div>;
   }
 };
+</script>
