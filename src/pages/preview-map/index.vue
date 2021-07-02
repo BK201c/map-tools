@@ -86,10 +86,9 @@
           height="300px"
         ></c-map>
       </div>
-      <c-prism
-        class="preview-params animate__animated animate__fadeInBottomRight"
-        :code="previewParams"
-      ></c-prism>
+      <div class="preview-params animate__animated animate__fadeInBottomRight">
+        <c-prism :code="previewParams"></c-prism>
+      </div>
     </div>
   </div>
 </template>
@@ -138,10 +137,9 @@ export default {
   methods: {
     //高级模式打开谷歌开发者工具
     openDevtools(checked) {
-      if (this.mapParams.url === "0096")
-        setTimeout(() => {
-          ipcRenderer.send("app-open-devtools", checked);
-        }, 200);
+      setTimeout(() => {
+        ipcRenderer.send("app-open-devtools", checked);
+      }, 200);
     },
 
     //通过服务器获取xml文件，同时解析元数据信息
@@ -210,14 +208,14 @@ export default {
     async preview() {
       // if (!this.checkParams()) return;
       try {
-        this.isMapParamsShow = true;
         this.fileList.length === 0
           ? await this.getLayerInfoByServer()
           : await this.getLayerInfoByFile();
+        this.isMapParamsShow = true;
         this.previewParams = this.layerSource[0];
       } catch (error) {
         console.log(error);
-        this.$message.error("参数错误,请确认后重试");
+        this.$message.error("参数错误,启用调试模式");
       }
     }
   }

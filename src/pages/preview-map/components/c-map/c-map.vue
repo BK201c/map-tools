@@ -58,7 +58,6 @@ export default {
   methods: {
     // 切换图层
     changeLayer(e) {
-      this.cleanAllLayer();
       const layerId = e.target.value;
       const [source] = this.$props.layerSource.filter(
         source => source.layer === layerId
@@ -70,7 +69,6 @@ export default {
     //支持瓦片鉴权验证
     tileLoader(tile, src) {
       const client = new XMLHttpRequest();
-
       client.open("GET", src);
       client.responseType = "arraybuffer";
       // const headers = this.source[0]?.headers;
@@ -106,6 +104,7 @@ export default {
 
     //设置需要显示的图层
     setTargetLayer(source) {
+      this.cleanAllLayer();
       const layer = new TileLayer({ source: this.createWmts(source) });
       const view = this.createView(source.projection);
       this.selectedLayerId = source.layer;
