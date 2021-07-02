@@ -111,7 +111,6 @@ export default {
       mapParams: {
         url:
           "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
-        // "http://10.67.14.50:8080/PGIS%20copy.xml",
         serviceType: "wmts"
       },
       center: [],

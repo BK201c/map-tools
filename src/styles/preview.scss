@@ -12,26 +12,6 @@
   width: $preWidth;
   height: 300px;
   transition: all 0.3s ease-in-out;
-}
-.preview-map {
-  position: relative;
-  .btn-group {
-    position: fixed;
-    left: 0.5em;
-    bottom: 0.5em;
-    z-index: 999;
-  }
-  .map-btn {
-    font-size: 26px;
-    color: #1890ff;
-    background-color: #d9d9d9b8;
-    border-radius: 3px;
-    padding: 3px;
-    transition: all 0.2s ease-in-out;
-    &:hover {
-      transform: scale(1.2);
-    }
-  }
   .map-tools {
     position: fixed;
     right: 0.5em;
@@ -49,6 +29,26 @@
       padding-left: 5px;
     }
   }
+  .btn-group {
+    position: fixed;
+    left: 0.5em;
+    bottom: 0.5em;
+    z-index: 999;
+  }
+  .map-btn {
+    font-size: 26px;
+    color: #1890ff;
+    background-color: #d9d9d9b8;
+    border-radius: 3px;
+    padding: 3px;
+    transition: all 0.2s ease-in-out;
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+}
+.preview-map {
+  position: relative;
 }
 .preview-box {
   flex-grow: 1;

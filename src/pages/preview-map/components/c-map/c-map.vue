@@ -1,6 +1,6 @@
 <template>
-  <div class="map-container" :width="width" :height="height" ref="map">
-    <div className="map-tools">
+  <div class="map-container" id="mapContainer" ref="mapDom">
+    <div class="map-tools">
       <h2>图层</h2>
       <a-radio-group :value="selectedLayerId" @change="changeLayer">
         <a-radio
@@ -25,14 +25,6 @@ export default {
       type: Array,
       default: () => [120, 31]
     },
-    width: {
-      type: String,
-      default: "100%"
-    },
-    height: {
-      type: String,
-      default: "100%"
-    },
     layerSource: {
       type: Array,
       default: () => []
@@ -49,7 +41,14 @@ export default {
       }
     };
   },
-  watch: {},
+  watch: {
+    layerSource: {
+      handler: function(newValue) {
+        this.setTargetLayer(newValue[0]);
+      },
+      immediate: false
+    }
+  },
   computed: {},
   components: {},
   created() {},
@@ -60,9 +59,9 @@ export default {
     // 切换图层
     changeLayer(e) {
       this.cleanAllLayer();
-      this.selectedLayerId = e.target.value;
+      const layerId = e.target.value;
       const [source] = this.$props.layerSource.filter(
-        source => source.layer === this.selectedLayerId
+        source => source.layer === layerId
       );
       this.setTargetLayer(source);
       this.$emit("change", source);
@@ -109,6 +108,7 @@ export default {
     setTargetLayer(source) {
       const layer = new TileLayer({ source: this.createWmts(source) });
       const view = this.createView(source.projection);
+      this.selectedLayerId = source.layer;
       console.log("settedSource", source, view);
       this.map.addLayer(layer);
       this.map.setView(view);
@@ -143,9 +143,9 @@ export default {
         crossOrigin: opiton.crossOrigin || "anonymous"
       };
       // const base = { ...opiton };
-      if (opiton.headers !== "") {
-        base.tileLoadFunction = this.tileLoader;
-      }
+      // if (opiton.headers !== "") {
+      //   base.tileLoadFunction = this.tileLoader;
+      // }
       const smOption = Object.assign({}, base, { tileGrid });
       return new WMTS(smOption);
     },
@@ -153,11 +153,13 @@ export default {
     // 初始化地图对象
     initMapObj() {
       this.map = new Map({
-        target: this.$el
+        target: this.$refs.mapDom
       });
-      // this.selectedLayerId = this.layerSource[0].layer;
-      // this.setTargetLayer(this.layerSource[0]);
+      this.setTargetLayer(this.layerSource[0]);
     }
   }
 };
 </script>
+<style lang="scss" scoped>
+@import "~@/styles/preview.scss";
+</style>
