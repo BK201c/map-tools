@@ -6,6 +6,7 @@
         <a-radio
           :value="source.layer"
           v-for="source of layerSource"
+          :style="radioStyle"
           :key="source.layer"
         >
           {{ source.layer }}

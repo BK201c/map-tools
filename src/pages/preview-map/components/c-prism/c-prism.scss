@@ -1,0 +1,14 @@
+@import "~@/styles/_var.scss";
+.preview-container {
+  width: $preWidth;
+  padding-top: 45px;
+  overflow-y: scroll;
+  position: relative;
+  height: 100%;
+  .btn-group {
+    position: fixed;
+    top: 10px;
+    right: 25px;
+    z-index: 10;
+  }
+}

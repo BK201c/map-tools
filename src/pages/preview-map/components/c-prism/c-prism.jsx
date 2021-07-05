@@ -1,4 +1,5 @@
 import Prism from "prismjs";
+import tools from "./c-prism-tools";
 export default {
   name: "c-prism",
   props: {
@@ -8,26 +9,54 @@ export default {
     },
     code: {
       default: () => ""
+    },
+    xml: {
+      default: () => ""
+    },
+    hasTools: {
+      type: Boolean,
+      default: true
+    },
+    path: {
+      type: String,
+      default: "C:/"
     }
   },
   data() {
     return {};
   },
   watch: {},
-  computed: {},
+  component: {
+    tools
+  },
+  computed: {
+    codeString: function() {
+      return this.code instanceof String
+        ? this.code
+        : JSON.stringify(this.code);
+    },
+    xmlString: function() {
+      return this.xml instanceof String ? this.xml : JSON.stringify(this.xml);
+    }
+  },
   created() {},
   methods: {},
   render() {
-    const { language, code } = this.$props;
-    const codeString = code instanceof String ? code : JSON.stringify(code);
+    const { language, path, code } = this.$props;
     const rawHtml = Prism.highlight(
-      codeString,
+      this.codeString,
       Prism.languages[language],
       language
     );
-    if (rawHtml === "") return <a-empty />;
+    if (!this.codeString) return <a-empty />;
     return (
-      <pre className={`language-${language}`}>
+      <pre class={`language-${language} preview-container`}>
+        <tools
+          path={path}
+          json={this.codeString}
+          xml={this.xmlString}
+          fileName={code.layer}
+        ></tools>
         <code domPropsInnerHTML={rawHtml}></code>
       </pre>
     );

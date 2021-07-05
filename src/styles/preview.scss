@@ -62,19 +62,7 @@
     width: calc(100vw - 185px);
   }
   .preview-params {
-    position: relative;
     width: $preWidth;
     height: 350px;
-    pre-box {
-      width: $preWidth;
-      padding-top: 45px;
-      overflow-y: scroll;
-    }
-    .btn-group {
-      position: absolute;
-      top: 10px;
-      right: 25px;
-      z-index: 10;
-    }
   }
 }

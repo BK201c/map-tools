@@ -1,17 +1,24 @@
 import formater from "@/utils/formater";
 import { fs, clipboard } from "@/core/electron";
+import "./c-prism.scss";
 export default {
-  name: "c-prism-btn",
+  name: "c-prism-tools",
   props: {
     xml: {
-      default: () => ""
+      type: String,
+      default: ""
     },
     json: {
-      default: () => ""
+      type: String,
+      default: ""
     },
     path: {
       type: String,
       default: "C:/"
+    },
+    fileName: {
+      type: String,
+      default: ""
     }
   },
   data() {
@@ -70,7 +77,7 @@ export default {
       } else if (type === "xml") {
         content = this.xml;
       }
-      const fileName = `adapt_${this.json.layer}_${dataPx}.${type}`;
+      const fileName = `adapt_${this.fileName}_${dataPx}.${type}`;
       const fullPath = `${this.path}/${fileName}`;
       fs.writeFile(fullPath, content, err => {
         if (err) {

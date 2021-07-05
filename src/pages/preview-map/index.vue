@@ -21,11 +21,11 @@
           </a-input>
         </a-form-model-item>
         <a-form-model-item label="切片方式">
-          <a-radio-group v-model="mapParams.serviceType" default-value="wmts">
-            <a-radio value="wmts" name="serviceType">
+          <a-radio-group v-model="mapParams.serviceType" default-value="WMTS">
+            <a-radio value="WMTS" name="serviceType">
               WMTS
             </a-radio>
-            <a-radio value="wms" name="serviceType" :disabled="true">
+            <a-radio value="WMS" name="serviceType" :disabled="true">
               WMS
             </a-radio>
           </a-radio-group>
@@ -87,7 +87,11 @@
         ></c-map>
       </div>
       <div class="preview-params animate__animated animate__fadeInBottomRight">
-        <c-prism :code="previewParams"></c-prism>
+        <c-prism
+          :code="previewParams"
+          :xml="originMetaXml"
+          :path="zipPath"
+        ></c-prism>
       </div>
     </div>
   </div>
@@ -110,7 +114,7 @@ export default {
       mapParams: {
         url:
           "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
-        serviceType: "wmts"
+        serviceType: "WMTS"
       },
       center: [],
       layerSource: [],
