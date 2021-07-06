@@ -184,7 +184,8 @@ export default {
 
         const result = {
           layerSource: this.layerSource,
-          originMetaXml: this.originMetaXml
+          originMetaXml: this.originMetaXml,
+          center: this.center
         };
 
         this.$emit("submmit", result);

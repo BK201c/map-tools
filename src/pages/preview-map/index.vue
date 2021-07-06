@@ -32,6 +32,7 @@ export default {
   data() {
     return {
       layerSource: [],
+      center: [],
       isMapParamsShow: false,
       originMetaXml: "",
       previewParams: null
@@ -54,6 +55,7 @@ export default {
       this.layerSource = data.layerSource;
       this.originMetaXml = data.originMetaXml;
       this.previewParams = data.layerSource[0];
+      this.center = data.center;
       this.isMapParamsShow = true;
     },
 
