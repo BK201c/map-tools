@@ -1,5 +1,5 @@
 export default {
-  name: "",
+  name: "c-map-switch",
   props: {
     layerSource: {
       type: Array,

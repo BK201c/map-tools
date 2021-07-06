@@ -1,6 +1,6 @@
 <template>
   <div class="map-container" id="mapContainer" ref="mapDom">
-    <div class="map-tools">
+    <div class="map-switch">
       <h2>图层</h2>
       <a-radio-group :value="selectedLayerId" @change="changeLayer">
         <a-radio
@@ -13,6 +13,7 @@
         </a-radio>
       </a-radio-group>
     </div>
+    <!-- <div class="btn-full-map"></div> -->
   </div>
 </template>
 <script>
