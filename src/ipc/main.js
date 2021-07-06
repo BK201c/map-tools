@@ -9,7 +9,7 @@ ipcMain.handle("app-update-zipPath", async () => {
 });
 
 ipcMain.on("app-open-devtools", (event, args) => {
-  mainWindow.webContents.isDevToolsOpened() && !args
-    ? mainWindow.webContents.closeDevTools()
-    : mainWindow.webContents.openDevTools();
+  !mainWindow.webContents.isDevToolsOpened() && args
+    ? mainWindow.webContents.openDevTools()
+    : mainWindow.webContents.closeDevTools();
 });

@@ -4,5 +4,6 @@ import TileLayer from "ol/layer/Tile";
 import WMTSTileGrid from "ol/tilegrid/WMTS";
 import WMTS from "ol/source/WMTS";
 import WMTSCapabilities from "ol/format/WMTSCapabilities";
+import XYZ from "ol/source/XYZ";
 
-export { Map, View, TileLayer, WMTSTileGrid, WMTS, WMTSCapabilities };
+export { Map, View, TileLayer, WMTSTileGrid, WMTS, WMTSCapabilities, XYZ };

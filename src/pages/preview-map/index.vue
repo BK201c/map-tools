@@ -56,7 +56,9 @@ export default {
       this.originMetaXml = data.originMetaXml;
       this.previewParams = data.layerSource[0];
       this.center = data.center;
-      this.isMapParamsShow = true;
+      if (this.layerSource.length > 0) {
+        this.isMapParamsShow = true;
+      }
     },
 
     // 图层切换事件

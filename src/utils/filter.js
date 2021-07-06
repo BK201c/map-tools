@@ -76,6 +76,7 @@ const filterLayerSource = xml => {
         {
           layer: layer.Identifier,
           url: OperationsMetadata.GetTile.DCP.HTTP.Get[0].href,
+          serviceType: "WMTS",
           style: layer.Style[0]?.Identifier,
           format: layer.Format[0],
           matrixSet: layer.TileMatrixSetLink[0]?.TileMatrixSet

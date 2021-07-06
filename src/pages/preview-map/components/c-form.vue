@@ -10,16 +10,42 @@
         <a-input
           v-model="queryParams.url"
           placeholder="http://xxx.xxxxx.com/vec_c/wmts"
+          :allowClear="true"
+          :disabled="isAdvanced"
         >
         </a-input>
       </a-form-model-item>
-      <a-form-model-item label="切片方式">
-        <a-radio-group v-model="queryParams.serviceType" default-value="WMTS">
+      <a-form-model-item label="接入方式">
+        <a-radio-group
+          v-model="queryParams.serviceType"
+          default-value="WMTS"
+          :disabled="isAdvanced"
+          @change="serviceTypeChange"
+        >
           <a-radio value="WMTS" name="serviceType">
             WMTS
           </a-radio>
+          <a-radio value="XYZ" name="serviceType">
+            XYZ
+          </a-radio>
           <a-radio value="WMS" name="serviceType" :disabled="true">
             WMS
+          </a-radio>
+        </a-radio-group>
+      </a-form-model-item>
+      <a-form-model-item
+        label="投影坐标系"
+        v-if="queryParams.serviceType === 'XYZ'"
+      >
+        <a-radio-group
+          v-model="queryParams.projection"
+          default-value="EPSG:3857"
+        >
+          <a-radio value="EPSG:3857" name="projection">
+            EPSG:3857
+          </a-radio>
+          <a-radio value="EPSG:4326" name="projection">
+            EPSG:4326
           </a-radio>
         </a-radio-group>
       </a-form-model-item>
@@ -42,7 +68,7 @@
           v-model="isAdvanced"
           checked-children="开"
           un-checked-children="关"
-          @change="openDevtools"
+          @click="openDevtools"
         />
       </a-form-model-item>
       <div class="advanced-items" v-if="isAdvanced">
@@ -57,22 +83,22 @@
           </a-upload>
         </a-form-model-item>
       </div>
-      <a-form-model-item :wrapper-col="{ span: 12, offset: 5 }">
+      <div class="submmit-button">
         <a-button
           type="primary"
           size="large"
           @click="preview"
-          width="120px"
           shape="round"
+          block
           >预览<a-icon type="arrow-right"
         /></a-button>
-      </a-form-model-item>
+      </div>
     </a-form-model>
   </section>
 </template>
 
 <script>
-import { ipcRenderer, fs } from "@/core/electron";
+import { fs, ipcRenderer } from "@/core/electron";
 import { filterLayerSource } from "@/utils/filter";
 import { initCityList, getXmlByMapServer } from "@/api/commonAPI";
 import { URL } from "url";
@@ -86,7 +112,8 @@ export default {
       queryParams: {
         url:
           "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
-        serviceType: "WMTS"
+        serviceType: "WMTS",
+        projection: "EPSG:3857"
       },
       center: [],
       layerSource: [],
@@ -107,13 +134,14 @@ export default {
   methods: {
     //高级模式打开谷歌开发者工具
     openDevtools(checked) {
+      checked ? (this.queryParams = {}) : (this.fileList = []);
       setTimeout(() => {
         ipcRenderer.send("app-open-devtools", checked);
-      }, 200);
+      }, 100);
     },
 
-    //通过服务器获取xml文件，同时解析元数据信息
-    async getLayerInfoByServer() {
+    //通过WMTS服务类元信息
+    async getWMTSInfo() {
       const url = this.queryParams.url.trim();
       const myURL = new URL(url);
       const query = {
@@ -128,20 +156,29 @@ export default {
           if (myURL.search !== "")
             this.layerSource.forEach(source => (source.url = url));
         })
-        .catch(function(error) {
-          console.log(error);
+        .catch(e => {
+          console.log(e);
+          this.$message.error(e.message);
         });
+    },
+
+    //通过XYZ构建图层
+    getXYZInfo() {
+      return new Promise(reslove => {
+        this.layerSource = [{ ...this.queryParams }];
+        reslove(true);
+      });
     },
 
     //通过手动模式直接上传切片元数据
     async getLayerInfoByFile() {
-      this.readLocalJson(this.fileList[0]?.path);
-      this.layerSource = [this.queryParams];
+      this.originMetaXml = "";
+      return this.readLocalJson(this.fileList[0]?.path);
     },
 
     // 城市选择
     changeCity(value, selectedOptions) {
-      this.center = selectedOptions[1]?.center;
+      if (selectedOptions?.length > 0) this.center = selectedOptions[1]?.center;
     },
 
     // 中心点搜索
@@ -152,6 +189,11 @@ export default {
       );
     },
 
+    //切片方式切换
+    serviceTypeChange() {
+      this.originMetaXml = "";
+    },
+
     // 读取本地json文件
     readLocalJson(path) {
       fs.readFile(path, "utf8", (err, data) => {
@@ -159,28 +201,40 @@ export default {
           console.error(err);
           return;
         }
-        const params = Object.assign({}, this.queryParams, JSON.parse(data));
-        this.queryParams = params;
+        const { source } = JSON.parse(data);
+        this.layerSource = source;
         this.$message.success("参数已读取");
       });
     },
 
     // 参数验证
-    checkParams() {
-      if (!this.queryParams.url) this.$message.error("地图服务地址不能为空", 2);
+    nullcheck() {
+      if (!this.queryParams.url && !this.fileList.length) {
+        this.$message.error("地图服务地址不能为空", 2);
+        return;
+      }
 
-      if (!this.center.length) this.$message.error("初始位置必选", 2);
+      if (!this.center.length) {
+        this.$message.error("初始位置必选", 2);
+        return;
+      }
+    },
 
-      return !!this.queryParams.url && !!this.center.length;
+    // 是否为手动预览模式
+    isManualMode() {
+      return this.fileList.length !== 0 && this.isAdvanced;
     },
 
     // 预览地图
     async preview() {
-      // if (!this.checkParams()) return;
+      this.nullcheck();
       try {
-        this.fileList.length === 0
-          ? await this.getLayerInfoByServer()
-          : await this.getLayerInfoByFile();
+        if (this.isManualMode()) {
+          await this.getLayerInfoByFile();
+        } else {
+          if (this.queryParams.serviceType === "WMTS") await this.getWMTSInfo();
+          if (this.queryParams.serviceType === "XYZ") await this.getXYZInfo();
+        }
 
         const result = {
           layerSource: this.layerSource,
@@ -189,13 +243,20 @@ export default {
         };
 
         this.$emit("submmit", result);
-      } catch (error) {
-        console.log(error);
-        this.$message.error("参数错误,启用调试模式");
+      } catch (e) {
+        console.log(e, e.message);
+        this.$message.error(e.message);
       }
     }
   }
 };
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.submmit-button {
+  width: 320px;
+  position: fixed;
+  left: 100px;
+  top: 400px;
+}
+</style>

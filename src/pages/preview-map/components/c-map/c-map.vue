@@ -17,7 +17,7 @@
   </div>
 </template>
 <script>
-import { Map, View, TileLayer, WMTSTileGrid, WMTS } from "@/core/ol";
+import { Map, View, TileLayer, WMTSTileGrid, WMTS, XYZ } from "@/core/ol";
 import { isMercatorProjection } from "@/utils/validation";
 import { lonLat2Mercator } from "@/utils/filter";
 export default {
@@ -107,12 +107,21 @@ export default {
     //设置需要显示的图层
     setTargetLayer(source) {
       this.cleanAllLayer();
-      const layer = new TileLayer({ source: this.createWmts(source) });
+      const layer = this.createLayer(source);
       const view = this.createView(source.projection);
       this.selectedLayerId = source.layer;
       console.log("settedSource", source, view);
-      this.map.addLayer(layer);
       this.map.setView(view);
+      this.map.addLayer(layer);
+    },
+
+    // 创建图层
+    createLayer(originSource) {
+      let source;
+      const type = originSource.serviceType.toUpperCase();
+      if (type === "WMTS") source = this.createWMTS(originSource);
+      if (type === "XYZ") source = this.createXYZ(originSource);
+      return new TileLayer({ source });
     },
 
     //创建视图
@@ -132,23 +141,16 @@ export default {
     },
 
     //创建wmts图层，默认设置图层名称为图层id
-    createWmts(opiton) {
+    createWMTS(opiton) {
+      const base = { ...opiton };
       const tileGrid = new WMTSTileGrid(opiton?.tileGrid);
-      const base = {
-        url: opiton.url,
-        layer: opiton.layer,
-        projection: opiton.projection,
-        format: opiton.format,
-        style: opiton.style,
-        matrixSet: opiton.matrixSet,
-        crossOrigin: opiton.crossOrigin || "anonymous"
-      };
-      // const base = { ...opiton };
-      // if (opiton.headers !== "") {
-      //   base.tileLoadFunction = this.tileLoader;
-      // }
       const smOption = Object.assign({}, base, { tileGrid });
       return new WMTS(smOption);
+    },
+
+    // 创建XYZ图层
+    createXYZ(option) {
+      return new XYZ(option);
     },
 
     // 初始化地图对象
