@@ -58,7 +58,7 @@
           }"
           :options="citys"
           :show-search="{ filter }"
-          :default-value="[320000, 320500]"
+          v-model="position"
           placeholder="搜索或选择中心点"
           @change="changeCity"
         />
@@ -115,7 +115,8 @@ export default {
         serviceType: "WMTS",
         projection: "EPSG:3857"
       },
-      center: [],
+      position: [320000, 320500],
+      center: [120.619585, 31.299379],
       citys: [],
       isAdvanced: false
     };
