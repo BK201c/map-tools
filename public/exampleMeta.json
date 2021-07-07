@@ -1,5 +1,5 @@
 {
-  "source": [
+  "layerSource": [
     {
       "url": "http://120.52.31.39/cloudapi/service/api/egis/base/v1/wmts",
       "serviceType": "wmts",

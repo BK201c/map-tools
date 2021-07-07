@@ -116,9 +116,7 @@ export default {
         projection: "EPSG:3857"
       },
       center: [],
-      layerSource: [],
       citys: [],
-      originMetaXml: "",
       isAdvanced: false
     };
   },
@@ -143,7 +141,6 @@ export default {
     //通过WMTS服务类元信息
     async getWMTSInfo() {
       const url = this.queryParams.url.trim();
-      const myURL = new URL(url);
       const query = {
         SERVICE: "WMTS",
         REQUEST: "GetCapabilities",
@@ -151,10 +148,11 @@ export default {
       };
       return getXmlByMapServer(url, query)
         .then(async xml => {
-          this.originMetaXml = xml;
-          this.layerSource = filterLayerSource(xml);
+          let layerSource = filterLayerSource(xml);
+          const myURL = new URL(url);
           if (myURL.search !== "")
-            this.layerSource.forEach(source => (source.url = url));
+            layerSource.forEach(source => (source.url = url));
+          return { layerSource, xml };
         })
         .catch(e => {
           console.log(e);
@@ -172,8 +170,7 @@ export default {
 
     //通过手动模式直接上传切片元数据
     async getLayerInfoByFile() {
-      this.originMetaXml = "";
-      return this.readLocalJson(this.fileList[0]?.path);
+      return await this.readLocalJson(this.fileList[0]?.path);
     },
 
     // 城市选择
@@ -196,28 +193,25 @@ export default {
 
     // 读取本地json文件
     readLocalJson(path) {
-      fs.readFile(path, "utf8", (err, data) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        const { source } = JSON.parse(data);
-        this.layerSource = source;
-        this.$message.success("参数已读取");
+      return new Promise((reslove, reject) => {
+        fs.readFile(path, "utf8", (err, data) => {
+          if (err) {
+            console.error(err);
+            reject(err);
+          }
+          const { layerSource } = JSON.parse(data);
+          this.$message.success("参数已导入");
+          reslove({ layerSource, xml: "" });
+        });
       });
     },
 
     // 参数验证
     nullcheck() {
-      if (!this.queryParams.url && !this.fileList.length) {
-        this.$message.error("地图服务地址不能为空", 2);
-        return;
-      }
+      if (!this.queryParams.url && !this.fileList.length)
+        throw { message: "URL错误：地图服务地址不能为空!" };
 
-      if (!this.center.length) {
-        this.$message.error("初始位置必选", 2);
-        return;
-      }
+      if (!this.center.length) throw { message: "参数错误：初始位置必选" };
     },
 
     // 是否为手动预览模式
@@ -225,26 +219,26 @@ export default {
       return this.fileList.length !== 0 && this.isAdvanced;
     },
 
+    //设置图层数据源
+    async setLayerSource() {
+      if (this.isManualMode()) {
+        return await this.getLayerInfoByFile();
+      } else {
+        return this.queryParams.serviceType === "WMTS"
+          ? await this.getWMTSInfo()
+          : await this.getXYZInfo();
+      }
+    },
+
     // 预览地图
-    async preview() {
-      this.nullcheck();
+    preview() {
       try {
-        if (this.isManualMode()) {
-          await this.getLayerInfoByFile();
-        } else {
-          if (this.queryParams.serviceType === "WMTS") await this.getWMTSInfo();
-          if (this.queryParams.serviceType === "XYZ") await this.getXYZInfo();
-        }
-
-        const result = {
-          layerSource: this.layerSource,
-          originMetaXml: this.originMetaXml,
-          center: this.center
-        };
-
-        this.$emit("submmit", result);
+        this.nullcheck();
+        this.setLayerSource().then(({ layerSource, xml }) => {
+          this.$emit("submmit", { layerSource, xml, center: this.center });
+        });
       } catch (e) {
-        console.log(e, e.message);
+        console.log(e);
         this.$message.error(e.message);
       }
     }

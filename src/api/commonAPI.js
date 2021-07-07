@@ -58,7 +58,7 @@ const initCityList = async () => {
 };
 
 //通过mapserver获取XML文件
-const getXmlByMapServer = async (url, params) => {
+const getXmlByMapServer = (url, params) => {
   return axios
     .get(url.trim(), { params })
     .then(res => {

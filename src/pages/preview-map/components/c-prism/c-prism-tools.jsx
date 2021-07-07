@@ -30,6 +30,7 @@ export default {
           icon: "copy",
           size: "small",
           ghost: true,
+          visible: true,
           clickEvent: "copyParams",
           params: ""
         },
@@ -39,6 +40,7 @@ export default {
           icon: "download",
           size: "small",
           ghost: true,
+          visible: true,
           clickEvent: "downloadParams",
           params: "json"
         },
@@ -48,13 +50,21 @@ export default {
           icon: "file-excel",
           size: "small",
           ghost: true,
+          visible: true,
           clickEvent: "downloadParams",
           params: "xml"
         }
       ]
     };
   },
-  watch: {},
+  watch: {
+    xml: {
+      handler: function(newValue) {
+        console.log(newValue);
+        this.btnGroup[2].visible = !!newValue;
+      }
+    }
+  },
   computed: {},
   created() {},
   methods: {
@@ -91,14 +101,16 @@ export default {
     }
   },
   render() {
-    const btns = this.btnGroup.map(btn => (
-      <a-tooltip title={btn.title} style="margin-left:10px">
-        <a-button
-          {...{ attrs: btn }}
-          onClick={() => this[btn.clickEvent](btn.params)}
-        ></a-button>
-      </a-tooltip>
-    ));
+    const btns = this.btnGroup
+      .filter(btn => btn.visible)
+      .map(btn => (
+        <a-tooltip title={btn.title} style="margin-left:10px">
+          <a-button
+            {...{ attrs: btn }}
+            onClick={() => this[btn.clickEvent](btn.params)}
+          ></a-button>
+        </a-tooltip>
+      ));
     return <div class="btn-group">{btns}</div>;
   }
 };

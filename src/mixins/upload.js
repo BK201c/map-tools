@@ -28,7 +28,6 @@ export default {
     // 获取上传文件路径
     beforeUpload(file) {
       this.fileList = [file];
-      console.log(this.fileList, file);
       return false;
     }
   }
