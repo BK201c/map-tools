@@ -53,7 +53,7 @@ export default {
     showMap(data) {
       console.log(data);
       this.layerSource = data.layerSource;
-      this.originMetaXml = data.originMetaXml;
+      this.originMetaXml = data.xml;
       this.previewParams = data.layerSource[0];
       this.center = data.center;
       if (this.layerSource.length > 0) {

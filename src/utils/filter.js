@@ -67,7 +67,6 @@ const filterTileGridInfo = TileMatrixSet => {
 // 获取图层组信息
 const filterLayerSource = xml => {
   const parser = new WMTSCapabilities();
-  console.log(parser.read(xml));
   const { Contents, OperationsMetadata } = parser.read(xml);
   const metaLayers = [
     ...Contents.Layer.map(layer =>

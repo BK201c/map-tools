@@ -1,6 +1,5 @@
 import formater from "@/utils/formater";
 import { fs, clipboard } from "@/core/electron";
-import "./c-prism.scss";
 export default {
   name: "c-prism-tools",
   props: {
@@ -57,14 +56,7 @@ export default {
       ]
     };
   },
-  watch: {
-    xml: {
-      handler: function(newValue) {
-        console.log(newValue);
-        this.btnGroup[2].visible = !!newValue;
-      }
-    }
-  },
+  watch: {},
   computed: {},
   created() {},
   methods: {
@@ -101,16 +93,18 @@ export default {
     }
   },
   render() {
-    const btns = this.btnGroup
-      .filter(btn => btn.visible)
-      .map(btn => (
-        <a-tooltip title={btn.title} style="margin-left:10px">
-          <a-button
-            {...{ attrs: btn }}
-            onClick={() => this[btn.clickEvent](btn.params)}
-          ></a-button>
-        </a-tooltip>
-      ));
-    return <div class="btn-group">{btns}</div>;
+    const btns = this.btnGroup.map(btn => (
+      <a-tooltip title={btn.title} style="margin-left:10px">
+        <a-button
+          {...{ attrs: btn }}
+          onClick={() => this[btn.clickEvent](btn.params)}
+        ></a-button>
+      </a-tooltip>
+    ));
+    return (
+      <div class="btn-group" style="position:fixed; right: 25px;top:15px;">
+        {btns}
+      </div>
+    );
   }
 };

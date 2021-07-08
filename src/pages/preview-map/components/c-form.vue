@@ -20,7 +20,6 @@
           v-model="queryParams.serviceType"
           default-value="WMTS"
           :disabled="isAdvanced"
-          @change="serviceTypeChange"
         >
           <a-radio value="WMTS" name="serviceType">
             WMTS
@@ -164,8 +163,7 @@ export default {
     //通过XYZ构建图层
     getXYZInfo() {
       return new Promise(reslove => {
-        this.layerSource = [{ ...this.queryParams }];
-        reslove(true);
+        reslove({ layerSource: [{ ...this.queryParams }], xml: "" });
       });
     },
 
@@ -185,11 +183,6 @@ export default {
         option =>
           option.name.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
       );
-    },
-
-    //切片方式切换
-    serviceTypeChange() {
-      this.originMetaXml = "";
     },
 
     // 读取本地json文件
