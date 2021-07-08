@@ -1,7 +1,7 @@
 {
   "layerSource": [
     {
-      "url": "http://120.52.31.39/cloudapi/service/api/egis/base/v1/wmts",
+      "url": "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
       "serviceType": "wmts",
       "crossOrigin": "anonymous",
       "projection": "EPSG:4326",
@@ -64,42 +64,44 @@
       }
     },
     {
-      "url": "http://120.52.31.39/cloudapi/service/api/egis/base/v1/wmts",
+      "url": "http://10.68.8.20/kmap-server/ogc/service/wmts",
       "serviceType": "wmts",
       "crossOrigin": "anonymous",
-      "projection": "EPSG:4326",
-      "layer": "vec",
-      "format": "tiles",
+      "projection": "EPSG:3857",
+      "layer": "raster2d:default:default",
+      "format": "image/png",
       "style": "default",
-      "matrixSet": "c",
+      "matrixSet": "EPSG:3857",
       "wrapX": true,
       "headers": {
         "Authorization": "Basic MjJhNDJmNjVjOGM0NDcyNGI1NzAzZWZkNTRiZjU3ODI6YWE5MDAxNTMyYmQzNDI3OWE5N2UzYjAxYmY2MTczZjk="
       },
       "tileGrid": {
         "resolutions": [
-          0.7031250000000002,
-          0.3515625000000001,
-          0.17578125000000006,
-          0.08789062500000003,
-          0.043945312500000014,
-          0.021972656250000007,
-          0.010986328125000003,
-          0.005493164062500002,
-          0.002746582031250001,
-          0.0013732910156250004,
-          0.0006866455078125002,
-          0.0003433227539062501,
-          0.00017166137695312505,
-          0.00008583068847656253,
-          0.000042915344238281264,
-          0.000021457672119140632,
-          0.000010728836059570316,
-          0.000005364418029785158,
-          0.000002682209014892579,
-          0.0000013411045074462895
+          156543.03392804094,
+          78271.51696402047,
+          39135.75848201023,
+          19567.879241005117,
+          9783.939620502559,
+          4891.969810251279,
+          2445.9849051256397,
+          1222.9924525628196,
+          611.4962262814101,
+          305.74811314070485,
+          152.87405657035248,
+          76.43702828517623,
+          38.218514142588134,
+          19.10925707129406,
+          9.55462853564703,
+          4.777314267823515,
+          2.3886571339117575,
+          1.1943285669558787,
+          0.5971642834779394,
+          0.2985821417389697,
+          0.14929107086948484
         ],
         "matrixIds": [
+          0,
           1,
           2,
           3,
@@ -121,10 +123,16 @@
           19
         ],
         "origin": [
-          -180,
-          90
+          -20037508.3427892,
+          20037508.3427892
         ]
       }
+    },
+    {
+      "layer": "tianditu_xyz",
+      "url": "https://t3.tianditu.gov.cn/vec_w/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35&service=WMTS&version=1.0.0&request=GetTile&layer=vec&format=tiles&style=default&tileMatrixSet=w&tileMatrix={z}&tileRow={y}&tileCol={x}",
+      "serviceType": "xyz",
+      "projection": "EPSG:3857"
     }
   ]
 }
