@@ -1,14 +1,10 @@
-export default {
-  name: "",
-  props: {},
+const upload = {
+  name: "upload",
   data() {
     return {
       fileList: []
     };
   },
-  watch: {},
-  computed: {},
-  created() {},
   methods: {
     // 移除上传文件
     handleRemove(file) {
@@ -32,3 +28,5 @@ export default {
     }
   }
 };
+
+export default upload;

@@ -97,11 +97,12 @@
 </template>
 
 <script>
-import { fs, ipcRenderer } from "@/core/electron";
+import { fs } from "@/core/electron";
+import { openDevTools } from "@/ipc/render";
 import { filterLayerSource } from "@/utils/filter";
-import { initCityList, getXmlByMapServer } from "@/api/commonAPI";
+import { getXmlByMapServer } from "@/api/commonAPI";
 import { URL } from "url";
-import upload from "@/mixins/upload.js";
+import { upload, citySelector } from "@/mixins";
 export default {
   data() {
     return {
@@ -115,27 +116,21 @@ export default {
         projection: "EPSG:3857"
       },
       position: [320000, 320500],
-      center: [120.619585, 31.299379],
-      citys: [],
       isAdvanced: false
     };
   },
   name: "c-form",
   components: {},
   computed: {},
-  mixins: [upload],
-  created() {
-    initCityList().then(res => (this.citys = res));
-  },
+  mixins: [upload, citySelector],
+  created() {},
   mounted() {},
   watch: {},
   methods: {
     //高级模式打开谷歌开发者工具
     openDevtools(checked) {
       checked ? (this.queryParams = {}) : (this.fileList = []);
-      setTimeout(() => {
-        ipcRenderer.send("app-open-devtools", checked);
-      }, 100);
+      setTimeout(openDevTools(checked), 100);
     },
 
     //通过WMTS服务类元信息
@@ -170,19 +165,6 @@ export default {
     //通过手动模式直接上传切片元数据
     async getLayerInfoByFile() {
       return await this.readLocalJson(this.fileList[0]?.path);
-    },
-
-    // 城市选择
-    changeCity(value, selectedOptions) {
-      if (selectedOptions?.length > 0) this.center = selectedOptions[1]?.center;
-    },
-
-    // 中心点搜索
-    filter(inputValue, path) {
-      return path.some(
-        option =>
-          option.name.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
-      );
     },
 
     // 读取本地json文件
