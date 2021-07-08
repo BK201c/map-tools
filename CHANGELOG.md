@@ -10,8 +10,7 @@ All notable changes to this project will be documented in this file. See [standa
 4. 支持专业模式下使用 devtool 进行调试。
 5. 支持下载保存地图显示参数为 JSON 文件。
 6. 支持下载地图服务原始 XML 描述文件。
-7. 支持 headers 鉴权方式的地图服务预览。
-8. 修复了一些 BUG。
+7. 修复了一些 BUG。
 
 ### [1.4.1](https://github.com/BK201c/map-tools/compare/v1.3.0...v1.4.1) (2021-06-23)
 
