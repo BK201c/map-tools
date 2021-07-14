@@ -11,16 +11,11 @@
           v-model="queryParams.url"
           placeholder="http://xxx.xxxxx.com/vec_c/wmts"
           :allowClear="true"
-          :disabled="isAdvanced"
         >
         </a-input>
       </a-form-model-item>
       <a-form-model-item label="接入方式">
-        <a-radio-group
-          v-model="queryParams.serviceType"
-          default-value="WMTS"
-          :disabled="isAdvanced"
-        >
+        <a-radio-group v-model="queryParams.serviceType" default-value="WMTS">
           <a-radio value="WMTS" name="serviceType">
             WMTS
           </a-radio>
@@ -129,8 +124,7 @@ export default {
   methods: {
     //高级模式打开谷歌开发者工具
     openDevtools(checked) {
-      checked ? (this.queryParams = {}) : (this.fileList = []);
-      setTimeout(openDevTools(checked), 100);
+      setTimeout(openDevTools(checked), 200);
     },
 
     //通过WMTS服务类元信息

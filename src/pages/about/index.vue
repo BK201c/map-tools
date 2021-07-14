@@ -42,9 +42,6 @@ export default {
         },
         {
           des: "Copyright 2020-2021"
-        },
-        {
-          des: "By KmapTeam Jonson"
         }
       ];
     }

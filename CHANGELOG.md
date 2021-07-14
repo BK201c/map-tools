@@ -1,14 +1,12 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
-
 ## [1.5.0](https://github.com/BK201c/map-tools/compare/v1.4.1...v1.5.0) (2021-07-08)
 
-1. 支持 OGC 标准的 WMTS，REST(XYZ)格式的栅格地图预览。
-2. 支持 URL 自动预览和手动导入参数预览。
-3. 支持不同坐标系的多个底图之间切换显示。
+1. 支持 OGC 标准 WMTS，REST(XYZ)接口服务的栅格地图预览。
+2. 支持输入服务 URL 地址自动预览和手动导入切片参数预览。
+3. 支持不同坐标系下多个底图切换显示。
 4. 支持专业模式下使用 devtool 进行调试。
-5. 支持下载保存地图显示参数为 JSON 文件。
+5. 支持下载保存地图切片参数为 JSON 文件。
 6. 支持下载地图服务原始 XML 描述文件。
 7. 修复了一些 BUG。
 

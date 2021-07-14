@@ -47,6 +47,7 @@ const filterTileGridInfo = TileMatrixSet => {
     TileMatrixSet.TileMatrix[0].TopLeftCorner[1],
     TileMatrixSet.TileMatrix[0].TopLeftCorner[0]
   ];
+  let tileSize = TileMatrixSet.TileMatrix[0].TileWidth || 256;
   let projection = "EPSG:" + TileMatrixSet.SupportedCRS?.split("::")[1];
   if (projection === "EPSG:4490") projection = "EPSG:4326";
   if (projection === "EPSG:3857") origin.reverse();
@@ -60,9 +61,16 @@ const filterTileGridInfo = TileMatrixSet => {
     origin,
     projection,
     matrixIds,
-    resolutions
+    resolutions,
+    tileSize
   };
 };
+
+//获取WMTS瓦片调用服务地址
+const getTileUrl = OperationsMetadata =>
+  OperationsMetadata.GetTile.DCP.HTTP.Get.filter(
+    l => l.Constraint[0].AllowedValues.Value[0].toUpperCase() === "KVP"
+  )[0].href;
 
 // 获取图层组信息
 const filterLayerSource = xml => {
@@ -74,7 +82,7 @@ const filterLayerSource = xml => {
         {},
         {
           layer: layer.Identifier,
-          url: OperationsMetadata.GetTile.DCP.HTTP.Get[0].href,
+          url: getTileUrl(OperationsMetadata),
           serviceType: "WMTS",
           style: layer.Style[0]?.Identifier,
           format: layer.Format[0],
@@ -98,7 +106,8 @@ const filterLayerSource = xml => {
           tileGrid: {
             resolutions: grid.resolutions,
             matrixIds: grid.matrixIds,
-            origin: grid.origin
+            origin: grid.origin,
+            tileSize: grid.tileSize
           }
         }
       );
