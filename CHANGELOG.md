@@ -1,5 +1,9 @@
 # Changelog
 
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### [1.5.1](https://github.com/BK201c/map-tools/compare/v1.5.0-beta...v1.5.1) (2021-07-14)
+
 ## [1.5.0](https://github.com/BK201c/map-tools/compare/v1.4.1...v1.5.0) (2021-07-08)
 
 1. 支持 OGC 标准 WMTS，REST(XYZ)接口服务的栅格地图预览。
