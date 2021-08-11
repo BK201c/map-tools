@@ -77,7 +77,7 @@
           </a-upload>
         </a-form-model-item>
       </div>
-      <div class="submmit-button">
+      <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button
           type="primary"
           size="large"
@@ -86,7 +86,7 @@
           block
           >预览<a-icon type="arrow-right"
         /></a-button>
-      </div>
+      </a-form-model-item>
     </a-form-model>
   </section>
 </template>

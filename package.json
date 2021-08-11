@@ -29,7 +29,6 @@
     "babel-plugin-prismjs": "^2.0.1",
     "core-js": "^3.6.5",
     "ol": "^6.5.0",
-    "ol-layerswitcher": "^3.8.1",
     "prismjs": "^1.23.0",
     "proj4": "^2.7.2",
     "uuid": "^8.3.2",

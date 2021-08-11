@@ -17,7 +17,15 @@
   </div>
 </template>
 <script>
-import { Map, View, TileLayer, WMTSTileGrid, WMTS, XYZ } from "@/core/ol";
+import {
+  Map,
+  View,
+  TileLayer,
+  WMTSTileGrid,
+  WMTS,
+  XYZ,
+  TileGrid
+} from "@/core/ol";
 import { isMercatorProjection } from "@/utils/validation";
 import { lonLat2Mercator } from "@/utils/filter";
 export default {
@@ -141,16 +149,19 @@ export default {
     },
 
     //创建wmts图层，默认设置图层名称为图层id
-    createWMTS(opiton) {
-      const base = { ...opiton };
-      const tileGrid = new WMTSTileGrid(opiton?.tileGrid);
+    createWMTS(option) {
+      const base = { ...option };
+      const tileGrid = new WMTSTileGrid(option?.tileGrid);
       const smOption = Object.assign({}, base, { tileGrid });
       return new WMTS(smOption);
     },
 
     // 创建XYZ图层
     createXYZ(option) {
-      return new XYZ(option);
+      const base = { ...option };
+      const tileGrid = new TileGrid(option?.tileGrid);
+      const smOption = Object.assign({}, base, { tileGrid });
+      return new XYZ(smOption);
     },
 
     // 初始化地图对象
