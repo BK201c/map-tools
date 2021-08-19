@@ -38,7 +38,7 @@ export default {
           des: `版本：v${config.version}`
         },
         {
-          des: `发布日期：${formater.date(new Date(), "yyyy-MM-dd")}`
+          des: `发布日期：${formater.date("2021-08-15", "yyyy-MM-dd")}`
         },
         {
           des: "Copyright 2020-2021"
