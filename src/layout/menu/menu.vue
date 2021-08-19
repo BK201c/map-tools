@@ -10,9 +10,13 @@
         <a-icon style="fontSize:18px" type="file-search" />
         <span>预览地图</span>
       </a-menu-item>
-      <a-menu-item key="createLayer">
+      <!-- <a-menu-item key="createLayer">
         <a-icon style="fontSize:18px" type="cloud-server" />
         <span>模拟数据</span>
+      </a-menu-item> -->
+      <a-menu-item key="guide">
+        <a-icon style="fontSize:18px" type="compass" />
+        <span>使用说明</span>
       </a-menu-item>
       <a-menu-item key="about">
         <a-icon style="fontSize:18px" type="info-circle" />
