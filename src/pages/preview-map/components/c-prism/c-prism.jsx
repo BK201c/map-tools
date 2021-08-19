@@ -1,5 +1,6 @@
 import Prism from "prismjs";
 import tools from "./c-prism-tools";
+import "./styles.scss";
 export default {
   name: "c-prism",
   props: {
@@ -51,6 +52,9 @@ export default {
     if (!this.codeString) return <a-empty />;
     return (
       <pre class={`language-${language} preview-container`}>
+        <div class="layer-name">
+          图层参数:&nbsp;<span>{code.layer}</span>
+        </div>
         <tools
           path={path}
           json={this.codeString}

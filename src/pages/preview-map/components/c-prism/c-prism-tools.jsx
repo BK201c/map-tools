@@ -24,7 +24,7 @@ export default {
     return {
       btnGroup: [
         {
-          title: "复制参数",
+          title: "复制图层参数",
           type: "primary",
           icon: "copy",
           size: "small",
@@ -34,7 +34,7 @@ export default {
           params: ""
         },
         {
-          title: "下载JSON",
+          title: "保存图层参数",
           type: "primary",
           icon: "download",
           size: "small",
@@ -44,7 +44,7 @@ export default {
           params: "json"
         },
         {
-          title: "下载XML",
+          title: "保存原始XML",
           type: "primary",
           icon: "file-excel",
           size: "small",
@@ -101,10 +101,6 @@ export default {
         ></a-button>
       </a-tooltip>
     ));
-    return (
-      <div class="btn-group" style="position:fixed; right: 25px;top:15px;">
-        {btns}
-      </div>
-    );
+    return <div class="btn-group">{btns}</div>;
   }
 };

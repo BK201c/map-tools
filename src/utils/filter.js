@@ -15,13 +15,13 @@ import { isMercatorProjection } from "./validation";
  * @returns 地面分辨率
  */
 const calcResolutionByScale = (scale, crs = 4326) => {
-  // 一个像素等于多少米距离（单位米）,OGC标准下单位像素距离
+  // 一个像素等于多少米距离（像素/米）,OGC标准下单位像素距离
   const defaultPixelMeter = 0.0254;
 
   //天地图等三方服务商单位像素距离
   // const defaultPixelMeter = 0.025399998;
 
-  //地球半径
+  //地球半径（m）
   const erathRadius = 6378137;
 
   // 当投影坐标系为（EPSG:4326,EPSG:4490时）地图单位（度/米），一度等于多少米距离单位（米），当地理坐标系为WGS84时，地图单位为度

@@ -1,6 +1,6 @@
 <template>
   <section>
-    <a-divider orientation="left">底图参数</a-divider>
+    <a-divider orientation="left">接口参数</a-divider>
     <a-form-model
       :model="queryParams"
       :label-col="labelCol"
@@ -11,20 +11,21 @@
           v-model="queryParams.url"
           placeholder="http://xxx.xxxxx.com/vec_c/wmts"
           :allowClear="true"
+          :disabled="isManualMode"
         >
         </a-input>
       </a-form-model-item>
       <a-form-model-item label="接入方式">
         <a-radio-group v-model="queryParams.serviceType" default-value="WMTS">
-          <a-radio value="WMTS" name="serviceType">
+          <a-radio value="WMTS" name="serviceType" :disabled="isManualMode">
             WMTS
           </a-radio>
-          <a-radio value="XYZ" name="serviceType">
+          <a-radio value="XYZ" name="serviceType" :disabled="isManualMode">
             XYZ
           </a-radio>
-          <a-radio value="WMS" name="serviceType" :disabled="true">
+          <!-- <a-radio value="WMS" name="serviceType" :disabled="true">
             WMS
-          </a-radio>
+          </a-radio> -->
         </a-radio-group>
       </a-form-model-item>
       <a-form-model-item
@@ -62,7 +63,7 @@
           v-model="isAdvanced"
           checked-children="开"
           un-checked-children="关"
-          @click="openDevtools"
+          @click="openTheDevtools"
         />
       </a-form-model-item>
       <div class="advanced-items" v-if="isAdvanced">
@@ -116,15 +117,22 @@ export default {
   },
   name: "c-form",
   components: {},
-  computed: {},
+  computed: {
+    // 是否为手动预览模式
+    isManualMode() {
+      return this.fileList.length > 0 && this.isAdvanced;
+    }
+  },
   mixins: [upload, citySelector],
   created() {},
   mounted() {},
   watch: {},
   methods: {
     //高级模式打开谷歌开发者工具
-    openDevtools(checked) {
-      setTimeout(openDevTools(checked), 200);
+    openTheDevtools(checked) {
+      setTimeout(() => {
+        openDevTools(checked);
+      }, 300);
     },
 
     //通过WMTS服务类元信息
@@ -184,14 +192,9 @@ export default {
       if (!this.center.length) throw { message: "参数错误：初始位置必选" };
     },
 
-    // 是否为手动预览模式
-    isManualMode() {
-      return this.fileList.length !== 0 && this.isAdvanced;
-    },
-
     //设置图层数据源
     async setLayerSource() {
-      if (this.isManualMode()) {
+      if (this.isManualMode) {
         return await this.getLayerInfoByFile();
       } else {
         return this.queryParams.serviceType === "WMTS"
