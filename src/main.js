@@ -14,6 +14,16 @@ import "./styles/reset.css";
 import "./styles/common.scss";
 import "animate.css";
 import "prismjs/themes/prism.css";
+
+import "github-markdown-css/github-markdown.css";
+import * as hljs from "highlight.js";
+Vue.directive("highlight", function(el) {
+  const blocks = el.querySelectorAll("pre code");
+  blocks.forEach(block => {
+    hljs.highlightBlock(block);
+  });
+});
+
 Vue.use(Antd);
 
 Vue.config.productionTip = false;

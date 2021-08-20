@@ -48,6 +48,7 @@ $blank: 10px;
     &-content {
       width: $contentWidth;
       flex-grow: 1;
+      overflow-y: scroll;
     }
   }
 }

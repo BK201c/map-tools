@@ -100,10 +100,7 @@ nav,
 section {
   display: block;
 }
-ol,
-ul {
-  list-style: none;
-}
+
 blockquote,
 q {
   quotes: none;
@@ -120,22 +117,9 @@ table {
   border-spacing: 0;
 }
 
-a {
-  color: #333;
-  text-decoration: none;
-  &:hover,
-  &:visited,
-  &:focus {
-    text-decoration: none;
-  }
-}
-
 button {
   border: none;
   outline: none;
-  &:hover {
-    cursor: pointer;
-  }
 }
 
 input {

@@ -21,7 +21,14 @@ module.exports = {
   // webpack 配置，键值对象时会合并配置，为方法时会改写配置
   // https://cli.vuejs.org/guide/webpack.html#simple-configuration
   configureWebpack: {
-    plugins: []
+    module: {
+      rules: [
+        {
+          test: /\.md$/,
+          use: "text-loader"
+        }
+      ]
+    }
   },
 
   // webpack 链接 API，用于生成和修改 webapck 配置

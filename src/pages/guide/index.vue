@@ -1,20 +1,28 @@
 <template>
-  <section></section>
+  <section>
+    <div class="markdown-body">
+      <VueMarkdown :source="mdData" v-highlight></VueMarkdown>
+    </div>
+  </section>
 </template>
 
 <script>
+import VueMarkdown from "vue-markdown";
+import markdownData from "../../../README.md";
 export default {
-  data() {
-    return {};
+  components: {
+    VueMarkdown
   },
-  name: "",
-  components: {},
-  computed: {},
-  created() {},
-  mounted() {},
-  watch: {},
-  methods: {}
+  data() {
+    return {
+      mdData: markdownData
+    };
+  }
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+section {
+  padding: 10px 20px;
+}
+</style>
