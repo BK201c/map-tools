@@ -151,7 +151,7 @@ export default {
     //创建wmts图层，默认设置图层名称为图层id
     createWMTS(option) {
       const base = { ...option };
-      const tileGrid = new WMTSTileGrid(option?.tileGrid);
+      const tileGrid = option?.tileGrid && new WMTSTileGrid(option?.tileGrid);
       const smOption = Object.assign({}, base, { tileGrid });
       return new WMTS(smOption);
     },
@@ -159,7 +159,7 @@ export default {
     // 创建XYZ图层
     createXYZ(option) {
       const base = { ...option };
-      const tileGrid = new TileGrid(option?.tileGrid);
+      const tileGrid = option?.tileGrid && new TileGrid(option?.tileGrid);
       const smOption = Object.assign({}, base, { tileGrid });
       return new XYZ(smOption);
     },
