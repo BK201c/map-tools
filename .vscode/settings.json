@@ -1,4 +1,4 @@
 {
-  "prettier.arrowParens": "avoid",
-  "prettier.trailingComma": "none"
+  "vetur.experimental.templateInterpolationService": true,
+  "typescript.tsdk": "node_modules\\typescript\\lib"
 }

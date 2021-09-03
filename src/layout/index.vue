@@ -1,54 +1,56 @@
 <template>
-  <section class="main-container">
-    <section class="layout-sidebar">
-      <the-menu></the-menu>
-    </section>
-    <section class="layout-content">
-      <router-view></router-view>
-    </section>
-  </section>
+  <a-layout class="layout">
+    <a-layout-sider
+      class="layout-sidebar"
+      :collapsed="isCollapsed"
+      :trigger="null"
+      collapsible
+    >
+      <Logo class="layout-sidebar-bottom" @change="change"></Logo>
+      <Sidebar></Sidebar>
+    </a-layout-sider>
+    <a-layout class="layout-main">
+      <a-layout-content class="layout-content">
+        <router-view></router-view>
+      </a-layout-content>
+    </a-layout>
+  </a-layout>
 </template>
 
-<script>
-import menu from "@/layout/menu/menu";
-import store from "@/store";
-import { ipcRenderer } from "@/core/electron";
-export default {
-  data() {
-    return {};
-  },
-  name: "",
-  components: { "the-menu": menu },
-  computed: {},
-  created() {},
-  mounted() {
-    setTimeout(() => {
-      ipcRenderer.invoke("app-update-zipPath").then(result => {
-        store.commit("app/SET_ZIP_PATH", result);
-      });
-    }, 500);
-  },
-  watch: {},
-  methods: {}
+<script lang="ts" setup>
+import Sidebar from "./components/sidebar/index.vue";
+import Logo from "./components/logo/index.vue";
+import { ref } from "@vue/reactivity";
+
+const isCollapsed = ref<boolean>(true);
+const change = (value: boolean) => {
+  isCollapsed.value = value;
 };
 </script>
 
-<style scoped lang="scss">
-@import "~@/styles/_var.scss";
-$blank: 10px;
-.main-container {
-  display: flex;
-  height: 100vh;
-  width: $mainWidth;
-  overflow: hidden;
-  .layout {
-    &-sidebar {
-      width: $sidebarWidth;
+<style lang="scss" scoped>
+@import "@/styles/_var.scss";
+.layout {
+  height: $layoutHeight;
+  width: $layoutWidth;
+  &-main {
+    overflow: hidden;
+  }
+  &-content {
+    padding: 20px;
+  }
+  &-sidebar {
+    position: relative;
+    &-top {
+      font-size: 20px;
     }
-    &-content {
-      width: $contentWidth;
-      flex-grow: 1;
-      overflow-y: scroll;
+    &-bottom {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99;
+      font-size: 20px;
     }
   }
 }
