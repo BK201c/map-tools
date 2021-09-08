@@ -6,19 +6,16 @@
     mode="inline"
     @click="handleClick"
   >
-    <a-sub-menu
+    <a-menu-item
       :key="menu.path"
-      v-for="menu in crmRouter"
+      v-for="menu of crmRouter"
       @titleClick="titleClick"
     >
       <template #icon>
         <AntIcon :icon="menu.meta.icon" />
       </template>
       <template #title>{{ menu.meta.title }}</template>
-      <a-menu-item :key="menuItem.path" v-for="menuItem in menu.children">{{
-        menuItem.meta.title
-      }}</a-menu-item>
-    </a-sub-menu>
+    </a-menu-item>
   </a-menu>
 </template>
 

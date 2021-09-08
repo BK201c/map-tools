@@ -1,55 +1,34 @@
 <template>
   <section>
     <div class="logo">
-      <img :src="logo" alt="MAPTOOLS" width="120px" />
+      <img :src="logo" alt="MAPTOOLS" />
       <p>MapTools</p>
     </div>
     <ul>
-      <li v-for="item in items" :key="item.index">
+      <li v-for="(item, index) of items" :key="index">
         {{ item.des }}
       </li>
     </ul>
   </section>
 </template>
 
-<script>
-import logo from "@/asset/img/logo.png";
+<script lang="ts" setup>
+import logo from "@/assets/img/logo.png";
 import config from "../../../package.json";
-import formater from "@/utils/formater";
-export default {
-  data() {
-    return {
-      items: [],
-      logo
-    };
+const items = [
+  {
+    des: `版本：v${config.version}`,
   },
-  name: "",
-  components: {},
-  computed: {},
-  created() {
-    this.init();
+  {
+    des: `发布日期：2021-08-15`,
   },
-  mounted() {},
-  watch: {},
-  methods: {
-    init() {
-      this.items = [
-        {
-          des: `版本：v${config.version}`
-        },
-        {
-          des: `发布日期：${formater.date("2021-08-15", "yyyy-MM-dd")}`
-        },
-        {
-          des: "Copyright 2020-2021"
-        }
-      ];
-    }
-  }
-};
+  {
+    des: "Copyright 2020-2021",
+  },
+];
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 section {
   text-align: center;
   padding-top: 50px;
@@ -59,6 +38,9 @@ section {
       margin-top: 10px;
     }
     margin-bottom: 50px;
+    img {
+      width: 50px;
+    }
   }
   li {
     margin-bottom: 15px;
