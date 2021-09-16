@@ -1,73 +1,38 @@
 <template>
-  <div class="container">
+  <section class="container">
     <div class="form-box animate__animated animate__fadeInRight">
-      <c-form @submmit="showMap"></c-form>
+      <MapForm @submmit="formSubmit"></MapForm>
     </div>
-    <div class="preview-box" v-if="isMapParamsShow">
-      <div class="preview-map animate__animated animate__fadeInTopRight">
-        <c-map
-          :layerSource="layerSource"
-          :center="center"
-          @change="layerChange"
-          width="200px"
-          height="300px"
-        ></c-map>
-      </div>
-      <div class="preview-params animate__animated animate__fadeInBottomRight">
-        <c-prism
-          :code="previewParams"
-          :xml="originMetaXml"
-          :path="zipPath"
-        ></c-prism>
-      </div>
-    </div>
-  </div>
+    <!-- <Map
+      :source="extraParams"
+      :center="center"
+      @layerChange="layerChange"
+      width="200px"
+      height="300px"
+    ></Map> -->
+  </section>
 </template>
 
-<script>
-import { mapGetters } from "vuex";
-import form from "./components/c-form";
-export default {
-  name: "previewMap",
-  data() {
-    return {
-      layerSource: [],
-      center: [],
-      isMapParamsShow: false,
-      originMetaXml: "",
-      previewParams: null
-    };
-  },
-  created() {},
-  mounted() {},
-  components: {
-    "c-map": () => import("./components/c-map/c-map"),
-    "c-prism": () => import("./components/c-prism/c-prism"),
-    "c-form": form
-  },
-  computed: {
-    ...mapGetters(["zipPath"])
-  },
-  methods: {
-    // 预览地图
-    showMap(data) {
-      console.log(data);
-      this.layerSource = data.layerSource;
-      this.originMetaXml = data.xml;
-      this.previewParams = data.layerSource[0];
-      this.center = data.center;
-      if (this.layerSource.length > 0) {
-        this.isMapParamsShow = true;
-      }
-    },
+<script lang="ts" setup>
+// import Map from "./components/map/index.vue";
+import MapForm from "./components/form/index.vue";
+import { reactive, toRefs } from "@vue/reactivity";
+import { Form, LayerSource } from "./components/form/interface";
+const status = reactive({
+  center: <any>[],
+  extraParams: <any>[],
+});
 
-    // 图层切换事件
-    layerChange(source) {
-      this.previewParams = source;
-    }
-  }
+const { center, extraParams } = toRefs(status);
+
+const formSubmit = (form: Form) => {
+  center.value = form.center;
+};
+
+// 图层切换事件
+const layerChange = (source: LayerSource) => {
+  console.log(source);
 };
 </script>
-<style lang="scss" scoped>
-@import "~@/styles/preview.scss";
-</style>
+
+<style lang="scss" scoped></style>

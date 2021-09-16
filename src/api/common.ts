@@ -1,26 +1,26 @@
 import axios from "axios";
 //根据道路名获取道路线点位
 const getRoadLine = (data, { host, token }) => {
-  return new Promise(reslove => {
+  return new Promise((reslove) => {
     const request = axios.create({
       baseURL: host.trim(),
       timeout: 3000,
-      headers: { authorization: token }
+      headers: { authorization: token },
     });
     const params = {
       adminId: data.adminId,
       keyword: data.keyword,
       pageNumber: 1,
-      pageSize: 3
+      pageSize: 3,
     };
     const url = "/search-server/back/poi/query/getRoadData";
     request
       .post(url, params)
-      .then(res => {
+      .then((res) => {
         reslove(res);
         console.log(res);
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
       });
   });
@@ -35,25 +35,18 @@ const sendPointData = (params, { host, token }) => {
     const request = axios.create({
       baseURL: host.trim(),
       timeout: 3000,
-      headers: { authorization: token }
+      headers: { authorization: token },
     });
     request
       .post(url, params)
-      .then(res => {
+      .then((res) => {
         console.log(res, params);
         reslove(res);
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error, params);
         reject(error);
       });
-  });
-};
-
-//获取全国城市列表（内置城市中心点）
-const initCityList = async () => {
-  return axios.get("./location.json").then(res => {
-    return res.data;
   });
 };
 
@@ -61,10 +54,10 @@ const initCityList = async () => {
 const getXmlByMapServer = (url, params) => {
   return axios
     .get(url.trim(), { params })
-    .then(res => {
+    .then((res) => {
       return res.data;
     })
-    .catch(error => {
+    .catch((error) => {
       return error;
     });
 };

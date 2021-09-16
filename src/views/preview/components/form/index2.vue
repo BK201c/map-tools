@@ -49,7 +49,7 @@
           :field-names="{
             label: 'name',
             value: 'adcode',
-            children: 'children'
+            children: 'children',
           }"
           :options="citys"
           :show-search="{ filter }"
@@ -109,10 +109,10 @@ export default {
         url:
           "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
         serviceType: "WMTS",
-        projection: "EPSG:3857"
+        projection: "EPSG:3857",
       },
       position: [320000, 320500],
-      isAdvanced: false
+      isAdvanced: false,
     };
   },
   name: "c-form",
@@ -121,7 +121,7 @@ export default {
     // 是否为手动预览模式
     isManualMode() {
       return this.fileList.length > 0 && this.isAdvanced;
-    }
+    },
   },
   mixins: [upload, citySelector],
   created() {},
@@ -141,17 +141,17 @@ export default {
       const query = {
         SERVICE: "WMTS",
         REQUEST: "GetCapabilities",
-        VERSION: "1.0.0"
+        VERSION: "1.0.0",
       };
       return getXmlByMapServer(url, query)
-        .then(async xml => {
+        .then(async (xml) => {
           let layerSource = filterLayerSource(xml);
           const myURL = new URL(url);
           if (myURL.search !== "")
-            layerSource.forEach(source => (source.url = url));
+            layerSource.forEach((source) => (source.url = url));
           return { layerSource, xml };
         })
-        .catch(e => {
+        .catch((e) => {
           console.log(e);
           this.$message.error(e.message);
         });
@@ -159,7 +159,7 @@ export default {
 
     //通过XYZ构建图层
     getXYZInfo() {
-      return new Promise(reslove => {
+      return new Promise((reslove) => {
         reslove({ layerSource: [{ ...this.queryParams }], xml: "" });
       });
     },
@@ -214,8 +214,8 @@ export default {
         console.log(e);
         this.$message.error(e.message);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
