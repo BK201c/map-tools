@@ -15,5 +15,5 @@ export {
   WMTS,
   WMTSCapabilities,
   XYZ,
-  TileGrid
+  TileGrid,
 };

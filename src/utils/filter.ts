@@ -5,7 +5,19 @@
 
 import * as turf from "@turf/turf";
 import { WMTSCapabilities } from "@/core/ol";
-import { isMercatorProjection } from "./validation";
+
+/**
+ * 判断是否是web墨卡托平面坐标
+ * @param {*坐标系 projection} 
+ * @returns boolen
+ */
+ export const isMercatorProjection = (projection:string):boolean => {
+  const degreeIndex = ["EPSG:4326", "EPSG:4490", "wgs84"];
+  const mercatorIndex = ["EPSG:3857", "EPSG:900913"];
+  return (
+    mercatorIndex.includes(projection) && !degreeIndex.includes(projection)
+  );
+};
 
 /**
  *
@@ -14,7 +26,7 @@ import { isMercatorProjection } from "./validation";
  * @param {*像素密度} dpi
  * @returns 地面分辨率
  */
-const calcResolutionByScale = (scale, crs = 4326) => {
+const calcResolutionByScale = (scale:number, crs = "EPSG:4326") => {
   // 一个像素等于多少米距离（像素/米）,OGC标准下单位像素距离
   const defaultPixelMeter = 0.0254;
 
@@ -40,18 +52,16 @@ const calcResolutionByScale = (scale, crs = 4326) => {
 };
 
 //获取tileGrid信息
-const filterTileGridInfo = TileMatrixSet => {
-  const matrixIds = [];
-  const resolutions = [];
+const filterTileGridInfo = (TileMatrixSet:any) => {
+  const matrixIds:number[] =[];
+  const resolutions:number[] = [];
   let origin = [
     TileMatrixSet.TileMatrix[0].TopLeftCorner[1],
     TileMatrixSet.TileMatrix[0].TopLeftCorner[0]
   ];
   let tileSize = TileMatrixSet.TileMatrix[0].TileWidth || 256;
   let projection = "EPSG:" + TileMatrixSet.SupportedCRS?.split("::")[1];
-  if (projection === "EPSG:4490") projection = "EPSG:4326";
-  if (projection === "EPSG:3857") origin.reverse();
-  TileMatrixSet.TileMatrix.forEach(matrix => {
+  TileMatrixSet.TileMatrix.forEach((matrix:any) => {
     matrixIds.push(Number(matrix.Identifier));
     resolutions.push(
       calcResolutionByScale(matrix?.ScaleDenominator, projection)
@@ -67,17 +77,17 @@ const filterTileGridInfo = TileMatrixSet => {
 };
 
 //获取WMTS瓦片调用服务地址
-const getTileUrl = OperationsMetadata =>
+const getTileUrl = (OperationsMetadata:any) =>
   OperationsMetadata.GetTile.DCP.HTTP.Get.filter(
-    l => l.Constraint[0].AllowedValues.Value[0].toUpperCase() === "KVP"
+    (l:any) => l.Constraint[0].AllowedValues.Value[0].toUpperCase() === "KVP"
   )[0].href;
 
 // 获取图层组信息
-const filterLayerSource = xml => {
+const filterLayerSource = (xml:any) => {
   const parser = new WMTSCapabilities();
   const { Contents, OperationsMetadata } = parser.read(xml);
   const metaLayers = [
-    ...Contents.Layer.map(layer =>
+    ...Contents.Layer.map((layer:any) =>
       Object.assign(
         {},
         {
@@ -93,9 +103,9 @@ const filterLayerSource = xml => {
   ];
 
   const tileGrids = [
-    ...metaLayers.map(meta => {
+    ...metaLayers.map((meta:any) => {
       const [TileMatrixSet] = Contents.TileMatrixSet.filter(
-        e => e.Identifier === meta.matrixSet
+        (e:any) => e.Identifier === meta.matrixSet
       );
       const grid = filterTileGridInfo(TileMatrixSet);
       return Object.assign(
@@ -117,7 +127,8 @@ const filterLayerSource = xml => {
   return tileGrids;
 };
 
-const lonLat2Mercator = point => {
+//经纬度转墨卡托
+const lonLat2Mercator = (point:number[]) => {
   var pt = turf.point(point);
   var converted = turf.toMercator(pt);
   return turf.getCoord(converted);

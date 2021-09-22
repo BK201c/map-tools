@@ -8,7 +8,7 @@
     >
       <a-form-item label="服务地址" :wrapperCol="{ span: 16, offset: 0 }">
         <a-input
-          v-model="formLayer.url"
+          v-model:value="formLayer.url"
           placeholder="http://xxx.xxxxx.com/vec_c/wmts"
           :allowClear="true"
           :disabled="isManualMode"
@@ -67,10 +67,11 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, toRefs, computed } from "vue";
+import { reactive, toRefs, ref, toRaw, UnwrapRef } from "vue";
 import CitySelector from "./components/citySelector/index.vue";
 import Uploader from "./components/uploader/index.vue";
 import { LayerSource } from "./interface";
+import { getLayerSourceByServer } from "@/api/common";
 
 // 表单样式配置
 const formConfig = {
@@ -79,14 +80,17 @@ const formConfig = {
   formLayout: "horizontal",
 };
 
+const emit = defineEmits(["submit"]);
+
 // 表单内容
-const formLayer: LayerSource = reactive({
+const formLayer: UnwrapRef<LayerSource> = reactive({
   url: "",
   layer: "defaultLayer",
   serviceType: "WMTS",
   projection: "EPSG:4326",
 });
 
+//表单状态切换
 const { isDevToolOpened, isManualMode } = toRefs(
   reactive({
     center: [120.619585, 31.299379],
@@ -94,6 +98,9 @@ const { isDevToolOpened, isManualMode } = toRefs(
     isManualMode: false,
   })
 );
+
+//地图预览source
+const source = ref<LayerSource[]>([formLayer]);
 
 // 更换中心点坐标
 const cityChange = (center: any): void => {
@@ -103,7 +110,8 @@ const cityChange = (center: any): void => {
 
 // 提交表单
 const submit = (): void => {
-  console.log(formLayer);
+  console.log(formLayer, source.value);
+  emit("submit", source.value);
 };
 
 // 打开开发者模式
@@ -114,6 +122,7 @@ const openTheDevtools = (): void => {
 //手动添加图层
 const fileUploaded = (layers: LayerSource[]): void => {
   console.log("已手动添加图层", layers);
+  source.value = layers;
 };
 </script>
 
