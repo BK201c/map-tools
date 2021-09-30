@@ -27,11 +27,11 @@
       </a-form-item>
       <a-form-item label="投影坐标系" v-if="formLayer.serviceType === 'XYZ'">
         <a-radio-group v-model:value="formLayer.projection">
-          <a-radio value="EPSG:3857" name="projection">
-            EPSG:3857
-          </a-radio>
           <a-radio value="EPSG:4326" name="projection">
             EPSG:4326
+          </a-radio>
+          <a-radio value="EPSG:3857" name="projection">
+            EPSG:3857
           </a-radio>
         </a-radio-group>
       </a-form-item>
@@ -70,28 +70,23 @@
 import { reactive, toRefs, ref, toRaw, UnwrapRef } from "vue";
 import CitySelector from "./components/citySelector/index.vue";
 import Uploader from "./components/uploader/index.vue";
-import { LayerSource } from "./interface";
+import { LayerSource } from "../interface";
+import { formConfig } from "../styles";
 import { getLayerSourceByServer } from "@/api/common";
 
-// 表单样式配置
-const formConfig = {
-  labelCol: { span: 5 },
-  wrapperCol: { span: 12 },
-  formLayout: "horizontal",
-};
-
-const emit = defineEmits(["submit"]);
+const $emit = defineEmits(["submit"]);
 
 // 表单内容
 const formLayer: UnwrapRef<LayerSource> = reactive({
-  url: "",
+  url:
+    "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
   layer: "defaultLayer",
   serviceType: "WMTS",
   projection: "EPSG:4326",
 });
 
 //表单状态切换
-const { isDevToolOpened, isManualMode } = toRefs(
+const { isDevToolOpened, isManualMode, center } = toRefs(
   reactive({
     center: [120.619585, 31.299379],
     isDevToolOpened: false,
@@ -110,8 +105,9 @@ const cityChange = (center: any): void => {
 
 // 提交表单
 const submit = (): void => {
-  console.log(formLayer, source.value);
-  emit("submit", source.value);
+  const sendSource = toRaw({ source: source.value, center: center.value });
+  $emit("submit", sendSource);
+  console.log("表单数据", sendSource);
 };
 
 // 打开开发者模式

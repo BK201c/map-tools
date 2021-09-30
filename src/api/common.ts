@@ -1,6 +1,7 @@
 import axios from "axios";
 import { filterLayerSource } from "@/utils/filter";
-import { LayerSource } from "@/views/preview/components/form/interface";
+import { LayerSource } from "@/views/preview/components/interface";
+
 //通过mapserver获取XML文件
 export const getLayerSourceByServer = async (url: string) => {
   const params = {

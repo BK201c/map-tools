@@ -4,9 +4,9 @@ export interface LayerSource {
   serviceType: string;
   projection: string;
   tileGrid?: {
-    resolution: number[];
-    matrixIds: number[];
-    origin: number[];
+    resolutions?: number[];
+    matrixIds?: number[];
+    origin?: number[];
   };
 }
 

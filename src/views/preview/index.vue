@@ -1,32 +1,36 @@
 <template>
   <section class="container">
-    <div class="form-box animate__animated animate__fadeInRight">
-      <MapForm @submmit="formSubmit"></MapForm>
+    <div class="container-form animate__animated animate__fadeInRight">
+      <MapForm @submit="formSubmit"></MapForm>
     </div>
-    <!-- <Map
-      :source="extraParams"
-      :center="center"
-      @layerChange="layerChange"
-      width="200px"
-      height="300px"
-    ></Map> -->
+    <div class="container-preview">
+      <Map
+        :sourceGroup="sourceGroup"
+        :center="center"
+        @layerChange="layerChange"
+        width="200px"
+        height="300px"
+      ></Map>
+    </div>
   </section>
 </template>
 
 <script lang="ts" setup>
-// import Map from "./components/map/index.vue";
+import Map from "./components/map/index.vue";
 import MapForm from "./components/form/index.vue";
 import { reactive, toRefs } from "@vue/reactivity";
-import { Form, LayerSource } from "./components/form/interface";
-const status = reactive({
-  center: <any>[],
-  extraParams: <any>[],
+import { LayerSource } from "./components/interface";
+
+const mapStatus = reactive({
+  center: [120.619585, 31.299379] as number[],
+  sourceGroup: [] as LayerSource[],
 });
 
-const { center, extraParams } = toRefs(status);
+const { center, sourceGroup } = toRefs(mapStatus);
 
-const formSubmit = (form: Form) => {
+const formSubmit = (form: any): void => {
   center.value = form.center;
+  sourceGroup.value = form.source;
 };
 
 // 图层切换事件
@@ -35,4 +39,14 @@ const layerChange = (source: LayerSource) => {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.container {
+  display: flex;
+  &-form {
+    flex-grow: 1;
+  }
+  &-preview {
+    flex-grow: 2;
+  }
+}
+</style>

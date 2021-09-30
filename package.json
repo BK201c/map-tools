@@ -63,5 +63,8 @@
     "vite": "^2.4.4",
     "vue-tsc": "^0.3.0",
     "wait-on": "^6.0.0"
+  },
+  "resolutions": {
+    "vscode-vue-languageservice": "0.27.xx"
   }
 }

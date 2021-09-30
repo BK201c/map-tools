@@ -1,22 +1,27 @@
 <template>
-  <div class="map-container" id="mapContainer" ref="mapDom">
-    <div class="map-switch">
-      <h2>图层</h2>
-      <a-radio-group :value="selectedLayerId" @change="changeLayer">
-        <a-radio
-          :value="source.layer"
-          v-for="source of layerSource"
-          :style="radioStyle"
-          :key="source.layer"
-        >
-          {{ source.layer }}
-        </a-radio>
-      </a-radio-group>
+  <section>
+    <div id="mapContainer" ref="mapDom" class="map-container">
+      <div class="map-switch">
+        <h2>图层</h2>
+        <a-radio-group :value="activedLayerId" @change="layerChange">
+          <a-radio
+            :value="source.layer"
+            v-for="source of sourceGroup"
+            :style="radioStyle"
+            :key="source.layer"
+          >
+            {{ source.layer }}
+          </a-radio>
+        </a-radio-group>
+      </div>
     </div>
-    <!-- <div class="btn-full-map"></div> -->
-  </div>
+  </section>
 </template>
-<script>
+
+<script lang="ts" setup>
+import { onMounted,reactive,toRefs } from "vue";
+import { LayerSource } from "../interface";
+import { radioStyle } from "../styles";
 import {
   Map,
   View,
@@ -26,154 +31,96 @@ import {
   XYZ,
   TileGrid
 } from "@/core/ol";
-import { isMercatorProjection } from "@/utils/validation";
-import { lonLat2Mercator } from "@/utils/filter";
-export default {
-  name: "c-map",
-  props: {
-    center: {
-      type: Array,
-      default: () => [120, 31]
-    },
-    layerSource: {
-      type: Array,
-      default: () => []
-    }
-  },
-  data() {
-    return {
-      map: {},
-      selectedLayerId: "",
-      radioStyle: {
-        display: "block",
-        height: "30px",
-        lineHeight: "30px"
-      }
-    };
-  },
-  watch: {
-    layerSource: {
-      handler: function(newValue) {
-        this.setTargetLayer(newValue[0]);
-      },
-      immediate: false
-    }
-  },
-  computed: {},
-  components: {},
-  created() {},
-  mounted() {
-    this.initMapObj();
-  },
-  methods: {
-    // 切换图层
-    changeLayer(e) {
-      const layerId = e.target.value;
-      const [source] = this.$props.layerSource.filter(
-        source => source.layer === layerId
-      );
-      this.setTargetLayer(source);
-      this.$emit("change", source);
-    },
+import { lonLat2Mercator, isMercatorProjection } from "@/utils/filter";
 
-    //支持瓦片鉴权验证
-    tileLoader(tile, src) {
-      const client = new XMLHttpRequest();
-      client.open("GET", src);
-      client.responseType = "arraybuffer";
-      // const headers = this.source[0]?.headers;
-      // if (headers !== "") {
-      //   for (const key in headers) {
-      //     client.setRequestHeader(key, headers[key]);
-      //   }
-      // }
+const status =reactive({
+  activedLayerId:"",
+  mapDom:"",
+})
+const {mapDom,activedLayerId} = toRefs(status);
 
-      client.onload = () => {
-        const arrayBufferView = new Uint8Array(this.response);
-        const blob = new Blob([arrayBufferView], { type: "image/png" });
-        const urlCreator = window.URL || window.webkitURL;
-        const imageUrl = urlCreator.createObjectURL(blob);
-        tile.getImage().src = imageUrl;
-      };
+//初始化地图实例
+let mapInstance:any;
+onMounted(()=>{
+  mapInstance = new Map({
+    target: mapDom.value
+  });
+})
 
-      client.send();
-    },
+// 图层切换
+const layerChange = (e: any): void => {
+  const layerId = e?.target?.value;
+  const [source] = $props.sourceGroup.filter(
+    (source:LayerSource) => source.layer === layerId
+  );
+  $emit("layerChange", source);
+  setTargetLayer(source)
+};
 
-    //清空全部地图
-    cleanAllLayer() {
-      this.map?.getLayers()?.forEach(l => this.map.removeLayer(l));
-    },
+const $emit = defineEmits(["layerChange"]);
 
-    //设置全屏地图
-    setMapFullScreen() {
-      this.isMapFullScreen = !this.isMapFullScreen;
-      setTimeout(() => {
-        this.map.updateSize();
-      }, 400);
-    },
+const $props = defineProps<{
+  sourceGroup: LayerSource[];
+  center: number[];
+}>();
 
-    //设置需要显示的图层
-    setTargetLayer(source) {
-      this.cleanAllLayer();
-      const layer = this.createLayer(source);
-      const view = this.createView(source.projection);
-      this.selectedLayerId = source.layer;
-      console.log("settedSource", source, view);
-      this.map.setView(view);
-      this.map.addLayer(layer);
-    },
+// 清空图层
+const cleanAllLayer = ():void => {
+  mapInstance?.getLayers()?.forEach((l:any) => mapInstance.removeLayer(l))
+};
 
-    // 创建图层
-    createLayer(originSource) {
-      let source;
-      const type = originSource.serviceType.toUpperCase();
-      if (type === "WMTS") source = this.createWMTS(originSource);
-      if (type === "XYZ") source = this.createXYZ(originSource);
-      return new TileLayer({ source });
-    },
+// 创建图层
+const createLayer = (originSource:LayerSource) => {
+  let source;
+  const type = originSource.serviceType.toUpperCase();
+  if (type === "WMTS") source = createWMTS(originSource);
+  if (type === "XYZ") source = createXYZ(originSource);
+  return new TileLayer({ source });
+};
 
-    //创建视图
-    createView(projection) {
-      const center = isMercatorProjection(projection)
-        ? lonLat2Mercator(this.center)
-        : this.center;
+//创建视图
+const createView = (projection:string) => {
+  const center = isMercatorProjection(projection)
+    ? lonLat2Mercator($props.center)
+    : $props.center;
 
-      const viewOption = {
-        center: center,
-        projection: projection,
-        minZoom: 0,
-        maxZoom: 20,
-        zoom: 8
-      };
-      return new View(viewOption);
-    },
+  const viewOption = {
+    center: center,
+    projection: projection,
+    minZoom: 0,
+    maxZoom: 20,
+    zoom: 8
+  };
+  return new View(viewOption);
+};
 
-    //创建wmts图层，默认设置图层名称为图层id
-    createWMTS(option) {
-      const base = { ...option };
-      const tileGrid = option?.tileGrid && new WMTSTileGrid(option?.tileGrid);
-      const smOption = Object.assign({}, base, { tileGrid });
-      return new WMTS(smOption);
-    },
 
-    // 创建XYZ图层
-    createXYZ(option) {
-      const base = { ...option };
-      const tileGrid = option?.tileGrid && new TileGrid(option?.tileGrid);
-      const smOption = Object.assign({}, base, { tileGrid });
-      return new XYZ(smOption);
-    },
+//设置需要显示的图层
+const setTargetLayer = (source:LayerSource):void => {
+  cleanAllLayer();
+  const layer = createLayer(source);
+  const view = createView(source.projection);
+  activedLayerId.value = source.layer;
+  mapInstance.setView(view);
+  mapInstance.addLayer(layer);
+  console.log("activedSource", source, view);
+};
 
-    // 初始化地图对象
-    initMapObj() {
-      this.map = new Map({
-        target: this.$refs.mapDom
-      });
-      this.setTargetLayer(this.layerSource[0]);
-    }
-  }
+//创建WMTS图层，默认设置图层名称为图层id
+const createWMTS = (option:any)=> {
+  const base = { ...option };
+  const tileGrid = option?.tileGrid && new WMTSTileGrid(option?.tileGrid);
+  const smOption = Object.assign({}, base, { tileGrid });
+  return new WMTS(smOption);
+};
+
+// 创建XYZ图层
+const createXYZ = (option:any)=>{
+  const base = { ...option };
+  const tileGrid = option?.tileGrid && new TileGrid(option?.tileGrid);
+  const smOption = Object.assign({}, base, { tileGrid });
+  return new XYZ(smOption);
 };
 </script>
-<style lang="scss" scoped>
-@import "~@/styles/preview.scss";
-</style>
+
+<style lang="scss" scoped></style>
