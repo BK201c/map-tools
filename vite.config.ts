@@ -7,7 +7,7 @@ export default defineConfig({
   // 本地服务配置
   server: {
     host: "localhost",
-    port: 3000,
+    port: 3030,
     proxy: {
       "/api": {
         target: "http://jsonplaceholder.typicode.com",

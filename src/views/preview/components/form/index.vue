@@ -77,25 +77,17 @@ import { getLayerSourceByServer } from "@/api/common";
 const $emit = defineEmits(["submit"]);
 
 // 表单内容
-const formLayer: UnwrapRef<LayerSource> = reactive({
+const formLayer = reactive({
   url:
     "https://t3.tianditu.gov.cn/vec_c/wmts?tk=b789a2ea9a2f0fa03122984062eb1f35",
   layer: "defaultLayer",
   serviceType: "WMTS",
   projection: "EPSG:4326",
+  center: [120.619585, 31.299379],
+  isDevToolOpened: false,
+  isManualMode: false,
+  source: [] as LayerSource[],
 });
-
-//表单状态切换
-const { isDevToolOpened, isManualMode, center } = toRefs(
-  reactive({
-    center: [120.619585, 31.299379],
-    isDevToolOpened: false,
-    isManualMode: false,
-  })
-);
-
-//地图预览source
-const source = ref<LayerSource[]>([formLayer]);
 
 // 更换中心点坐标
 const cityChange = (center: any): void => {
@@ -105,20 +97,23 @@ const cityChange = (center: any): void => {
 
 // 提交表单
 const submit = (): void => {
-  const sendSource = toRaw({ source: source.value, center: center.value });
+  const sendSource = toRaw({
+    source: formLayer.source,
+    center: formLayer.center,
+  });
   $emit("submit", sendSource);
   console.log("表单数据", sendSource);
 };
 
 // 打开开发者模式
 const openTheDevtools = (): void => {
-  isDevToolOpened.value = !isDevToolOpened.value;
+  formLayer.isDevToolOpened = !formLayer.isDevToolOpened;
 };
 
 //手动添加图层
 const fileUploaded = (layers: LayerSource[]): void => {
   console.log("已手动添加图层", layers);
-  source.value = layers;
+  formLayer.source = layers;
 };
 </script>
 
