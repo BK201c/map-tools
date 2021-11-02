@@ -4,7 +4,7 @@ export interface MenuItem {
   component?: Function;
   name?: string;
   redirect?: string;
-  meta?: {
+  meta: {
     title: string;
     icon?: string;
   };

@@ -7,8 +7,8 @@ export const crmRouter: Array<MenuItem> = [
       title: "预览地图",
       icon: "HomeOutlined",
     },
-    path: "/privew",
-    name: "privew",
+    path: "/preview",
+    name: "preview",
     component: () => import("@/views/preview/index.vue"),
   },
   {

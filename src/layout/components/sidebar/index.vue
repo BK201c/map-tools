@@ -14,7 +14,7 @@
       <template #icon>
         <AntIcon :icon="menu.meta.icon" />
       </template>
-      <template #title>{{ menu.meta.title }}</template>
+      {{ menu.meta.title }}
     </a-menu-item>
   </a-menu>
 </template>
