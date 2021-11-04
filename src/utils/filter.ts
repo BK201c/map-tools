@@ -19,6 +19,11 @@ import { WMTSCapabilities } from "@/core/ol";
   );
 };
 
+// 转换投影坐标系
+export const convertProjection = (boolean = true):string =>{
+  return boolean ? "EPSG:3857":"EPSG:4326";
+};
+
 /**
  *
  * @param {*比例尺} scale
@@ -69,7 +74,7 @@ const filterTileGridInfo = (TileMatrixSet:any) => {
   });
   return {
     origin,
-    projection,
+    projection:convertProjection(isMercatorProjection(projection)),
     matrixIds,
     resolutions,
     tileSize

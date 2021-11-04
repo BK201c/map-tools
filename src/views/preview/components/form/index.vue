@@ -11,16 +11,24 @@
           v-model:value="formLayer.url"
           placeholder="http://xxx.xxxxx.com/vec_c/wmts"
           :allowClear="true"
-          :disabled="isManualMode"
+          :disabled="formLayer.isManualMode"
         >
         </a-input>
       </a-form-item>
       <a-form-item label="接入方式">
         <a-radio-group v-model:value="formLayer.serviceType">
-          <a-radio value="WMTS" name="serviceType" :disabled="isManualMode">
+          <a-radio
+            value="WMTS"
+            name="serviceType"
+            :disabled="formLayer.isManualMode"
+          >
             WMTS
           </a-radio>
-          <a-radio value="XYZ" name="serviceType" :disabled="isManualMode">
+          <a-radio
+            value="XYZ"
+            name="serviceType"
+            :disabled="formLayer.isManualMode"
+          >
             XYZ
           </a-radio>
         </a-radio-group>
@@ -40,13 +48,13 @@
       </a-form-item>
       <a-form-item label="专业模式">
         <a-switch
-          :checked="isDevToolOpened"
+          :checked="formLayer.isDevToolOpened"
           checked-children="开"
           un-checked-children="关"
           @click="openTheDevtools"
         />
       </a-form-item>
-      <div class="advanced-items" v-if="isDevToolOpened">
+      <div class="advanced-items" v-if="formLayer.isDevToolOpened">
         <a-form-item label="调试参数">
           <Uploader @uploaded="fileUploaded"></Uploader>
         </a-form-item>
@@ -92,17 +100,20 @@ const formLayer = reactive({
 // 更换中心点坐标
 const cityChange = (center: any): void => {
   center.values = center;
-  console.log("已切换初始中心点坐标", center);
+  console.log("Center point has been changed!", center);
 };
 
 // 提交表单
 const submit = (): void => {
-  const sendSource = toRaw({
-    source: formLayer.source,
-    center: formLayer.center,
+  getLayerSourceByServer(formLayer.url).then((source) => {
+    formLayer.source = source as LayerSource[];
+    const sendSource = toRaw({
+      source: formLayer.source,
+      center: formLayer.center,
+    });
+    $emit("submit", sendSource);
+    console.log("Form submmitted", sendSource);
   });
-  $emit("submit", sendSource);
-  console.log("表单数据", sendSource);
 };
 
 // 打开开发者模式
@@ -112,7 +123,7 @@ const openTheDevtools = (): void => {
 
 //手动添加图层
 const fileUploaded = (layers: LayerSource[]): void => {
-  console.log("已手动添加图层", layers);
+  console.log("Layer has been added manually", layers);
   formLayer.source = layers;
 };
 </script>

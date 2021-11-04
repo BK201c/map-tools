@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div id="mapContainer" ref="mapDom" class="map-container">
+    <div id="MapLayoutContainer" class="map-container">
       <div class="map-switch">
         <h2>图层</h2>
         <a-radio-group :value="activedLayerId" @change="layerChange">
@@ -9,9 +9,8 @@
             v-for="source of sourceGroup"
             :style="radioStyle"
             :key="source.layer"
+            >{{ source.layer }}</a-radio
           >
-            {{ source.layer }}
-          </a-radio>
         </a-radio-group>
       </div>
     </div>
@@ -19,8 +18,8 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted,reactive,toRefs } from "vue";
-import { LayerSource } from "../interface";
+import { onMounted, ref } from "vue";
+import { LayerSource } from "../../interface";
 import { radioStyle } from "../styles";
 import {
   Map,
@@ -33,44 +32,48 @@ import {
 } from "@/core/ol";
 import { lonLat2Mercator, isMercatorProjection } from "@/utils/filter";
 
-const status =reactive({
-  activedLayerId:"",
-  mapDom:"",
-})
-const {mapDom,activedLayerId} = toRefs(status);
-
-//初始化地图实例
-let mapInstance:any;
-onMounted(()=>{
-  mapInstance = new Map({
-    target: mapDom.value
-  });
-})
-
-// 图层切换
-const layerChange = (e: any): void => {
-  const layerId = e?.target?.value;
-  const [source] = $props.sourceGroup.filter(
-    (source:LayerSource) => source.layer === layerId
-  );
-  $emit("layerChange", source);
-  setTargetLayer(source)
-};
-
-const $emit = defineEmits(["layerChange"]);
-
+//数据接收项
 const $props = defineProps<{
   sourceGroup: LayerSource[];
   center: number[];
 }>();
 
+const activedLayerId = ref("default");
+
+//初始化地图实例
+let mapInstance: any;
+onMounted(() => {
+  mapInstance = init()
+  console.log(`Map is initialized`);
+})
+
+//初始化地图实例
+const init = (domElement = "MapLayoutContainer") => {
+  return new Map({
+    target: domElement
+  });
+}
+
+// 图层切换
+const $emit = defineEmits(["layerChange"]);
+
+const layerChange = (e: any): void => {
+  const layerId = e?.target?.value;
+  const [source] = $props.sourceGroup.filter(
+    (source: LayerSource) => source.layer === layerId
+  );
+  $emit("layerChange", source);
+  setTargetLayer(source)
+};
+
+
 // 清空图层
-const cleanAllLayer = ():void => {
-  mapInstance?.getLayers()?.forEach((l:any) => mapInstance.removeLayer(l))
+const cleanAllLayer = (): void => {
+  mapInstance?.getLayers()?.forEach((l: any) => mapInstance.removeLayer(l))
 };
 
 // 创建图层
-const createLayer = (originSource:LayerSource) => {
+const createLayer = (originSource: LayerSource) => {
   let source;
   const type = originSource.serviceType.toUpperCase();
   if (type === "WMTS") source = createWMTS(originSource);
@@ -79,7 +82,7 @@ const createLayer = (originSource:LayerSource) => {
 };
 
 //创建视图
-const createView = (projection:string) => {
+const createView = (projection: string) => {
   const center = isMercatorProjection(projection)
     ? lonLat2Mercator($props.center)
     : $props.center;
@@ -96,18 +99,18 @@ const createView = (projection:string) => {
 
 
 //设置需要显示的图层
-const setTargetLayer = (source:LayerSource):void => {
+const setTargetLayer = (source: LayerSource): void => {
   cleanAllLayer();
   const layer = createLayer(source);
   const view = createView(source.projection);
   activedLayerId.value = source.layer;
   mapInstance.setView(view);
   mapInstance.addLayer(layer);
-  console.log("activedSource", source, view);
+  console.log("Setted source", source, view);
 };
 
 //创建WMTS图层，默认设置图层名称为图层id
-const createWMTS = (option:any)=> {
+const createWMTS = (option: any) => {
   const base = { ...option };
   const tileGrid = option?.tileGrid && new WMTSTileGrid(option?.tileGrid);
   const smOption = Object.assign({}, base, { tileGrid });
@@ -115,7 +118,7 @@ const createWMTS = (option:any)=> {
 };
 
 // 创建XYZ图层
-const createXYZ = (option:any)=>{
+const createXYZ = (option: any) => {
   const base = { ...option };
   const tileGrid = option?.tileGrid && new TileGrid(option?.tileGrid);
   const smOption = Object.assign({}, base, { tileGrid });
