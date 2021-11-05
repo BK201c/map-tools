@@ -1,24 +1,14 @@
 <template>
   <section>
     <div class="markdown-body">
-      <VueMarkdown :source="mdData" v-highlight></VueMarkdown>
+      <VueMarkdown :source="markdownData" v-highlight></VueMarkdown>
     </div>
   </section>
 </template>
 
-<script>
+<script lang="ts" setup>
 import VueMarkdown from "vue-markdown";
 import markdownData from "../../../README.md";
-export default {
-  components: {
-    VueMarkdown
-  },
-  data() {
-    return {
-      mdData: markdownData
-    };
-  }
-};
 </script>
 
 <style lang="scss" scoped>

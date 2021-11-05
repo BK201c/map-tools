@@ -2,9 +2,6 @@ import { WMTSTileGrid, TileGrid, XYZ } from "@/core/ol";
 
 type SourceType = "wmts" | "xyz" | "wms";
 type Projection = "EPSG:4326" | "EPSG:3857";
-type TileGrideXYZ = {};
-
-type TileGrideWMTS = {};
 
 type Source = {
   layer: string;
@@ -13,11 +10,17 @@ type Source = {
   projection: Projection;
   tileGride?: {};
 };
+export class BaseLayer {
+  layer: string;
+  url: string;
+  serviceType: SourceType;
+  projection: Projection;
 
-export class LayerSource {
-  private tileGride;
   constructor(opt: any) {
-    this.tileGride = this.createTileGrid(opt.serviceType, opt.tileGride);
+    this.layer = opt.layer;
+    this.url = opt.url;
+    this.serviceType = opt.serviceType;
+    this.projection = opt.serviceType;
   }
 
   /**
@@ -32,4 +35,6 @@ export class LayerSource {
       return new TileGrid(tileGride);
     }
   }
+
+  createLayer() {}
 }
