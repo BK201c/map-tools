@@ -1,4 +1,4 @@
-class Proj {
+class ProjExt {
   constructor() {}
 
   /**
@@ -6,13 +6,13 @@ class Proj {
    * @param {*坐标系 projection}
    * @returns boolen
    */
-  static isMercatorProjection(projection: string): boolean {
+  static isMercatorProjection = (projection: string): boolean => {
     const degreeMapper = ["EPSG:4326", "EPSG:4490", "wgs84"];
     const mercatorMapper = ["EPSG:3857", "EPSG:900913"];
     return (
       mercatorMapper.includes(projection) && !degreeMapper.includes(projection)
     );
-  }
+  };
 
   /**
    *
@@ -21,11 +21,11 @@ class Proj {
    * @param {*像素密度} dpi
    * @returns 地面分辨率
    */
-  static calcResolutionByScale(
+  static calcResolutionByScale = (
     scale: number,
     isMercatorProjection = false,
     dpi = 96
-  ): number {
+  ): number => {
     // 一个像素等于多少米距离（像素/米）,OGC标准下单位像素距离
     const defaultPixelMeter = 0.0254;
 
@@ -45,15 +45,14 @@ class Proj {
     const customDpi = isMercatorProjection ? defaultPixelMeter / 0.00028 : dpi;
 
     return (defaultPixelMeter * scale) / (customDpi * units);
-  }
+  };
 
   // 转换投影坐标系
-  static convertProjection(projection = "EPSG:4326"): string {
-    return Proj.isMercatorProjection(projection) ? "EPSG:3857" : "EPSG:4326";
-  }
+  static convertProjection = (projection = "EPSG:4326"): string =>
+    ProjExt.isMercatorProjection(projection) ? "EPSG:3857" : "EPSG:4326";
 
   //经纬度转墨卡托
-  static lonLat2Mercator(coordinates: number[]): number[] {
+  static lonLat2Mercator = (coordinates: number[]): number[] => {
     const [lon, lat] = coordinates;
     const x = (lon * 20037508.34) / 180;
     const y =
@@ -61,7 +60,7 @@ class Proj {
         20037508.34) /
       180;
     return [x, y];
-  }
+  };
 }
 
-export default Proj;
+export default ProjExt;

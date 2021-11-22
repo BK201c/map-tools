@@ -30,7 +30,7 @@ import {
   XYZ,
   TileGrid
 } from "@/core/ol";
-import { lonLat2Mercator, isMercatorProjection } from "@/utils/filter";
+import ProjExt from "@/utils/projExt";
 
 //数据接收项
 const $props = defineProps<{
@@ -83,8 +83,8 @@ const createLayer = (originSource: LayerSource) => {
 
 //创建视图
 const createView = (projection: string) => {
-  const center = isMercatorProjection(projection)
-    ? lonLat2Mercator($props.center)
+  const center = ProjExt.isMercatorProjection(projection)
+    ? ProjExt.lonLat2Mercator($props.center)
     : $props.center;
 
   const viewOption = {
