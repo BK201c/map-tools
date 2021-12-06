@@ -15,5 +15,4 @@ export interface Form {
   center: number[];
   projection: string;
   serviceType: string;
-  extraParams?: LayerSource[];
 }

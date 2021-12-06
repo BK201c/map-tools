@@ -6,7 +6,7 @@
         <a-radio-group :value="activedLayerId" @change="layerChange">
           <a-radio
             :value="source.layer"
-            v-for="source of sourceGroup"
+            v-for="source of mapSource"
             :style="radioStyle"
             :key="source.layer"
             >{{ source.layer }}</a-radio
@@ -34,7 +34,7 @@ import ProjExt from "@/utils/projExt";
 
 //数据接收项
 const $props = defineProps<{
-  sourceGroup: LayerSource[];
+  mapSource: LayerSource[];
   center: number[];
 }>();
 
@@ -59,7 +59,7 @@ const $emit = defineEmits(["layerChange"]);
 
 const layerChange = (e: any): void => {
   const layerId = e?.target?.value;
-  const [source] = $props.sourceGroup.filter(
+  const [source] = $props.mapSource.filter(
     (source: LayerSource) => source.layer === layerId
   );
   $emit("layerChange", source);

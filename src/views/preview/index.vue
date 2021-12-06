@@ -5,7 +5,7 @@
     </div>
     <div class="container-preview">
       <Map
-        :sourceGroup="sourceGroup"
+        :mapSource="mapSource"
         :center="center"
         @layerChange="layerChange"
         width="200px"
@@ -19,18 +19,18 @@
 import Map from "./components/map/index.vue";
 import MapForm from "./components/form/index.vue";
 import { reactive, toRefs } from "@vue/reactivity";
-import { LayerSource } from "./components/interface";
+import { LayerSource } from "./interface";
 
 const mapStatus = reactive({
   center: [120.619585, 31.299379] as number[],
-  sourceGroup: [] as LayerSource[],
+  mapSource: [] as LayerSource[],
 });
 
-const { center, sourceGroup } = toRefs(mapStatus);
+const { center, mapSource } = toRefs(mapStatus);
 
-const formSubmit = (form: any): void => {
-  center.value = form.center;
-  sourceGroup.value = form.source;
+const formSubmit = (data: any): void => {
+  mapSource.value = data.mapSource;
+  center.value = data.center;
 };
 
 // 图层切换事件
