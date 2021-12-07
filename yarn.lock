@@ -3272,10 +3272,10 @@ highlight.js@^10.7.1:
   resolved "https://registry.nlark.com/highlight.js/download/highlight.js-10.7.3.tgz"
   integrity sha1-aXJy45kTVuQMPKxWanTu9oF1ZTE=
 
-highlight.js@^11.2.0:
-  version "11.2.0"
-  resolved "https://registry.nlark.com/highlight.js/download/highlight.js-11.2.0.tgz"
-  integrity sha1-p+O4wf3E8FOLk7LcLd1TpAxqsPA=
+highlight.js@^11.3.1:
+  version "11.3.1"
+  resolved "https://registry.npmmirror.com/highlight.js/download/highlight.js-11.3.1.tgz#813078ef3aa519c61700f84fe9047231c5dc3291"
+  integrity sha1-gTB47zqlGcYXAPhP6QRyMcXcMpE=
 
 highlight.js@^9.12.0:
   version "9.18.5"

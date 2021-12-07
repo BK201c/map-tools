@@ -13,6 +13,15 @@ export const crmRouter: Array<MenuItem> = [
   },
   {
     meta: {
+      title: "适配文件",
+      icon: "HomeOutlined",
+    },
+    path: "/adapter",
+    name: "adapter",
+    component: () => import("@/views/adapter/index.vue"),
+  },
+  {
+    meta: {
       title: "使用说明",
       icon: "ProjectOutlined",
     },
