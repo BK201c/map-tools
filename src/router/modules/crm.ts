@@ -14,7 +14,7 @@ export const crmRouter: Array<MenuItem> = [
   {
     meta: {
       title: "适配文件",
-      icon: "HomeOutlined",
+      icon: "FileSearchOutlined",
     },
     path: "/adapter",
     name: "adapter",
