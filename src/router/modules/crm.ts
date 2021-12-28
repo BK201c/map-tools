@@ -20,15 +20,15 @@ export const crmRouter: Array<MenuItem> = [
     name: "adapter",
     component: () => import("@/views/adapter/index.vue"),
   },
-  {
-    meta: {
-      title: "使用说明",
-      icon: "ProjectOutlined",
-    },
-    path: "/guide",
-    name: "guide",
-    component: () => import("@/views/guide/index.vue"),
-  },
+  // {
+  //   meta: {
+  //     title: "使用说明",
+  //     icon: "ProjectOutlined",
+  //   },
+  //   path: "/guide",
+  //   name: "guide",
+  //   component: () => import("@/views/guide/index.vue"),
+  // },
   {
     meta: {
       title: "关于",

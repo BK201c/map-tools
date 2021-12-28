@@ -8,7 +8,7 @@
 const $props = defineProps({
   code: {
     type: [Object, String],
-    default: () => "dddd",
+    default: "",
   },
 });
 </script>

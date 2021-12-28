@@ -22,7 +22,6 @@
 <script lang="ts" setup>
 import AntIcon from "@/components/icon";
 import { message } from "ant-design-vue";
-import { log } from "console";
 import { ref ,computed} from "vue";
 interface FileItem {
   uid: string;
@@ -59,18 +58,25 @@ const handleRemove = (file: FileItem) => {
 // 上传前处理事件
 const beforeUpload = (file: FileItem) => {
   fileList.value = [...fileList.value, file];
+  $emit("uploaded", uploadData);
   return false;
 };
 
-//解析json文件
+//解析file 格式json文件
 const getJsonParse = (file: any) => {
-  const reader = new FileReader();
-  reader.readAsText(file);
-  reader.onload = (e: any) => {
-    const uploadData = JSON.parse(e?.target?.result);
-    console.log("已解析上传文件", uploadData);
-    $emit("uploaded", uploadData);
-  };
+  return new Promise((reject,resolve)=>{
+    try {
+      const reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = (e: any) => {
+        const uploadData = JSON.parse(e?.target?.result);
+        console.log("已解析上传文件", uploadData);
+        resolve(uploadData)
+      };
+    } catch (error) {
+      reject(error)
+    }
+  })
 };
 </script>
 

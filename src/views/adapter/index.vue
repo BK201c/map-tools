@@ -15,7 +15,7 @@
 import Uploader from "@/components/uploader/index.vue";
 import Higlight from "@/components/higlight/index.vue";
 import { ref } from "vue";
-const code = ref("asas");
+const code = ref("");
 
 const uploaded = (value: any): void => {
   code.value = value;
