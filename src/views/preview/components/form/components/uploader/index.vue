@@ -46,7 +46,7 @@ const beforeUpload = (file: FileItem) => {
 const getJsonParse = (file: any) => {
   const reader = new FileReader();
   reader.readAsText(file);
-  reader.onload = (e: ProgressEvent) => {
+  reader.onload = (e: any) => {
     const uploadData = JSON.parse(e?.target?.result);
     emit("uploaded", uploadData);
   };

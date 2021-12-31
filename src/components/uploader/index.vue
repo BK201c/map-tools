@@ -3,7 +3,7 @@
     :is="'a-upload-dragger'"
     v-model:fileList="fileList"
     name="file"
-    :multiple="true"
+    :multiple="false"
     :remove="handleRemove"
     :before-upload="beforeUpload"
   >
@@ -58,13 +58,13 @@ const handleRemove = (file: FileItem) => {
 // 上传前处理事件
 const beforeUpload = (file: FileItem) => {
   fileList.value = [...fileList.value, file];
-  $emit("uploaded", uploadData);
+  readJsonByFile(fileList.value[0]).then(res=>$emit("uploaded", res));
   return false;
 };
 
 //解析file 格式json文件
-const getJsonParse = (file: any) => {
-  return new Promise((reject,resolve)=>{
+const readJsonByFile = (file: any) => {
+  return new Promise((resolve,reject)=>{
     try {
       const reader = new FileReader();
       reader.readAsText(file);
@@ -74,6 +74,7 @@ const getJsonParse = (file: any) => {
         resolve(uploadData)
       };
     } catch (error) {
+      console.log("解析文件失败，请重新上传", error);
       reject(error)
     }
   })

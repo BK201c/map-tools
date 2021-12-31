@@ -7,10 +7,15 @@
 <script lang="ts" setup>
 const $props = defineProps({
   code: {
-    type: [Object, String],
-    default: "",
+    type: Object,
+    default: () => {},
   },
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+section {
+  max-height: 300px;
+  overflow-y: scroll;
+}
+</style>

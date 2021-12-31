@@ -9,9 +9,6 @@
     "style": "default",
     "matrixSet": "c",
     "wrapX": true,
-    "headers": {
-      "Authorization": "Basic MjJhNDJmNjVjOGM0NDcyNGI1NzAzZWZkNTRiZjU3ODI6YWE5MDAxNTMyYmQzNDI3OWE5N2UzYjAxYmY2MTczZjk="
-    },
     "tileGrid": {
       "resolutions": [
         0.7031250000000002,

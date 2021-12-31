@@ -123,6 +123,7 @@ button {
 }
 
 ol,
+li,
 ul {
   list-style: none;
 }
