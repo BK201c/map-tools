@@ -15,7 +15,7 @@ const $props = defineProps({
 
 <style lang="scss" scoped>
 section {
-  max-height: 300px;
+  max-height: 90vh;
   overflow-y: scroll;
 }
 </style>

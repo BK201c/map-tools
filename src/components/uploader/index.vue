@@ -1,11 +1,12 @@
 <template>
   <a-upload-dragger
-    :is="'a-upload-dragger'"
     v-model:fileList="fileList"
     name="file"
     :multiple="false"
     :remove="handleRemove"
     :before-upload="beforeUpload"
+    @change="handleChange"
+    accept=".json"
   >
     <p class="ant-upload-drag-icon">
       <AntIcon icon="InboxOutlined" />
@@ -31,21 +32,33 @@ interface FileItem {
   url?: string;
   raw: any;
 }
+interface FileInfo {
+  file: FileItem;
+  fileList: FileItem[];
+}
 
 const fileList = ref<FileItem[]>([]);
 
 const $emit = defineEmits(["uploaded","removed"]);
 
-interface Props {
-  isDraggable: boolean
-}
-const $props = withDefaults(defineProps<Props>(), {
-  isDraggable:true,
-})
+const handleChange = (info: FileInfo) => {
+    let resFileList = [...info.fileList];
 
-const currentModule = computed(()=>{
-  $props.isDraggable? "a-upload-dragger":"a-upload"
-})
+    // 1. Limit the number of uploaded files
+    //    Only to show two recent uploaded files, and old ones will be replaced by the new
+    resFileList = resFileList.slice(-2);
+
+    // 2. read from response and show file link
+    // resFileList = resFileList.map(file => {
+    //   if (file.response) {
+    //     // Component will show file.url as link
+    //     file.url = file.response.url;
+    //   }
+    //   return file;
+    // });
+
+    fileList.value = resFileList;
+  };
 
 // 移除文件
 const handleRemove = (file: FileItem) => {
