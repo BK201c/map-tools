@@ -9,12 +9,12 @@
         </a-row>
         <a-row class="adapter-container-tags">
           <a-col :span="24">
-            <Transform @change="change" :iptStyle="code"></Transform>
+            <Transform @change="change" :iptStyle="styleJson"></Transform>
           </a-col>
         </a-row>
       </a-col>
       <a-col :span="14">
-        <Higlight :code="code"></Higlight>
+        <Higlight :code="resultStyle"></Higlight>
       </a-col>
     </a-row>
   </section>
@@ -25,14 +25,17 @@ import Uploader from "@/components/uploader/index.vue";
 import Higlight from "@/components/higlight/index.vue";
 import Transform from "./components/transform.vue";
 import { ref } from "vue";
-const code = ref({});
+const styleJson = ref({});
+const resultStyle = ref({});
 
 const uploaded = (value: any): void => {
-  code.value = value;
+  styleJson.value = value;
   console.log("捕获到upload");
 };
 
-const change = (): void => {};
+const change = (optStyle: any): void => {
+  resultStyle.value = optStyle;
+};
 </script>
 
 <style lang="scss" scoped>

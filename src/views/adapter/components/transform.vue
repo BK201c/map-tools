@@ -13,7 +13,7 @@
           </a-checkbox>
           <a-checkbox-group
             v-model:value="state.checkedList"
-            :options="state.layerNames"
+            :options="state.checkNameList"
           />
         </a-space>
       </a-col>
@@ -58,7 +58,7 @@ const state = reactive({
   checkAll: false,
   checkedList: [],
   layerGroup: [],
-  layerNames: <any>[],
+  checkNameList: <any>[],
   replaceIP: "",
   styleVersion: "v3",
 });
@@ -72,23 +72,23 @@ watch(
   { deep: true }
 );
 
-// 从样式文件结构styles
+// 解析原始styles为单个图层列表
 const decodeLayers = (styles: any) => {
   const layers = styles["layers"] || styles["2d"]["layers"] || styles;
   const tags = Object.values(layers) as [];
   state.layerGroup.push(...tags);
-  state.layerNames = [...tags.map((e: any, i: number) => String(i))];
+  state.checkNameList = [...tags.map((e: any, i: number) => String(i))];
 };
 
 const onCheckAllChange = (e: any) => {
   Object.assign(state, {
-    checkedList: e.target.checked ? state.layerNames : [],
+    checkedList: e.target.checked ? state.checkNameList : [],
     indeterminate: false,
   });
 };
 
 // 转换样式文件
-const generateLayer = (version: string, layers: []): void => {
+const generateLayer = (version: string, layerGroup: any[]): void => {
   const versionStyle = {
     v2: {
       isCompatibleEngine: true,
@@ -109,9 +109,16 @@ const generateLayer = (version: string, layers: []): void => {
       },
     },
   };
+  let layers: { [key: string]: any } = {};
+  layerGroup.map((e, i) => {
+    layers[`layer${i}`] = e;
+  });
   switch (version) {
     case "v2":
-      return Object.assign({} as any, versionStyle.v2, { layers });
+      return Object.assign({} as any, versionStyle.v2, {
+        projection: layerGroup[0].projection,
+        layers,
+      });
     case "v3":
       return Object.assign({} as any, versionStyle.v3, { "2d": { layers } });
     default:
@@ -125,8 +132,12 @@ const onSearch = (searchValue: string) => {
   console.log("or use this.value", state.replaceIP);
 };
 
+//生成样式文件
 const createStyle = (): void => {
-  // generateLayer(state.styleVersion.value);
+  const checkdLayer = [...state.checkedList.map((e) => state.layerGroup[e])];
+  const targetStyle = generateLayer(state.styleVersion, checkdLayer);
+  console.log(`已生成${state.styleVersion}样式`, targetStyle);
+  $emit("change", targetStyle);
 };
 </script>
 
