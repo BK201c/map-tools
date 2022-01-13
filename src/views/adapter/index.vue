@@ -1,6 +1,6 @@
 <template>
   <section class="adapter-container">
-    <a-row>
+    <a-row :gutter="[8, 8]">
       <a-col :span="10">
         <a-row>
           <a-col :span="24">
@@ -26,7 +26,7 @@ import Higlight from "@/components/higlight/index.vue";
 import Transform from "./components/transform.vue";
 import { ref } from "vue";
 const styleJson = ref({});
-const resultStyle = ref({});
+const resultStyle = ref();
 
 const uploaded = (value: any): void => {
   styleJson.value = value;

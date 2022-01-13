@@ -25,15 +25,21 @@ module.exports = {
       rules: [
         {
           test: /\.md$/,
-          use: "text-loader"
-        }
-      ]
-    }
+          use: "text-loader",
+        },
+      ],
+    },
+    node: {
+      global: false,
+      __filename: false,
+      __dirname: false,
+      fs: true,
+    },
   },
 
   // webpack 链接 API，用于生成和修改 webapck 配置
-  chainWebpack: config => {
-    config.plugin("html").tap(args => {
+  chainWebpack: (config) => {
+    config.plugin("html").tap((args) => {
       args[0].title = "MapTools";
       return args;
     });
@@ -48,7 +54,7 @@ module.exports = {
 
     https: false,
 
-    hotOnly: true
+    hotOnly: true,
   },
 
   // 构建时开启多进程处理 babel 编译
@@ -63,7 +69,7 @@ module.exports = {
       nodeIntegration: true,
       builderOptions: {
         electronDownload: {
-          mirror: "https://npm.taobao.org/mirrors/electron/"
+          mirror: "https://npm.taobao.org/mirrors/electron/",
         },
         appId: "com.mapTools.app",
         copyright: "Copyright 2020-2021",
@@ -71,9 +77,9 @@ module.exports = {
         files: ["!dist/**/*"],
         win: {
           target: ["zip"],
-          icon: "./public/logo.png"
-        }
-      }
-    }
-  }
+          icon: "./public/logo.png",
+        },
+      },
+    },
+  },
 };

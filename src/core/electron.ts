@@ -6,21 +6,7 @@ import {
   Menu,
   ipcMain,
   clipboard,
-  ipcRenderer
+  ipcRenderer,
 } from "electron";
 
-//node
-import path from "path";
-import fs from "fs";
-
-export {
-  app,
-  protocol,
-  BrowserWindow,
-  Menu,
-  ipcMain,
-  clipboard,
-  ipcRenderer,
-  path,
-  fs
-};
+export { app, protocol, BrowserWindow, Menu, ipcMain, clipboard, ipcRenderer };

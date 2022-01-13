@@ -36,7 +36,7 @@
           v-model:value="state.replaceIP"
           placeholder="输入替换目标地址"
           enter-button="更改"
-          @search="onSearch"
+          @search="replaceUrl"
         />
       </a-col>
     </a-row>
@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, toRaw, reactive } from "vue";
+import { watch, toRaw, reactive, ref } from "vue";
 
 const $emit = defineEmits(["change"]);
 const $props = defineProps({
@@ -88,7 +88,7 @@ const onCheckAllChange = (e: any) => {
 };
 
 // 转换样式文件
-const generateLayer = (version: string, layerGroup: any[]): void => {
+const generateLayer = (version: string, layerGroup: any[]): {} => {
   const versionStyle = {
     v2: {
       isCompatibleEngine: true,
@@ -126,18 +126,50 @@ const generateLayer = (version: string, layerGroup: any[]): void => {
   }
 };
 
-// ip替换
-const onSearch = (searchValue: string) => {
-  console.log("use value", searchValue);
-  console.log("or use this.value", state.replaceIP);
-};
-
 //生成样式文件
 const createStyle = (): void => {
   const checkdLayer = [...state.checkedList.map((e) => state.layerGroup[e])];
   const targetStyle = generateLayer(state.styleVersion, checkdLayer);
   console.log(`已生成${state.styleVersion}样式`, targetStyle);
   $emit("change", targetStyle);
+};
+
+//替换样式文件地址
+const replaceUrlByVersion = (
+  version: string,
+  ip: string,
+  url: string
+): void => {
+  const kmapServer = {
+    v2: {
+      ip: "@kedacom.com",
+      path: "/kmap-server/threeMap",
+      map: "local_map",
+    },
+    v3: {
+      ip: "@kedacom.com",
+      path: "/kmap-server-engine/threeMap",
+      map: "local_map",
+    },
+  };
+  const targetPath: string = `${ip || kmapServer[version].ip}${
+    kmapServer[version].path
+  }${kmapServer[version].map}`;
+  const reg =
+    "((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+$,\w]+@)?[A-Za-z0-9.-]+(:[0-9]+)?|(?:ww‌​w.|[-;:&=\+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?‌​(?:[\w]*))?)";
+  return url.replace(reg, targetPath);
+};
+
+const replaceUrl = (): void => {
+  state.layerGroup.forEach(
+    (layer: any) =>
+      (layer.url = replaceUrlByVersion(
+        state.styleVersion,
+        state.replaceIP,
+        layer.url
+      ))
+  );
+  setTimeout(() => createStyle(), 0);
 };
 </script>
 
