@@ -1,6 +1,6 @@
 <template>
   <a-upload-dragger
-    v-model:fileList="fileList"
+    :file-list="fileList"
     name="file"
     :multiple="false"
     :remove="handleRemove"
@@ -42,23 +42,12 @@ const fileList = ref<FileItem[]>([]);
 const $emit = defineEmits(["uploaded","removed"]);
 
 const handleChange = (info: FileInfo) => {
-    let resFileList = [...info.fileList];
-
-    // 1. Limit the number of uploaded files
-    //    Only to show two recent uploaded files, and old ones will be replaced by the new
-    resFileList = resFileList.slice(-2);
-
-    // 2. read from response and show file link
-    // resFileList = resFileList.map(file => {
-    //   if (file.response) {
-    //     // Component will show file.url as link
-    //     file.url = file.response.url;
-    //   }
-    //   return file;
-    // });
-
-    fileList.value = resFileList;
-  };
+  let resFileList = [...info.fileList];
+  // 1. Limit the number of uploaded files
+  //    Only to show two recent uploaded files, and old ones will be replaced by the new
+  resFileList = resFileList.slice(-1);
+  fileList.value = resFileList;
+};
 
 // 移除文件
 const handleRemove = (file: FileItem) => {
@@ -70,8 +59,7 @@ const handleRemove = (file: FileItem) => {
 
 // 上传前处理事件
 const beforeUpload = (file: FileItem) => {
-  fileList.value = [...fileList.value, file];
-  readJsonByFile(fileList.value[0]).then(res=>$emit("uploaded", res));
+  readJsonByFile(file).then(res=>$emit("uploaded", res));
   return false;
 };
 

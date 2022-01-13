@@ -140,24 +140,24 @@ const replaceUrlByVersion = (
   ip: string,
   url: string
 ): void => {
-  const kmapServer = {
-    v2: {
-      ip: "@kedacom.com",
-      path: "/kmap-server/threeMap",
-      map: "local_map",
-    },
-    v3: {
-      ip: "@kedacom.com",
-      path: "/kmap-server-engine/threeMap",
-      map: "local_map",
-    },
-  };
-  const targetPath: string = `${ip || kmapServer[version].ip}${
-    kmapServer[version].path
-  }${kmapServer[version].map}`;
-  const reg =
-    "((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+$,\w]+@)?[A-Za-z0-9.-]+(:[0-9]+)?|(?:ww‌​w.|[-;:&=\+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?‌​(?:[\w]*))?)";
-  return url.replace(reg, targetPath);
+  // const kmapServer = {
+  //   v2: {
+  //     ip: "@kedacom.com",
+  //     path: "/kmap-server/threeMap",
+  //     map: "local_map",
+  //   },
+  //   v3: {
+  //     ip: "@kedacom.com",
+  //     path: "/kmap-server-engine/threeMap",
+  //     map: "local_map",
+  //   },
+  // };
+  // const targetPath: string = `${ip || kmapServer[version].ip}${
+  //   kmapServer[version].path
+  // }${kmapServer[version].map}`;
+  // const reg =
+  //   "((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+$,\w]+@)?[A-Za-z0-9.-]+(:[0-9]+)?|(?:ww‌​w.|[-;:&=\+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?‌​(?:[\w]*))?)";
+  // return url.replace(reg, targetPath);
 };
 
 const replaceUrl = (): void => {
@@ -175,8 +175,6 @@ const replaceUrl = (): void => {
 
 <style lang="scss" scoped>
 .trans-styles {
-  &-origin {
-  }
   &-button {
     margin-top: 10px;
   }

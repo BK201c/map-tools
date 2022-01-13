@@ -55,15 +55,23 @@ const downloadParams = () => {
   const downloadContent = String(code);
   const file = `adapt_${fileName}_${dataPx}.${fileType}`;
   const fullPath = `${path}/${file}`;
-  fs.writeFile(fullPath, downloadContent, (err) => {
-    if (err) {
-      console.error(err);
-      // this.$message.success(err);
-      return;
-    }
-    //文件写入成功。
-    // this.$message.success(`${fileName} 已保存至程序的resources目录`);
+  const blob = new Blob([JSON.stringify(downloadContent, null, 2)], {
+    type: "application/json",
   });
+  const urlCreator = window.URL || window.webkitURL;
+  const link = urlCreator.createObjectURL(blob);
+  let linknode = document.createElement("a");
+  linknode.setAttribute("download", file);
+  linknode.setAttribute("href", link);
+  // fs.writeFile(fullPath, downloadContent, (err) => {
+  //   if (err) {
+  //     console.error(err);
+  //     this.$message.success(err);
+  //     return;
+  //   }
+  //   //文件写入成功。
+  //   this.$message.success(`${fileName} 已保存至程序的resources目录`);
+  // });
 };
 </script>
 
