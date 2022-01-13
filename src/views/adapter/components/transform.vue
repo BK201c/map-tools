@@ -49,7 +49,7 @@ import { watch, toRaw, reactive, ref } from "vue";
 const $emit = defineEmits(["change"]);
 const $props = defineProps({
   iptStyle: {
-    type: Object,
+    type: [Object, String],
     default: () => {},
   },
 });

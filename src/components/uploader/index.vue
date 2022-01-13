@@ -1,23 +1,25 @@
 <template>
-  <a-upload-dragger
-    :file-list="fileList"
-    name="file"
-    :multiple="false"
-    :remove="handleRemove"
-    :before-upload="beforeUpload"
-    @change="handleChange"
-    accept=".json"
-  >
-    <p class="ant-upload-drag-icon">
-      <AntIcon icon="InboxOutlined" />
-    </p>
-    <p class="ant-upload-text">
-      点击或拖拽上传文件
-    </p>
-    <p class="ant-upload-hint">
-      仅支持上传json文件
-    </p>
-  </a-upload-dragger>
+  <section style="height: 200px;">
+    <a-upload-dragger
+      :file-list="fileList"
+      name="file"
+      :multiple="false"
+      :remove="handleRemove"
+      :before-upload="beforeUpload"
+      @change="handleChange"
+      accept=".json"
+    >
+      <p class="ant-upload-drag-icon">
+        <AntIcon icon="InboxOutlined" />
+      </p>
+      <p class="ant-upload-text">
+        点击或拖拽上传文件
+      </p>
+      <p class="ant-upload-hint">
+        仅支持上传json文件
+      </p>
+    </a-upload-dragger>
+  </section>
 </template>
 
 <script lang="ts" setup>
@@ -71,7 +73,7 @@ const readJsonByFile = (file: any) => {
       reader.readAsText(file);
       reader.onload = (e: any) => {
         const uploadData = JSON.parse(e?.target?.result);
-        console.log("已解析上传文件", uploadData);
+        console.log("上传文件已解析", uploadData);
         resolve(uploadData)
       };
     } catch (error) {

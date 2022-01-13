@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div class="opera-are">
+    <div class="opera-are" v-if="hasTools">
       <a-row class="btn-list-item" justify="end">
         <a-space>
           <a-button @click="copyParams">
@@ -21,7 +21,11 @@ import fs from "fs";
 import dayjs from "dayjs";
 const $props = defineProps({
   code: {
-    type: Object,
+    type: [Object, String],
+  },
+  hasTools: {
+    type: Boolean,
+    default: false,
   },
   path: {
     type: String,
