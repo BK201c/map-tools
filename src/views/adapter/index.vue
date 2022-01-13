@@ -9,7 +9,11 @@
         </a-row>
         <a-row class="adapter-container-tags">
           <a-col :span="24">
-            <Transform @change="change" :iptStyle="style.upload"></Transform>
+            <Transform
+              @rebuild="rebuild"
+              @changeVersion="changeVersion"
+              :iptStyle="style.upload"
+            ></Transform>
           </a-col>
         </a-row>
       </a-col>
@@ -21,7 +25,7 @@
           <a-collapse-panel key="1" header="原始样式" :style="customStyle">
             <Higlight :code="style.upload"></Higlight>
           </a-collapse-panel>
-          <a-collapse-panel key="2" header="重构后" :style="customStyle">
+          <a-collapse-panel key="2" header="当前生成" :style="customStyle">
             <Higlight :code="style.rebuild" :hasTools="true"></Higlight>
           </a-collapse-panel>
         </a-collapse>
@@ -39,8 +43,8 @@ import { reactive } from "vue";
 const customStyle =
   "background: #f7f7f7;border-radius: 4px;margin-bottom: 10px;border: 0;overflow: hidden";
 const style = reactive({
-  upload: null,
-  rebuild: null,
+  upload: "",
+  rebuild: "",
   activeKey: [1],
 });
 
@@ -48,8 +52,13 @@ const uploaded = (value: any): void => {
   style.upload = value;
 };
 
-const change = (optStyle: any): void => {
+const rebuild = (optStyle: any): void => {
   style.rebuild = optStyle;
+  style.activeKey = [2];
+};
+
+const changeVersion = (ver: string): void => {
+  console.log(ver);
 };
 </script>
 

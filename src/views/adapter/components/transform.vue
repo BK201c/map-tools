@@ -22,7 +22,10 @@
       <a-col :span="24">
         <a-space>
           <span>切换版本：</span>
-          <a-radio-group v-model:value="state.styleVersion">
+          <a-radio-group
+            v-model:value="state.styleVersion"
+            @change="changeVersion"
+          >
             <a-radio value="v2">v2</a-radio>
             <a-radio value="v3">v3</a-radio>
           </a-radio-group>
@@ -46,11 +49,10 @@
 <script lang="ts" setup>
 import { watch, toRaw, reactive, ref } from "vue";
 
-const $emit = defineEmits(["change"]);
+const $emit = defineEmits(["rebuild", "changeVersion"]);
 const $props = defineProps({
   iptStyle: {
     type: [Object, String],
-    default: () => {},
   },
 });
 const state = reactive({
@@ -76,8 +78,12 @@ watch(
 const decodeLayers = (styles: any) => {
   const layers = styles["layers"] || styles["2d"]["layers"] || styles;
   const tags = Object.values(layers) as [];
-  state.layerGroup.push(...tags);
+  state.layerGroup = tags;
   state.checkNameList = [...tags.map((e: any, i: number) => String(i))];
+};
+
+const changeVersion = (e: Event) => {
+  $emit("changeVersion", e);
 };
 
 const onCheckAllChange = (e: any) => {
@@ -131,7 +137,7 @@ const createStyle = (): void => {
   const checkdLayer = [...state.checkedList.map((e) => state.layerGroup[e])];
   const targetStyle = generateLayer(state.styleVersion, checkdLayer);
   console.log(`已生成${state.styleVersion}样式`, targetStyle);
-  $emit("change", targetStyle);
+  $emit("rebuild", targetStyle);
 };
 
 //替换样式文件地址
