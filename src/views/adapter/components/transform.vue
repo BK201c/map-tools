@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, toRaw, reactive, ref } from "vue";
+import { watch, toRaw, reactive, watchEffect } from "vue";
 
 const $emit = defineEmits(["rebuild", "changeVersion"]);
 const $props = defineProps({
@@ -59,7 +59,8 @@ const state = reactive({
   indeterminate: true,
   checkAll: false,
   checkedList: [],
-  layerGroup: [],
+  layerGroup: <any>[],
+  checkdLayer: <any>[],
   checkNameList: <any>[],
   replaceIP: "",
   styleVersion: "v3",
@@ -68,11 +69,14 @@ const state = reactive({
 watch(
   () => $props.iptStyle,
   (newIptStyle) => {
-    console.log("监听到文件上传", newIptStyle);
     decodeLayers(toRaw(newIptStyle));
   },
   { deep: true }
 );
+
+watchEffect(() => {
+  state.checkdLayer = [...state.checkedList.map((e) => state.layerGroup[e])];
+});
 
 // 解析原始styles为单个图层列表
 const decodeLayers = (styles: any) => {
@@ -80,6 +84,7 @@ const decodeLayers = (styles: any) => {
   const tags = Object.values(layers) as [];
   state.layerGroup = tags;
   state.checkNameList = [...tags.map((e: any, i: number) => String(i))];
+  state.checkedList = state.checkNameList;
 };
 
 const changeVersion = (e: Event) => {
@@ -134,48 +139,40 @@ const generateLayer = (version: string, layerGroup: any[]): {} => {
 
 //生成样式文件
 const createStyle = (): void => {
-  const checkdLayer = [...state.checkedList.map((e) => state.layerGroup[e])];
-  const targetStyle = generateLayer(state.styleVersion, checkdLayer);
+  const targetStyle = generateLayer(state.styleVersion, state.checkdLayer);
   console.log(`已生成${state.styleVersion}样式`, targetStyle);
   $emit("rebuild", targetStyle);
 };
 
 //替换样式文件地址
 const replaceUrlByVersion = (
-  version: string,
   ip: string,
-  url: string
-): void => {
-  // const kmapServer = {
-  //   v2: {
-  //     ip: "@kedacom.com",
-  //     path: "/kmap-server/threeMap",
-  //     map: "local_map",
-  //   },
-  //   v3: {
-  //     ip: "@kedacom.com",
-  //     path: "/kmap-server-engine/threeMap",
-  //     map: "local_map",
-  //   },
-  // };
-  // const targetPath: string = `${ip || kmapServer[version].ip}${
-  //   kmapServer[version].path
-  // }${kmapServer[version].map}`;
-  // const reg =
-  //   "((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+$,\w]+@)?[A-Za-z0-9.-]+(:[0-9]+)?|(?:ww‌​w.|[-;:&=\+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?‌​(?:[\w]*))?)";
-  // return url.replace(reg, targetPath);
+  originUrl: string,
+  mapName?: string
+): string => {
+  const urlConfig: { [key: string]: any } = {
+    v2: {
+      ip: ip || "@kedacom.com",
+      path: "/kmap-server/threeMap/",
+      map: mapName || "local_map",
+    },
+    v3: {
+      ip: ip || "@kedacom.com",
+      path: "/kmap-server-engine/threeMap/",
+      map: mapName || "local_map",
+    },
+  };
+  const path: string = Object.values(urlConfig[state.styleVersion]).join("");
+  const url = new URL(originUrl);
+  return `${path}${url.pathname}${url.search}`;
 };
 
 const replaceUrl = (): void => {
-  state.layerGroup.forEach(
-    (layer: any) =>
-      (layer.url = replaceUrlByVersion(
-        state.styleVersion,
-        state.replaceIP,
-        layer.url
-      ))
-  );
+  state.checkdLayer.forEach((layer: any) => {
+    layer.url = replaceUrlByVersion(state.replaceIP, layer.url);
+  });
   setTimeout(() => createStyle(), 0);
+  //TODO 需修复不能连续替换IP问题
 };
 </script>
 
