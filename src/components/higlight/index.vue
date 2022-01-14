@@ -59,8 +59,8 @@ const downloadParams = () => {
   const downloadContent = String(code);
   const file = `adapt_${fileName}_${dataPx}.${fileType}`;
   const fullPath = `${path}/${file}`;
-  const blob = new Blob([JSON.stringify(downloadContent, null, 2)], {
-    type: "application/json",
+  const blob = new Blob([downloadContent], {
+    type: "text/plain",
   });
   const urlCreator = window.URL || window.webkitURL;
   const link = urlCreator.createObjectURL(blob);

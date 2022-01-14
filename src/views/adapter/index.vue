@@ -50,6 +50,7 @@ const style = reactive({
 
 const uploaded = (value: any): void => {
   style.upload = value;
+  style.activeKey = [1];
 };
 
 const rebuild = (optStyle: any): void => {
