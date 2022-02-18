@@ -153,7 +153,9 @@ export default {
         })
         .catch(e => {
           console.log(e);
-          this.$message.error(e.message);
+          this.$message.error(
+            "此服务不支持GetCapabilities操作，请重新输入合法WMTS接口地址"
+          );
         });
     },
 
@@ -177,7 +179,7 @@ export default {
             console.error(err);
             reject(err);
           }
-          const { layerSource } = JSON.parse(data);
+          const layerSource = JSON.parse(data);
           this.$message.success("参数已导入");
           reslove({ layerSource, xml: "" });
         });
