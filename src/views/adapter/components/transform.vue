@@ -80,8 +80,10 @@ watchEffect(() => {
 
 // 解析原始styles为单个图层列表
 const decodeLayers = (styles: any) => {
-  const layers = styles["layers"] || styles["2d"]["layers"] || styles;
-  const tags = Object.values(layers) as [];
+  let tags;
+  const layers = styles["layers"] || styles["2d"]["layers"];
+  if (!layers) tags = styles;
+  tags = Object.values(layers) as [];
   state.layerGroup = tags;
   state.checkNameList = [...tags.map((e: any, i: number) => String(i))];
   state.checkedList = state.checkNameList;
