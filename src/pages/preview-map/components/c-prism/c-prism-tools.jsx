@@ -75,7 +75,7 @@ export default {
       const dataPx = formater.date(new Date(), "yyyy-MM-dd_hh.mm.ss");
       let content;
       if (type === "json") {
-        content = this.json;
+        content = `[${this.json}]`;
       } else if (type === "xml") {
         content = this.xml;
       }
