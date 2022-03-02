@@ -15,7 +15,6 @@
 <script>
 import logo from "@/asset/img/logo.png";
 import config from "../../../package.json";
-import formater from "@/utils/formater";
 export default {
   data() {
     return {
@@ -38,10 +37,10 @@ export default {
           des: `版本：v${config.version}`
         },
         {
-          des: `发布日期：${formater.date("2021-08-15", "yyyy-MM-dd")}`
+          des: `发布日期：2021-09-27}`
         },
         {
-          des: "Copyright 2020-2021"
+          des: `Copyright 2020-${new Date().getFullYear()}`
         }
       ];
     }

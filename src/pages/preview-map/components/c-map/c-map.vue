@@ -88,7 +88,7 @@ export default {
       //   }
       // }
 
-      client.onload = () => {
+      client.onload = function() {
         const arrayBufferView = new Uint8Array(this.response);
         const blob = new Blob([arrayBufferView], { type: "image/png" });
         const urlCreator = window.URL || window.webkitURL;
