@@ -1,6 +1,4 @@
-type version = "v2" | "v3";
-
-interface CTStyle {
+interface V2 {
   isCompatibleEngine: true;
   projection: string;
   layers: {};
@@ -10,7 +8,7 @@ interface CTStyle {
   kmapServerUrl: "";
 }
 
-interface KgisStyle {
+interface V3 {
   configType: "three";
   "3d": {
     content: [];
@@ -22,13 +20,23 @@ interface KgisStyle {
 
 export class style {
   static defaultPath: "@kedacom.com/kmap-server/local_map/";
-  layers: any[];
-  constructor(layers: []) {
+  private layers: any[];
+  private version: string;
+  constructor(layers: [], version: string) {
     this.layers = layers;
+    this.version = version;
   }
-  buildStyle(): CTStyle;
-  buildStyle(): KgisStyle;
-  buildStyle(): any {}
+
+  buildStyle(version: string) {
+    switch (version) {
+      case "v2":
+        break;
+      case "v3":
+        break;
+      default:
+        break;
+    }
+  }
 
   setMapProxy(ip?: string, mapName?: string) {
     this.layers.map((l) => {

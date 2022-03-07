@@ -20,10 +20,10 @@ const items = [
     des: `版本：v${config.version}`,
   },
   {
-    des: `发布日期：2021-08-15`,
+    des: `发布日期：2021-09-27`,
   },
   {
-    des: "Copyright 2020-2021",
+    des: "Copyright 2020-2022",
   },
 ];
 </script>

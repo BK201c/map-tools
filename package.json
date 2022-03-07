@@ -4,32 +4,12 @@
   "private": true,
   "description": "a simple mapTools",
   "author": "jonson wei",
-  "license": "GPL",
   "scripts": {
-    "dev": "vite",
+    "serve": "vite preview",
     "build": "vue-tsc --noEmit && vite build",
-    "serve": "vite preview"
+    "dev": "vite"
   },
-  "build": {
-    "appId": "com.inkGod.MapTools",
-    "productName": "MapTools",
-    "copyright": "Copyright © 2021 ${author}",
-    "mac": {
-      "category": "public.app-category.utilities"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
-    },
-    "files": [
-      "dist/**/*",
-      "electron/**/*"
-    ],
-    "directories": {
-      "buildResources": "assets",
-      "output": "dist_electron"
-    }
-  },
+  "main": "background.js",
   "dependencies": {
     "@turf/projection": "^6.3.0",
     "@turf/turf": "^6.3.0",
@@ -60,12 +40,35 @@
     "cross-env": "^7.0.3",
     "electron": "^14.0.0",
     "electron-builder": "^22.11.7",
+    "electron-devtools-installer": "^3.1.0",
     "sass": "^1.37.5",
     "typescript": "^4.3.2",
     "vite": "^2.4.4",
+    "vue-cli-plugin-electron-builder": "~2.1.1",
     "vue-tsc": "^0.3.0",
     "wait-on": "^6.0.0"
   },
+  "build": {
+    "appId": "com.gauss.MapTools",
+    "productName": "MapTools",
+    "copyright": "Copyright © 2022 ${author}",
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist_electron"
+    }
+  },
+  "license": "GPL",
   "resolutions": {
     "vscode-vue-languageservice": "0.27.xx"
   }
