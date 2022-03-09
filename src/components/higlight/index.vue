@@ -3,7 +3,7 @@
     <div class="opera-are" v-if="hasTools">
       <a-row class="btn-list-item" justify="end">
         <a-space>
-          <a-button @click="copyParams">
+          <a-button @click="copyToClipboard">
             复制
           </a-button>
           <a-button @click="downloadParams">
@@ -17,11 +17,13 @@
 </template>
 
 <script lang="ts" setup>
-import fs from "fs";
 import dayjs from "dayjs";
+import { apply } from "ol/transform";
+import { inject } from "vue";
 const $props = defineProps({
   code: {
     type: [Object, String],
+    default: () => "",
   },
   hasTools: {
     type: Boolean,
@@ -41,15 +43,17 @@ const $props = defineProps({
   },
 });
 
+const message: any = inject("$message");
 // 一键复制参数
-const copyParams = (): void => {
-  // clipboard.writeText($props.code.toString());
-  setTimeout(() => {
-    // const text = clipboard.readText();
-    // if (text !== "" && text !== null) {
-    //   this.$message.success("已复制到剪贴板");
-    // }
-  }, 300);
+const copyToClipboard = async () => {
+  try {
+    await navigator.clipboard.writeText(JSON.stringify($props.code));
+    message.success("已复制");
+    console.log("已复制", JSON.stringify($props.code));
+  } catch (err) {
+    message.error("Failed to copy: ", err);
+    console.error("Failed to copy: ", err);
+  }
 };
 
 //保存显示地图的参数文件
@@ -67,15 +71,6 @@ const downloadParams = () => {
   let linknode = document.createElement("a");
   linknode.setAttribute("download", file);
   linknode.setAttribute("href", link);
-  // fs.writeFile(fullPath, downloadContent, (err) => {
-  //   if (err) {
-  //     console.error(err);
-  //     this.$message.success(err);
-  //     return;
-  //   }
-  //   //文件写入成功。
-  //   this.$message.success(`${fileName} 已保存至程序的resources目录`);
-  // });
 };
 </script>
 

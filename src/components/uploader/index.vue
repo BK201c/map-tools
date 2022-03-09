@@ -24,7 +24,6 @@
 
 <script lang="ts" setup>
 import AntIcon from "@/components/icon";
-import { message } from "ant-design-vue";
 import { ref ,computed} from "vue";
 interface FileItem {
   uid: string;
