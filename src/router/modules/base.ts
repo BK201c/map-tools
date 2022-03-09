@@ -1,7 +1,7 @@
 import { MenuItem } from "../interface/menu";
 
 //侧边栏导航
-export const crmRouter: Array<MenuItem> = [
+export const baseRouter: Array<MenuItem> = [
   {
     meta: {
       title: "预览地图",

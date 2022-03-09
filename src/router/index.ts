@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from "vue-router";
-import { crmRouter } from "./modules/crm";
+import { baseRouter } from "./modules/base";
 import { MenuItem } from "./interface/menu";
 
 const constantRouterMap: Array<MenuItem> = [
@@ -9,8 +9,8 @@ const constantRouterMap: Array<MenuItem> = [
       title: "root",
     },
     component: () => import("@/layout/index.vue"),
-    children: crmRouter,
-    redirect: "/preview",
+    children: baseRouter,
+    redirect: "/adapter",
   },
 ];
 

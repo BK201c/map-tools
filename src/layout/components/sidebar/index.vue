@@ -8,7 +8,7 @@
   >
     <a-menu-item
       :key="menu.path"
-      v-for="menu of crmRouter"
+      v-for="menu of baseRouter"
       @titleClick="titleClick"
     >
       <template #icon>
@@ -21,7 +21,7 @@
 
 <script lang="ts" setup>
 import { reactive, toRefs } from "vue";
-import { crmRouter } from "@/router/modules/crm";
+import { baseRouter } from "@/router/modules/base";
 import router from "@/router";
 import AntIcon from "@/components/icon";
 const state = reactive({

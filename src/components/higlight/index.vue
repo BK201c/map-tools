@@ -18,7 +18,6 @@
 
 <script lang="ts" setup>
 import dayjs from "dayjs";
-import { apply } from "ol/transform";
 import { inject } from "vue";
 const $props = defineProps({
   code: {
