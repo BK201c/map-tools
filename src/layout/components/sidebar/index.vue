@@ -1,6 +1,5 @@
 <template>
   <a-menu
-    v-model:openKeys="openKeys"
     v-model:selectedKeys="selectedKeys"
     theme="dark"
     mode="inline"
@@ -20,19 +19,16 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, toRefs } from "vue";
+import { ref } from "vue";
 import { baseRouter } from "@/router/modules/base";
 import router from "@/router";
 import AntIcon from "@/components/icon";
-const state = reactive({
-  selectedKeys: ["1"],
-  openKeys: ["sub1"],
-});
-const { selectedKeys, openKeys } = toRefs(state);
+import { useRoute } from "vue-router";
+const route = useRoute();
+const selectedKeys = ref([route.path]);
 
 const handleClick = (e: any): void => {
   const path = e.keyPath.join("/");
-  console.log("click", e, path);
   router.push({ path: path });
 };
 

@@ -6,7 +6,7 @@ export interface MenuItem {
   redirect?: string;
   meta: {
     title: string;
-    icon?: string;
+    icon: string;
   };
   children?: MenuItem[];
 }
