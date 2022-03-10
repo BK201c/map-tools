@@ -17,8 +17,9 @@
 </template>
 
 <script lang="ts" setup>
-import dayjs from "dayjs";
-import { inject } from "vue";
+// import dayjs from "dayjs";
+import { message } from "ant-design-vue";
+import FileSaver from "file-saver";
 const $props = defineProps({
   code: {
     type: [Object, String],
@@ -42,7 +43,6 @@ const $props = defineProps({
   },
 });
 
-const message: any = inject("$message");
 // 一键复制参数
 const copyToClipboard = async () => {
   try {
@@ -50,26 +50,27 @@ const copyToClipboard = async () => {
     message.success("已复制");
     console.log("已复制", JSON.stringify($props.code));
   } catch (err) {
-    message.error("Failed to copy: ", err);
+    message.error("Failed to copy:");
     console.error("Failed to copy: ", err);
   }
 };
 
 //保存显示地图的参数文件
 const downloadParams = () => {
-  const dataPx = dayjs(new Date());
+  // const dataPx = dayjs(`${new Date()}`).format('YYYY-MM-DD HH:mm:ss');
   const { code, fileName, fileType, path } = $props;
-  const downloadContent = String(code);
-  const file = `adapt_${fileName}_${dataPx}.${fileType}`;
-  const fullPath = `${path}/${file}`;
-  const blob = new Blob([downloadContent], {
-    type: "text/plain",
-  });
-  const urlCreator = window.URL || window.webkitURL;
-  const link = urlCreator.createObjectURL(blob);
-  let linknode = document.createElement("a");
-  linknode.setAttribute("download", file);
-  linknode.setAttribute("href", link);
+  const downloadContent = JSON.stringify(code);
+  const file = `style_${fileName}.${fileType}`;
+  try {
+    const blob = new Blob([downloadContent], {
+      type: "text/plain;charset=utf-8",
+    });
+    FileSaver.saveAs(blob, file);
+    message.success(`已下载${file}`);
+  } catch (error) {
+    console.log(error);
+    message.error("下载失败~");
+  }
 };
 </script>
 

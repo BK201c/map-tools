@@ -31,13 +31,23 @@
       </a-col>
     </a-row>
     <a-row class="trans-styles-rebuild">
-      <a-col :span="24">
-        <a-input-search
-          v-model:value="state.replaceIP"
-          placeholder="输入替换目标地址"
-          enter-button="更改"
-          @search="replaceTargetUrl"
-        />
+      <a-col :span="5">
+        <a-select style="width:100%" v-model:value="state.targetLayer">
+          <a-select-option
+            v-for="(value, key) in state.layerGroup"
+            :value="key"
+            >{{ key }}</a-select-option
+          >
+        </a-select>
+      </a-col>
+      <a-col :span="9">
+        <a-input v-model:value="state.targetHost" placeholder="host" />
+      </a-col>
+      <a-col :span="5">
+        <a-input v-model:value="state.targetMapName" placeholder="mapName" />
+      </a-col>
+      <a-col :span="5">
+        <a-button type="primary" ghost>替换</a-button>
       </a-col>
     </a-row>
   </section>
@@ -56,7 +66,9 @@ const state = reactive({
   checkAll: false,
   layerGroup: {},
   checkedGroup: <any>[],
-  replaceIP: "",
+  targetLayer: "",
+  targetHost: "",
+  targetMapName: "",
   version: "v3",
 });
 
@@ -106,7 +118,7 @@ const generatedStyle = (layers: object, version: string): {} => {
   const style: { [key: string]: any } = {
     v2: {
       isCompatibleEngine: true,
-      projection: "",
+      projection: Object.values(layers)[0].projection,
       layers: layers,
       scenes: {
         default: [],
@@ -135,9 +147,10 @@ const replaceTargetUrl = (
   try {
     const url = new URL(originFullUrl);
     const pathList = url.pathname.split("/");
-    if (pathList[1] === "threeMap") {
+    if (pathList[2] === "threeMap") {
       // 判断是否属于kmapserver转发后的url
-      return `${flagHost}/threeMap/${flagMapName || pathList[2]}${url.search}`;
+      return `${flagHost}/threeMap/${flagMapName ||
+        pathList[3]}/${pathList.slice(-1).join("/")}${url.search}`;
     } else {
       return `${flagHost}/threeMap/${flagMapName || "local_map"}${
         url.pathname
@@ -176,7 +189,8 @@ const getReverseLayer = () => {
     }
   }
   const newStyle = generatedStyle(layers, state.version);
-  $emit("rebuild", newStyle);
+  const fileName = `${state.version}_[ ${state.checkedGroup.join("&")} ]`;
+  $emit("rebuild", { newStyle, fileName });
 };
 </script>
 
