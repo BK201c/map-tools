@@ -22,14 +22,11 @@
       <a-col :span="24">
         <a-space>
           <span>切换版本：</span>
-          <a-radio-group
-            v-model:value="state.styleVersion"
-            @change="changeVersion"
-          >
+          <a-radio-group v-model:value="state.version" @change="changeVersion">
             <a-radio value="v2">v2</a-radio>
             <a-radio value="v3">v3</a-radio>
           </a-radio-group>
-          <a-button type="primary" @click="createStyle">生成</a-button>
+          <a-button type="primary" @click="getReverseLayer">生成</a-button>
         </a-space>
       </a-col>
     </a-row>
@@ -39,7 +36,7 @@
           v-model:value="state.replaceIP"
           placeholder="输入替换目标地址"
           enter-button="更改"
-          @search="replaceUrl"
+          @search="replaceTargetUrl"
         />
       </a-col>
     </a-row>
@@ -47,8 +44,8 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, toRaw, reactive, watchEffect, version } from "vue";
-
+import { watch, toRaw, reactive, watchEffect } from "vue";
+import _ from "lodash";
 const $emit = defineEmits(["rebuild", "changeVersion"]);
 const $props = defineProps({
   iptStyle: {
@@ -60,7 +57,7 @@ const state = reactive({
   layerGroup: {},
   checkedGroup: <any>[],
   replaceIP: "",
-  styleVersion: "v3",
+  version: "v3",
 });
 
 watch(
@@ -74,26 +71,23 @@ watch(
 watchEffect(() => {
   // state.checkedGroup = [...state.checkedList.map((e) => state.layerGroup[e])];
 });
+
+// checkbox选中事件
 const layerCheck = (key: any) => {
-  console.log(key);
+  if (state.checkedGroup.includes(key)) {
+    _.pull(state.checkedGroup, key);
+  } else {
+    state.checkedGroup.push(key);
+  }
+  console.log(`选中${key}`, state.checkedGroup);
 };
 
 // 解析原始styles为单个图层列表
 const decodeLayers = (styles: any) => {
   let layers = styles["layers"] || styles["2d"]["layers"];
-  // if (styles["layers"] !== "") {
-  //   layers = styles["layers"];
-  // } else if (styles["2d"]["layers"] !== "") {
-  //   layers = styles["2d"]["layers"];
-  // } else if (styles instanceof Array && styles !== []) {
-  //   layers = styles;
-  // }
-  console.log(layers);
-
-  debugger;
+  if (layers === "") layers = styles;
   state.layerGroup = layers;
-  // state.checkList = Object.keys(layers);
-  console.log(state.layerGroup, state.checkList);
+  console.log("已解析", state.layerGroup);
 };
 
 const changeVersion = (e: Event) => {
@@ -108,12 +102,12 @@ const onCheckAllChange = (e: any) => {
 };
 
 // 转换样式文件
-const generateLayer = (version: string, layerGroup: any[]): {} => {
-  const versionStyle = {
+const generatedStyle = (layers: object, version: string): {} => {
+  const style: { [key: string]: any } = {
     v2: {
       isCompatibleEngine: true,
       projection: "",
-      layers: {},
+      layers: layers,
       scenes: {
         default: [],
       },
@@ -125,32 +119,11 @@ const generateLayer = (version: string, layerGroup: any[]): {} => {
         content: [],
       },
       "2d": {
-        layers: {},
+        layers: layers,
       },
     },
   };
-  let layers: { [key: string]: any } = {};
-  layerGroup.map((e, i) => {
-    layers[`layer${i}`] = e;
-  });
-  switch (version) {
-    case "v2":
-      return Object.assign({} as any, versionStyle.v2, {
-        projection: layerGroup[0].projection,
-        layers,
-      });
-    case "v3":
-      return Object.assign({} as any, versionStyle.v3, { "2d": { layers } });
-    default:
-      return Object.assign({} as any, versionStyle.v3, { "2d": { layers } });
-  }
-};
-
-//生成样式文件
-const createStyle = (): void => {
-  const targetStyle = generateLayer(state.styleVersion, state.checkedGroup);
-  console.log(`已生成${state.styleVersion}样式`, targetStyle);
-  $emit("rebuild", targetStyle);
+  return style[version];
 };
 
 //替换样式文件地址
@@ -159,28 +132,51 @@ const replaceTargetUrl = (
   flagHost: string,
   flagMapName?: string
 ): string => {
-  const url = new URL(originFullUrl);
-  return `${url.pathname}${url.search}`;
+  try {
+    const url = new URL(originFullUrl);
+    const pathList = url.pathname.split("/");
+    if (pathList[1] === "threeMap") {
+      // 判断是否属于kmapserver转发后的url
+      return `${flagHost}/threeMap/${flagMapName || pathList[2]}${url.search}`;
+    } else {
+      return `${flagHost}/threeMap/${flagMapName || "local_map"}${
+        url.pathname
+      }${url.search}`;
+    }
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 };
 
 //替换原始地址
 const getPathByVersion = (version: string): string => {
   switch (version) {
     case "v2":
-      return "@kedacom.com/kmap-server/threeMap/local_map";
+      return "@kedacom.com/kmap-server";
     case "v3":
-      return "@kedacom.com/kmap-server-engine/threeMap/local_map";
+      return "@kedacom.com/kmap-server-engine";
     default:
-      return "@kedacom.com/kmap-server-engine/threeMap/local_map";
+      return "@kedacom.com/kmap-server-engine";
   }
 };
 
-//
-const replaceUrl = (): void => {
-  state.checkedGroup.forEach((layer: any) => {
-    // layer.url = replaceUrlByVersion(state.replaceIP, layer.url);
-  });
-  setTimeout(() => createStyle(), 0);
+//获取转换版本后的图层
+const getReverseLayer = () => {
+  const layers: { [key: string]: any } = _.cloneDeep(
+    _.pick(state.layerGroup, state.checkedGroup)
+  );
+  for (const key in layers) {
+    if (Object.prototype.hasOwnProperty.call(layers, key)) {
+      const element = layers[key];
+      element.url = replaceTargetUrl(
+        element.url,
+        getPathByVersion(state.version)
+      );
+    }
+  }
+  const newStyle = generatedStyle(layers, state.version);
+  $emit("rebuild", newStyle);
 };
 </script>
 
