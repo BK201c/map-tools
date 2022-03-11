@@ -1,4 +1,5 @@
-import { WMTSCapabilities, optionsFromCapabilities } from "@/core/ol";
+import { optionsFromCapabilities } from "ol/source/WMTS";
+import WMTSCapabilities from "ol/format/WMTSCapabilities";
 
 interface Config {
   layer: string;

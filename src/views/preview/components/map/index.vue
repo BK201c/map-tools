@@ -21,15 +21,13 @@
 import { onMounted, ref } from "vue";
 import { LayerSource } from "../../interface";
 import { radioStyle } from "../styles";
-import {
-  Map,
-  View,
-  TileLayer,
-  WMTSTileGrid,
-  WMTS,
-  XYZ,
-  TileGrid
-} from "@/core/ol";
+import Map from "ol/Map";
+import View from "ol/View";
+import TileLayer from "ol/layer/Tile";
+import WMTSTileGrid from "ol/tilegrid/WMTS";
+import WMTS from "ol/source/WMTS";
+import XYZ from "ol/source/XYZ";
+import TileGrid from "ol/tilegrid/TileGrid";
 import ProjExt from "@/utils/projExt";
 
 //数据接收项

@@ -106,8 +106,6 @@ const decodeLayers = (styles: any) => {
     if (styles.hasOwnProperty("layers")) layers = styles["layers"];
     if (styles.hasOwnProperty("2d")) layers = styles["2d"]["layers"];
     if (styles instanceof Array && styles.length > 0) layers = { ...styles };
-    console.log(toRaw(layers));
-
     state.layerGroup = layers;
     console.log("已解析", state.layerGroup);
     message.success("检测到样式文件，已解析");
@@ -204,7 +202,9 @@ const getReverseLayer = () => {
     }
   }
   const newStyle = generatedStyle(layers, state.version);
-  const fileName = `${state.version}_[ ${state.checkedGroup.join("&")} ]`;
+  const fileName = `style_${state.version}_[ ${state.checkedGroup.join(
+    "&"
+  )} ].json`;
   $emit("rebuild", { newStyle, fileName });
 };
 </script>

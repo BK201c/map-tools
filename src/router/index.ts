@@ -7,6 +7,7 @@ const constantRouterMap: Array<MenuItem> = [
     path: "/",
     meta: {
       title: "root",
+      icon: "",
     },
     component: () => import("@/layout/index.vue"),
     children: baseRouter,

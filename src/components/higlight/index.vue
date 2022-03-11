@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div class="opera-are" v-if="hasTools">
+    <div class="opera-are" v-if="$props.hasTools">
       <a-row class="btn-list-item" justify="end">
         <a-space>
           <a-button @click="copyToClipboard">
@@ -20,27 +20,16 @@
 // import dayjs from "dayjs";
 import { message } from "ant-design-vue";
 import FileSaver from "file-saver";
-const $props = defineProps({
-  code: {
-    type: [Object, String],
-    default: () => "",
-  },
-  hasTools: {
-    type: Boolean,
-    default: false,
-  },
-  path: {
-    type: String,
-    default: "C:/",
-  },
-  fileName: {
-    type: String,
-    default: "",
-  },
-  fileType: {
-    type: String,
-    default: "json",
-  },
+
+interface Props {
+  code?: Object;
+  hasTools?: boolean;
+  path?: string;
+  fileName?: string;
+  fileType?: string;
+}
+const $props = withDefaults(defineProps<Props>(), {
+  hasTools: false,
 });
 
 // 一键复制参数
@@ -57,15 +46,14 @@ const copyToClipboard = async () => {
 //保存显示地图的参数文件
 const downloadParams = () => {
   // const dataPx = dayjs(`${new Date()}`).format('YYYY-MM-DD HH:mm:ss');
-  const { code, fileName, fileType, path } = $props;
+  const { code, fileName } = $props;
   const downloadContent = JSON.stringify(code);
-  const file = `style_${fileName}.${fileType}`;
   try {
     const blob = new Blob([downloadContent], {
       type: "text/plain;charset=utf-8",
     });
-    FileSaver.saveAs(blob, file);
-    message.success(`已下载 ${file}`);
+    FileSaver.saveAs(blob, fileName);
+    message.success(`已下载 ${fileName}`);
   } catch (error) {
     console.log(error);
     message.error("下载失败~");

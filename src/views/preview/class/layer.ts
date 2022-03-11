@@ -1,5 +1,4 @@
-import { WMTSTileGrid, TileGrid, XYZ, TileLayer, WMTS } from "@/core/ol";
-
+import WMTSTileGrid from "ol/tilegrid/WMTS";
 type SourceType = "wmts" | "xyz" | "wms";
 type Projection = "EPSG:4326" | "EPSG:3857";
 
