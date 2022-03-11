@@ -1,6 +1,6 @@
 <template>
   <section class="trans-styles-container">
-    <a-row class="trans-styles-origin">
+    <a-row class="trans-styles-items">
       <a-col :span="24">
         <a-space>
           <span>图层列表：</span>
@@ -18,7 +18,7 @@
         </a-space>
       </a-col>
     </a-row>
-    <a-row class="trans-styles-button">
+    <a-row class="trans-styles-items">
       <a-col :span="24">
         <a-space>
           <span>切换版本：</span>
@@ -26,11 +26,15 @@
             <a-radio value="v2">v2</a-radio>
             <a-radio value="v3">v3</a-radio>
           </a-radio-group>
-          <a-button type="primary" @click="getReverseLayer">生成</a-button>
         </a-space>
       </a-col>
     </a-row>
-    <a-row class="trans-styles-rebuild">
+    <a-row class="trans-styles-items">
+      <a-col :span="24">
+        <a-button type="primary" @click="getReverseLayer" ghost>生成</a-button>
+      </a-col>
+    </a-row>
+    <!-- <a-row class="trans-styles-rebuild">
       <a-col :span="5">
         <a-select style="width:100%" v-model:value="state.targetLayer">
           <a-select-option
@@ -49,13 +53,14 @@
       <a-col :span="5">
         <a-button type="primary" ghost>替换</a-button>
       </a-col>
-    </a-row>
+    </a-row> -->
   </section>
 </template>
 
 <script lang="ts" setup>
 import { watch, toRaw, reactive, watchEffect } from "vue";
 import _ from "lodash";
+import { message } from "ant-design-vue";
 const $emit = defineEmits(["rebuild", "changeVersion"]);
 const $props = defineProps({
   iptStyle: {
@@ -96,10 +101,20 @@ const layerCheck = (key: any) => {
 
 // 解析原始styles为单个图层列表
 const decodeLayers = (styles: any) => {
-  let layers = styles["layers"] || styles["2d"]["layers"];
-  if (layers === "") layers = styles;
-  state.layerGroup = layers;
-  console.log("已解析", state.layerGroup);
+  try {
+    let layers;
+    if (styles.hasOwnProperty("layers")) layers = styles["layers"];
+    if (styles.hasOwnProperty("2d")) layers = styles["2d"]["layers"];
+    if (styles instanceof Array && styles.length > 0) layers = { ...styles };
+    console.log(toRaw(layers));
+
+    state.layerGroup = layers;
+    console.log("已解析", state.layerGroup);
+    message.success("检测到样式文件，已解析");
+  } catch (error) {
+    console.log("样式文件解析失败", error);
+    message.error("数据格式错误，解析失败！");
+  }
 };
 
 const changeVersion = (e: Event) => {
@@ -196,10 +211,7 @@ const getReverseLayer = () => {
 
 <style lang="scss" scoped>
 .trans-styles {
-  &-button {
-    margin-top: 10px;
-  }
-  &-rebuild {
+  &-items {
     margin-top: 10px;
   }
 }

@@ -47,8 +47,7 @@ const $props = defineProps({
 const copyToClipboard = async () => {
   try {
     await navigator.clipboard.writeText(JSON.stringify($props.code));
-    message.success("已复制");
-    console.log("已复制", JSON.stringify($props.code));
+    message.success("样式参数已复制");
   } catch (err) {
     message.error("Failed to copy:");
     console.error("Failed to copy: ", err);
@@ -66,7 +65,7 @@ const downloadParams = () => {
       type: "text/plain;charset=utf-8",
     });
     FileSaver.saveAs(blob, file);
-    message.success(`已下载${file}`);
+    message.success(`已下载 ${file}`);
   } catch (error) {
     console.log(error);
     message.error("下载失败~");

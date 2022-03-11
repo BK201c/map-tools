@@ -4,22 +4,22 @@ import { MenuItem } from "../interface/menu";
 export const baseRouter: Array<MenuItem> = [
   {
     meta: {
-      title: "预览地图",
-      icon: "HomeOutlined",
-    },
-    path: "/preview",
-    name: "preview",
-    component: () => import("@/views/preview/index.vue"),
-  },
-  {
-    meta: {
       title: "适配文件",
-      icon: "FileSearchOutlined",
+      icon: "HomeOutlined",
     },
     path: "/adapter",
     name: "adapter",
     component: () => import("@/views/adapter/index.vue"),
   },
+  // {
+  //   meta: {
+  //     title: "预览地图",
+  //     icon: "FileSearchOutlined",
+  //   },
+  //   path: "/preview",
+  //   name: "preview",
+  //   component: () => import("@/views/preview/index.vue"),
+  // },
   // {
   //   meta: {
   //     title: "使用说明",
