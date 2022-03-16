@@ -101,6 +101,11 @@ export default {
     setMapFullScreen() {
       this.isMapFullScreen = !this.isMapFullScreen;
       this.$emit("sizeChange", this.isMapFullScreen);
+      if (this.isMapFullScreen) {
+        this.map.on("moveend", this.onMapMoveend);
+      } else {
+        this.map.off("moveend", this.onMapMoveend);
+      }
       setTimeout(() => {
         this.map.updateSize();
       }, 400);
@@ -163,7 +168,6 @@ export default {
       this.map = new Map({
         target: this.$refs.mapDom
       });
-      this.map.on("moveend", this.onMapMoveend);
       this.setTargetLayer(this.layerSource[0]);
     },
 

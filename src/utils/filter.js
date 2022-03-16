@@ -40,16 +40,24 @@ const calcResolutionByScale = (scale, crs = 4326) => {
 
 //获取tileGrid信息
 const filterTileGridInfo = TileMatrixSet => {
+  let projection;
+  let origin;
   const matrixIds = [];
   const resolutions = [];
-  let origin = [
+  const sourceOrigin = [
     TileMatrixSet.TileMatrix[0].TopLeftCorner[1],
     TileMatrixSet.TileMatrix[0].TopLeftCorner[0]
   ];
-  let tileSize = TileMatrixSet.TileMatrix[0].TileWidth || 256;
-  let projection = "EPSG:" + TileMatrixSet.SupportedCRS?.split("::")[1];
-  if (projection === "EPSG:4490") projection = "EPSG:4326";
-  if (projection === "EPSG:3857") origin.reverse();
+  const tileSize = TileMatrixSet.TileMatrix[0].TileWidth || 256;
+  const sourcePro = "EPSG:" + TileMatrixSet.SupportedCRS?.split("::")[1];
+  console.log(sourcePro);
+  if (isMercatorProjection(sourcePro)) {
+    projection = "EPSG:3857";
+    origin = [-20037508.3427892, 20037508.3427892];
+  } else {
+    projection = "EPSG:4326";
+    origin = sourceOrigin;
+  }
   TileMatrixSet.TileMatrix.forEach(matrix => {
     matrixIds.push(Number(matrix.Identifier));
     resolutions.push(
