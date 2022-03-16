@@ -3,10 +3,9 @@
  * https://docs.opengeospatial.org/is/13-082r2/13-082r2.html#21
  */
 
-import * as turf from "@turf/turf";
 import { WMTSCapabilities } from "@/core/ol";
 import { isMercatorProjection } from "./validation";
-
+import { transform } from "ol/proj";
 /**
  *
  * @param {*比例尺} scale
@@ -118,9 +117,7 @@ const filterLayerSource = xml => {
 };
 
 const lonLat2Mercator = point => {
-  var pt = turf.point(point);
-  var converted = turf.toMercator(pt);
-  return turf.getCoord(converted);
+  return transform(point, "EPSG:4326", "EPSG:3857");
 };
 
 export { filterLayerSource, lonLat2Mercator };

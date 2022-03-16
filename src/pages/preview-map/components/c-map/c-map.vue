@@ -13,7 +13,20 @@
         </a-radio>
       </a-radio-group>
     </div>
-    <!-- <div class="btn-full-map"></div> -->
+    <div class="map-stats" v-if="isMapFullScreen">
+      <ul>
+        <li class="items">
+          层级：<span>{{ zoom }}</span>
+        </li>
+        <li class="items">
+          中心点：<span>{{ coordnates }}</span>
+        </li>
+      </ul>
+    </div>
+    <div class="btn-full-map map-btn" @click="setMapFullScreen">
+      <a-icon type="fullscreen" v-if="!isMapFullScreen" />
+      <a-icon type="fullscreen-exit" v-if="isMapFullScreen" />
+    </div>
   </div>
 </template>
 <script>
@@ -48,7 +61,10 @@ export default {
         display: "block",
         height: "30px",
         lineHeight: "30px"
-      }
+      },
+      zoom: 8,
+      coordnates: [],
+      isMapFullScreen: false
     };
   },
   watch: {
@@ -73,30 +89,7 @@ export default {
         source => source.layer === layerId
       );
       this.setTargetLayer(source);
-      this.$emit("change", source);
-    },
-
-    //支持瓦片鉴权验证
-    tileLoader(tile, src) {
-      const client = new XMLHttpRequest();
-      client.open("GET", src);
-      client.responseType = "arraybuffer";
-      // const headers = this.source[0]?.headers;
-      // if (headers !== "") {
-      //   for (const key in headers) {
-      //     client.setRequestHeader(key, headers[key]);
-      //   }
-      // }
-
-      client.onload = function() {
-        const arrayBufferView = new Uint8Array(this.response);
-        const blob = new Blob([arrayBufferView], { type: "image/png" });
-        const urlCreator = window.URL || window.webkitURL;
-        const imageUrl = urlCreator.createObjectURL(blob);
-        tile.getImage().src = imageUrl;
-      };
-
-      client.send();
+      this.$emit("layerChange", source);
     },
 
     //清空全部地图
@@ -107,6 +100,7 @@ export default {
     //设置全屏地图
     setMapFullScreen() {
       this.isMapFullScreen = !this.isMapFullScreen;
+      this.$emit("sizeChange", this.isMapFullScreen);
       setTimeout(() => {
         this.map.updateSize();
       }, 400);
@@ -137,7 +131,7 @@ export default {
       const center = isMercatorProjection(projection)
         ? lonLat2Mercator(this.center)
         : this.center;
-
+      console.log(projection, center);
       const viewOption = {
         center: center,
         projection: projection,
@@ -169,11 +163,32 @@ export default {
       this.map = new Map({
         target: this.$refs.mapDom
       });
+      this.map.on("moveend", this.onMapMoveend);
       this.setTargetLayer(this.layerSource[0]);
+    },
+
+    //监控函数
+    onMapMoveend() {
+      this.zoom = this.map
+        .getView()
+        .getZoom()
+        .toFixed();
+      this.coordnates = [
+        ...this.map
+          .getView()
+          .getCenter()
+          .map(e => e.toFixed(8))
+      ];
     }
   }
 };
 </script>
 <style lang="scss" scoped>
 @import "~@/styles/preview.scss";
+.btn-full-map {
+  position: fixed;
+  left: 0.5em;
+  bottom: 0.5em;
+  z-index: 99;
+}
 </style>
