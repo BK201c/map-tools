@@ -41,6 +41,7 @@ import {
 } from "@/core/ol";
 import { isMercatorProjection } from "@/utils/validation";
 import { lonLat2Mercator } from "@/utils/filter";
+import { transformExtent } from "ol/proj";
 export default {
   name: "c-map",
   props: {
@@ -136,13 +137,25 @@ export default {
       const center = isMercatorProjection(projection)
         ? lonLat2Mercator(this.center)
         : this.center;
+
+      const chinaExtent = [
+        73.32783475401652,
+        19.4243521114706,
+        135.16017906160056,
+        53.83501005646246
+      ];
       console.log(projection, center);
       const viewOption = {
         center: center,
         projection: projection,
         minZoom: 0,
         maxZoom: 20,
-        zoom: 8
+        zoom: 8,
+
+        //限制显示范围为国内
+        extent: isMercatorProjection(projection)
+          ? transformExtent(chinaExtent, "EPSG:4326", "EPSG:3857")
+          : chinaExtent
       };
       return new View(viewOption);
     },

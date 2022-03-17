@@ -1,4 +1,5 @@
 {
   "prettier.arrowParens": "avoid",
-  "prettier.trailingComma": "none"
+  "prettier.trailingComma": "none",
+  "npm.packageManager": "yarn"
 }

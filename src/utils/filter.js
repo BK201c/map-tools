@@ -38,32 +38,41 @@ const calcResolutionByScale = (scale, crs = 4326) => {
   return (defaultPixelMeter * scale) / (dpi * units);
 };
 
+const getResolutionByCalc = (level = 20, size = 0.7031250000000002) => {
+  const matrixIds = [...Array(level + 1).keys()];
+  const resolutions = [...matrixIds.map(e => size / Math.pow(2, e))];
+  return { resolutions, matrixIds };
+};
+
 //获取tileGrid信息
 const filterTileGridInfo = TileMatrixSet => {
   let projection;
   let origin;
-  const matrixIds = [];
-  const resolutions = [];
+  let matrixIds = [];
+  let resolutions = [];
   const sourceOrigin = [
     TileMatrixSet.TileMatrix[0].TopLeftCorner[1],
     TileMatrixSet.TileMatrix[0].TopLeftCorner[0]
   ];
   const tileSize = TileMatrixSet.TileMatrix[0].TileWidth || 256;
   const sourcePro = "EPSG:" + TileMatrixSet.SupportedCRS?.split("::")[1];
-  console.log(sourcePro);
+
   if (isMercatorProjection(sourcePro)) {
     projection = "EPSG:3857";
     origin = [-20037508.3427892, 20037508.3427892];
+    const list = getResolutionByCalc(20, 156543.034);
+    matrixIds = list.matrixIds;
+    resolutions = list.resolutions;
   } else {
     projection = "EPSG:4326";
     origin = sourceOrigin;
+    TileMatrixSet.TileMatrix.forEach(matrix => {
+      matrixIds.push(Number(matrix.Identifier));
+      resolutions.push(
+        calcResolutionByScale(matrix?.ScaleDenominator, projection)
+      );
+    });
   }
-  TileMatrixSet.TileMatrix.forEach(matrix => {
-    matrixIds.push(Number(matrix.Identifier));
-    resolutions.push(
-      calcResolutionByScale(matrix?.ScaleDenominator, projection)
-    );
-  });
   return {
     origin,
     projection,
