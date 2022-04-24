@@ -7,14 +7,14 @@ import { WMTSCapabilities } from "@/core/ol";
 import { isMercatorProjection } from "./validation";
 import { transform } from "ol/proj";
 /**
- *
- * @param {*比例尺} scale
- * @param {*坐标系统} crs
- * @param {*像素密度} dpi
- * @returns 地面分辨率
+ * Returns resolution(地图分辨率 )
+ * @param {number} scale-比例尺
+ * @param {string} crs-坐标系统
+ * @param {number} dpi-像素密度
+ * @returns {number} resolution(地图分辨率 )
  */
 const calcResolutionByScale = (scale, crs = 4326) => {
-  // 一个像素等于多少米距离（像素/米）,OGC标准下单位像素距离
+  // OGC标准下单位像素距离,米与英寸的单位转换,一个像素等于多少米距离（像素/米）
   const defaultPixelMeter = 0.0254;
 
   //天地图等三方服务商单位像素距离
@@ -23,10 +23,10 @@ const calcResolutionByScale = (scale, crs = 4326) => {
   //地球半径（m）
   const erathRadius = 6378137;
 
-  // 当投影坐标系为（EPSG:4326,EPSG:4490时）地图单位（度/米），一度等于多少米距离单位（米），当地理坐标系为WGS84时，地图单位为度
+  // 当投影坐标系为经纬度直投（EPSG:4326,EPSG:4490时）地图单位（度/米），一度等于多少米距离单位（米），当地理坐标系为WGS84时，地图单位为度
   const degreeMeter = (Math.PI * 2 * erathRadius) / 360;
 
-  // 当投影坐标系为（EPSG：3857，EPSG:90013时）地图单位（米）
+  // 当投影坐标系为墨卡托投影（EPSG：3857，EPSG:90013时）地图单位（米）
   const meter = 1;
 
   // 地图单位
@@ -35,7 +35,10 @@ const calcResolutionByScale = (scale, crs = 4326) => {
   // OGC标准中没有规定屏幕分辨率（pixel/inch），而是用像元大小（0.28mm=0.00028m）来界定，WMTS 1.0.0接口，每英寸像元数为：1inch/(0.00028m/0.0254(m/inch))=0.0254/0.00028≈90.714
   const dpi = isMercatorProjection(crs) ? defaultPixelMeter / 0.00028 : 96;
 
-  return (defaultPixelMeter * scale) / (dpi * units);
+  // 比例尺(scale)=0.0254/(Resolution*96)。
+  const resolution = (defaultPixelMeter * scale) / (dpi * units);
+
+  return resolution;
 };
 
 const getResolutionByCalc = (level = 20, size = 0.7031250000000002) => {
@@ -102,7 +105,8 @@ const filterLayerSource = xml => {
           serviceType: "WMTS",
           style: layer.Style[0]?.Identifier,
           format: layer.Format[0],
-          matrixSet: layer.TileMatrixSetLink[0]?.TileMatrixSet
+          matrixSet: layer.TileMatrixSetLink[0]?.TileMatrixSet,
+          crossOrigin: "anonymous"
         }
       )
     )
