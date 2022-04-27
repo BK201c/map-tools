@@ -8,9 +8,9 @@ import { isMercatorProjection } from "./validation";
 import { transform } from "ol/proj";
 /**
  * Returns resolution(地图分辨率 )
- * @param {number} scale-比例尺
- * @param {string} crs-坐标系统
- * @param {number} dpi-像素密度
+ * @param {number} scale 比例尺
+ * @param {string} crs 坐标系统
+ * @param {number} dpi 像素密度
  * @returns {number} resolution(地图分辨率 )
  */
 const calcResolutionByScale = (scale, crs = 4326) => {
@@ -24,7 +24,7 @@ const calcResolutionByScale = (scale, crs = 4326) => {
   const erathRadius = 6378137;
 
   // 当投影坐标系为经纬度直投（EPSG:4326,EPSG:4490时）地图单位（度/米），一度等于多少米距离单位（米），当地理坐标系为WGS84时，地图单位为度
-  const degreeMeter = (Math.PI * 2 * erathRadius) / 360;
+  const degreeMeter = (Math.PI * erathRadius) / 180;
 
   // 当投影坐标系为墨卡托投影（EPSG：3857，EPSG:90013时）地图单位（米）
   const meter = 1;
