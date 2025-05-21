@@ -23,9 +23,12 @@ jobs:
       - name: Build Electron app
         run: npm run app:build
 
+      - name: Zip dist_electron
+        run: zip -r map_tools.zip dist_electron
+
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
         with:
-          files: dist_electron/**
+          files: map_tools.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
