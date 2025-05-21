@@ -65,6 +65,7 @@ module.exports = {
         electronDownload: {
           mirror: "https://npmmirror.com/mirrors/electron/"
         },
+        publish: null,
         appId: "com.mapTools.app",
         copyright: "Copyright 2020-2021",
         productName: "MapTools",
