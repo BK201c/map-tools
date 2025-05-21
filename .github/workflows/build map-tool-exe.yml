@@ -2,9 +2,8 @@ name: build map-tool-exe
 
 on:
   push:
-    branches:
-      - release
-
+    tags:
+      - 'v*' 
 jobs:
   build:
     runs-on: ubuntu-latest
