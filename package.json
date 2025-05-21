@@ -27,7 +27,6 @@
     "@types/ol": "^6.4.2",
     "animate.css": "^4.1.1",
     "ant-design-vue": "^1.7.3",
-    "aws-sdk": "^2.851.0",
     "axios": "^0.21.1",
     "babel-plugin-prismjs": "^2.0.1",
     "core-js": "^3.6.5",

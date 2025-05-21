@@ -63,7 +63,7 @@ module.exports = {
       nodeIntegration: true,
       builderOptions: {
         electronDownload: {
-          mirror: "https://npm.taobao.org/mirrors/electron/"
+          mirror: "https://npmmirror.com/mirrors/electron/"
         },
         appId: "com.mapTools.app",
         copyright: "Copyright 2020-2021",
